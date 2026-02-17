@@ -1360,7 +1360,7 @@ function renderizarUsuariosLogin() {
     return `
       <div class="flex flex-col items-center cursor-pointer group transition-transform hover:scale-105" onclick="seleccionarUsuarioLogin('${key}')">
         <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 group-hover:border-blue-500 transition-all shadow-sm bg-gray-100">
-          <img src="${u.foto}" alt="${u.nombre}" class="w-full h-full object-cover">
+          
         </div>
         <span class="text-xs text-gray-500 group-hover:text-blue-600 mt-1 font-medium">${u.nombre}</span>
       </div>
@@ -1400,4 +1400,5 @@ document.addEventListener('DOMContentLoaded', () => {
   if(inputUser) inputUser.addEventListener('input', actualizarAvatarLogin);
   renderizarUsuariosLogin();
 });
+
 
