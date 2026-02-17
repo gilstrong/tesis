@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Test de Funcionalidad</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+    .ok { background: #d4edda; }
+    .error { background: #f8d7da; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Test de Funcionalidades</h1>
+  <div id="resultados"></div>
+  
+  <script src="scriptgeneral-v2.js"></script>
+  
+  <script>
+    const resultados = document.getElementById('resultados');
+    
+    function test(nombre, condicion) {
+      const div = document.createElement('div');
+      div.className = 'test ' + (condicion ? 'ok' : 'error');
+      div.textContent = (condicion ? '✅' : '❌') + ' ' + nombre;
+      resultados.appendChild(div);
+      console.log((condicion ? '✅' : '❌'), nombre);
+    }
+    
+    // Esperar a que cargue
+    setTimeout(() => {
+      test('Variable carrito existe', typeof carrito !== 'undefined');
+      test('Función agregarImpresion existe', typeof agregarImpresion === 'function');
+      test('Función agregarEncuadernado existe', typeof agregarEncuadernado === 'function');
+      test('Función agregarEmpastado existe', typeof agregarEmpastado === 'function');
+      test('Función agregarPloteo existe', typeof agregarPloteo === 'function');
+      test('Función agregarPlastificado existe', typeof agregarPlastificado === 'function');
+      test('Función eliminarDelCarrito existe', typeof eliminarDelCarrito === 'function');
+      test('Función limpiarCarrito existe', typeof limpiarCarrito === 'function');
+      test('Función actualizarCarrito existe', typeof actualizarCarrito === 'function');
+      test('Función calcularPrecioImpresion existe', typeof calcularPrecioImpresion === 'function');
+      test('Función calcularPrecioEncuadernado existe', typeof calcularPrecioEncuadernado === 'function');
+      test('Función calcularPrecioEmpastado existe', typeof calcularPrecioEmpastado === 'function');
+      test('Función calcularPrecioPloteo existe', typeof calcularPrecioPloteo === 'function');
+      test('Función calcularPrecioPlastificado existe', typeof calcularPrecioPlastificado === 'function');
+      
+      // Test de cálculos
+      test('Cálculo B/N 100 páginas = 150', calcularPrecioImpresion(100, 'bn') === 150);
+      test('Cálculo Color 30 páginas = 450', calcularPrecioImpresion(30, 'color') === 450);
+      test('Cálculo Encuadernado 75 páginas = 120', calcularPrecioEncuadernado(75) === 120);
+      test('Cálculo Empastado Tapa Dura Carta = 600', calcularPrecioEmpastado('Tapa Dura', 'carta') === 600);
+      
+    }, 500);
+  </script>
+</body>
+</html>
