@@ -1348,7 +1348,7 @@ function cargarCotizacionGuardada(id) {
 // ============================================
 
 const USUARIOS_CONOCIDOS = {
-  'yulissa': { nombre: 'Yulissa', foto: 'yuli.png' },
+  'yulissa': { nombre: 'Yulissa' },
 };
 
 function renderizarUsuariosLogin() {
@@ -1400,3 +1400,4 @@ document.addEventListener('DOMContentLoaded', () => {
   if(inputUser) inputUser.addEventListener('input', actualizarAvatarLogin);
   renderizarUsuariosLogin();
 });
+
