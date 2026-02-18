@@ -541,7 +541,7 @@ function formatearMonto(valor) {
 function generarEncabezado(idCotizacion, fecha) {
   return `
     <div class="cotizacion-header">
-      <img src="logo.png" class="logo" alt="Logo ServiGaco">
+      <img src="s="logo" alt="Logo ServiGaco">
       <div class="empresa-info">
         <h1>Cotización de Tesis</h1>
         <p>
@@ -847,7 +847,7 @@ async function generarPDFDesdeBackend(share = false) {
         <div class="container">
           <div class="header">
             <div class="header-content">
-              <img src="logo.png" alt="Servigaco Logo" class="logo" />
+              <img src=""Servigaco Logo" class="logo" />
               <h1>Cotización de Tesis</h1>
               <div class="header-divider"></div>
               <p>ID: ${datos.idCotizacion}</p>
@@ -1342,61 +1342,3 @@ function cargarCotizacionGuardada(id) {
     mostrarNotificacion(`Tesis de "${cotizacion.nombre}" cargada`, 'success');
   }
 }
-
-// ============================================
-// 🔐 LÓGICA DE AVATAR LOGIN
-// ============================================
-
-const USUARIOS_CONOCIDOS = {
-  'yulissa': { nombre: 'Yulissa', foto: 'yuli.png' },
-};
-
-function renderizarUsuariosLogin() {
-  const container = document.getElementById('listaUsuariosLogin');
-  if (!container) return;
-  
-  container.innerHTML = Object.keys(USUARIOS_CONOCIDOS).map(key => {
-    const u = USUARIOS_CONOCIDOS[key];
-    return `
-      <div class="flex flex-col items-center cursor-pointer group transition-transform hover:scale-105" onclick="seleccionarUsuarioLogin('${key}')">
-        <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 group-hover:border-blue-500 transition-all shadow-sm bg-gray-100">
-          <img src="${u.foto}" alt="${u.nombre}" class="w-full h-full object-cover">
-        </div>
-        <span class="text-xs text-gray-500 group-hover:text-blue-600 mt-1 font-medium">${u.nombre}</span>
-      </div>
-    `;
-  }).join('');
-}
-
-window.seleccionarUsuarioLogin = function(usuario) {
-  const input = document.getElementById('usuarioLogin');
-  if(input) {
-      input.value = usuario;
-      actualizarAvatarLogin();
-      document.getElementById('passwordLogin')?.focus();
-  }
-};
-
-function actualizarAvatarLogin() {
-  const input = document.getElementById('usuarioLogin');
-  if(!input) return;
-  
-  const usuario = input.value.trim().toLowerCase();
-  const img = document.getElementById('loginAvatarImg');
-  const icon = document.getElementById('loginAvatarIcon');
-  
-  if (USUARIOS_CONOCIDOS[usuario]) {
-    img.src = USUARIOS_CONOCIDOS[usuario].foto;
-    img.classList.remove('hidden');
-    icon.classList.add('hidden');
-  } else {
-    img.classList.add('hidden');
-    icon.classList.remove('hidden');
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const inputUser = document.getElementById('usuarioLogin');
-  if(inputUser) inputUser.addEventListener('input', actualizarAvatarLogin);
-  renderizarUsuariosLogin();
-});
