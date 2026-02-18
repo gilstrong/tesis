@@ -707,55 +707,177 @@ function generarTiempoEntrega(tipoEmp) {
 /**
  * Abre la cotización en una nueva ventana para usar la función de impresión del navegador.
  */
+async function getPDFBlob(datos) {
+  const filename = nombreArchivoPDF(datos.idCotizacion, datos.colorTapa);
+
+  // Generar filas de la tabla
+  const filaImpresion = generarFilaImpresion(datos);
+  const filaEmpastado = generarFilaEmpastado(datos);
+  const filaLomo = datos.lomo ? generarFilaLomo(datos.tomos, datos.lomoVal) : '';
+  const filaCD = (datos.cd && datos.cantidadCd) ? generarFilaCD(datos.cantidadCd, datos.cdVal) : '';
+  const tableBody = `${filaImpresion}${filaEmpastado}${filaLomo}${filaCD}`;
+
+  // Generar pie de tabla con total
+  const resumenHTML = `
+    <tr style="background: linear-gradient(to right, #2563eb, #1e40af);">
+      <td colspan="4" style="text-align: right; font-weight: bold; color: white; padding: 16px; font-size: 14px;">TOTAL:</td>
+      <td style="text-align: right; font-weight: 900; color: white; padding: 16px; font-size: 18px; background: linear-gradient(to right, #ea580c, #c2410c);">RD$${formatearMonto(datos.totalRedondeado)}</td>
+    </tr>
+  `;
+
+  // Construir el HTML completo para el PDF
+  const html = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="utf-8">
+      <base href="${window.location.origin}/">
+      <title>Cotización Tesis - ${datos.idCotizacion}</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: white; }
+        .container { max-width: 900px; margin: 0 auto; background: white; overflow: hidden; }
+        .header { background: linear-gradient(135deg, #2563eb 0%, #1e40af 50%, #1e3a8a 100%); color: white; padding: 40px 30px; position: relative; overflow: hidden; }
+        .header-content { position: relative; z-index: 1; text-align: center; }
+        .logo { width: 140px; height: auto; margin: 0 auto 15px; display: block; }
+        .header h1 { font-size: 28px; font-weight: 900; margin-bottom: 5px; letter-spacing: -0.5px; }
+        .header-divider { width: 50px; height: 4px; background: linear-gradient(to right, #f97316, #ea580c); margin: 10px auto 15px; border-radius: 10px; }
+        .header p { font-size: 12px; color: #bfdbfe; font-weight: 600; letter-spacing: 1px; margin-bottom: 15px; }
+        .header-badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 12px 20px; font-size: 12px; font-weight: 600; }
+        .content { padding: 30px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+        thead tr { background: linear-gradient(to right, #2563eb, #1e40af); color: white; }
+        thead th { padding: 14px 16px; text-align: left; font-weight: 700; font-size: 12px; letter-spacing: 0.5px; text-transform: uppercase; }
+        tbody tr { border-bottom: 1px solid #e0e7ff; }
+        tbody tr:nth-child(odd) { background: #f0f9ff; }
+        tbody td { padding: 14px 16px; font-size: 13px; }
+        tbody td:first-child { font-weight: 700; color: #1e3a8a; }
+        .center { text-align: center; }
+        .right { text-align: right; }
+        .footer { background: linear-gradient(to right, #1f2937, #111827); border-top: 4px solid #ea580c; padding: 25px 30px; text-align: center; color: white; }
+        .footer-brand { color: #f97316; font-weight: 900; font-size: 16px; letter-spacing: 1px; margin-bottom: 5px; }
+        .footer-subtitle { color: #cbd5e1; font-size: 11px; font-weight: 600; margin-bottom: 12px; }
+        .footer-text { color: #94a3b8; font-size: 11px; line-height: 1.6; border-top: 1px solid #374151; padding-top: 12px; margin-top: 12px; }
+        /* Estilos para los bloques adicionales */
+        .bloque-ejemplar, .cuentas-pago, .tiempo-entrega { page-break-inside: avoid; margin-top: 2rem; }
+        .bloque-ejemplar { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+        .bloque-ejemplar-header { background: #f3f4f6; padding: 10px; font-weight: bold; }
+        .bloque-ejemplar-img { padding: 20px; text-align: center; }
+        .bloque-ejemplar-img img { max-width: 250px; height: auto; }
+        .cuentas-pago { text-align: center; }
+        .img-cuenta { max-width: 100%; height: auto; margin-bottom: 1rem; }
+        .tiempo-entrega { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 15px; border-radius: 8px; text-align: center; font-size: 14px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="header-content">
+            <img src="Servigaco Logo" class="logo" />
+            <h1>Cotización de Tesis</h1>
+            <div class="header-divider"></div>
+            <p>ID: ${datos.idCotizacion}</p>
+            <div class="header-badge">
+              📅 ${datos.fecha} | ✓ Presupuesto Válido
+            </div>
+          </div>
+        </div>
+        <div class="content">
+          <table>
+            <thead>
+              <tr>
+                <th>Concepto</th>
+                <th>Detalle</th>
+                <th class="center">Cantidad</th>
+                <th class="right">Precio Unit.</th>
+                <th class="right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>${tableBody}</tbody>
+            <tfoot>${resumenHTML}</tfoot>
+          </table>
+          ${generarBloqueEjemplar(datos.tipoEmp, datos.colorTapa)}
+          ${BLOQUE_CUENTAS.replace('{{TIEMPO_ENTREGA}}', generarTiempoEntrega(datos.tipoEmp))}
+        </div>
+        <div class="footer">
+          <div class="footer-brand">ServiGaco®</div>
+          <div class="footer-subtitle">CALIDAD Y RAPIDEZ</div>
+          <div class="footer-text">Cotización generada automáticamente. Válida por 30 días.</div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const response = await fetch('/generar-pdf', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ html: html, filename: filename })
+  });
+
+  if (!response.ok) {
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'El servidor no pudo generar el PDF.');
+    } else {
+      throw new Error(`Error ${response.status}: El endpoint /generar-pdf no existe.\n\n⚠️ CAUSA PROBABLE: No estás ejecutando 'node server.js' o estás usando otro servidor (como Live Server) en el puerto 3000.`);
+    }
+  }
+
+  return await response.blob();
+}
+
+async function descargarPDF(data, nombre) {
+  try {
+    const pdfBlob = await getPDFBlob(data);
+    const url = window.URL.createObjectURL(pdfBlob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = nombre;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
+    mostrarNotificacion('PDF descargado correctamente', 'success');
+  } catch (error) {
+    console.error('Error al descargar PDF:', error);
+    mostrarNotificacion(error.message || 'Error al descargar el PDF', 'error');
+  }
+}
+
+async function imprimirPDF(data) {
+  try {
+    const pdfBlob = await getPDFBlob(data);
+    const url = window.URL.createObjectURL(pdfBlob);
+    const printWindow = window.open(url, '_blank');
+    if (printWindow) {
+      printWindow.focus();
+      // Esperar un poco para que el PDF cargue y luego intentar imprimir
+      setTimeout(() => {
+        try {
+          printWindow.print();
+        } catch (e) {
+          mostrarNotificacion('No se pudo imprimir automáticamente. Use Ctrl+P en la nueva pestaña.', 'warning');
+        }
+      }, 1000);
+    } else {
+      mostrarNotificacion('Bloqueado por el navegador. Abra el PDF manualmente para imprimir.', 'warning');
+    }
+  } catch (error) {
+    console.error('Error al imprimir PDF:', error);
+    mostrarNotificacion(error.message || 'Error al generar el PDF para imprimir', 'error');
+  }
+}
+
 function imprimir() {
   if (!ultimaCotizacion) {
     return mostrarNotificacion('Calcule primero la cotización', 'warning');
   }
-
-  const ventana = window.open('', '', 'width=1000,height=700');
-  const headHTML = document.head.innerHTML;
-
-  ventana.document.write(`
-    <!DOCTYPE html>
-    <html lang="es">
-      <head>
-        ${headHTML}
-        <title>Cotización de Tesis - ServiGaco</title>
-
-        <style>
-          @page {
-            size: A4;
-            margin: 12mm;
-          }
-.print-page {
-  width: 190mm;
-  max-width: 190mm;
-  margin: auto;
+  imprimirPDF(datosUltimaCotizacion);
 }
 
-          body {
-            margin: 0;
-            zoom: 0.9; /* 🔥 auto-ajuste seguro */
-          }
-
-          .cotizacion {
-            width: 100%;
-            box-sizing: border-box;
-          }
-        </style>
-      </head>
-      <body>
-        ${ultimaCotizacion}
-      </body>
-    </html>
-  `);
-
-  ventana.document.close();
-
-  setTimeout(() => {
-    ventana.print();
-  }, 500);
-}
 
 /**
  * Genera y descarga/comparte el PDF usando el backend con Puppeteer
@@ -784,124 +906,7 @@ async function generarPDFDesdeBackend(share = false) {
     const datos = datosUltimaCotizacion;
     const filename = nombreArchivoPDF(datos.idCotizacion, datos.colorTapa);
 
-    // Generar filas de la tabla
-    const filaImpresion = generarFilaImpresion(datos);
-    const filaEmpastado = generarFilaEmpastado(datos);
-    const filaLomo = datos.lomo ? generarFilaLomo(datos.tomos, datos.lomoVal) : '';
-    const filaCD = (datos.cd && datos.cantidadCd) ? generarFilaCD(datos.cantidadCd, datos.cdVal) : '';
-    const tableBody = `${filaImpresion}${filaEmpastado}${filaLomo}${filaCD}`;
-
-    // Generar pie de tabla con total
-    const resumenHTML = `
-      <tr style="background: linear-gradient(to right, #2563eb, #1e40af);">
-        <td colspan="4" style="text-align: right; font-weight: bold; color: white; padding: 16px; font-size: 14px;">TOTAL:</td>
-        <td style="text-align: right; font-weight: 900; color: white; padding: 16px; font-size: 18px; background: linear-gradient(to right, #ea580c, #c2410c);">RD$${formatearMonto(datos.totalRedondeado)}</td>
-      </tr>
-    `;
-
-    // Construir el HTML completo para el PDF
-    const html = `
-      <!DOCTYPE html>
-      <html lang="es">
-      <head>
-        <meta charset="utf-8">
-        <base href="${window.location.origin}/">
-        <title>Cotización Tesis - ${datos.idCotizacion}</title>
-        <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: white; }
-          .container { max-width: 900px; margin: 0 auto; background: white; overflow: hidden; }
-          .header { background: linear-gradient(135deg, #2563eb 0%, #1e40af 50%, #1e3a8a 100%); color: white; padding: 40px 30px; position: relative; overflow: hidden; }
-          .header-content { position: relative; z-index: 1; text-align: center; }
-          .logo { width: 140px; height: auto; margin: 0 auto 15px; display: block; }
-          .header h1 { font-size: 28px; font-weight: 900; margin-bottom: 5px; letter-spacing: -0.5px; }
-          .header-divider { width: 50px; height: 4px; background: linear-gradient(to right, #f97316, #ea580c); margin: 10px auto 15px; border-radius: 10px; }
-          .header p { font-size: 12px; color: #bfdbfe; font-weight: 600; letter-spacing: 1px; margin-bottom: 15px; }
-          .header-badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 12px 20px; font-size: 12px; font-weight: 600; }
-          .content { padding: 30px; }
-          table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
-          thead tr { background: linear-gradient(to right, #2563eb, #1e40af); color: white; }
-          thead th { padding: 14px 16px; text-align: left; font-weight: 700; font-size: 12px; letter-spacing: 0.5px; text-transform: uppercase; }
-          tbody tr { border-bottom: 1px solid #e0e7ff; }
-          tbody tr:nth-child(odd) { background: #f0f9ff; }
-          tbody td { padding: 14px 16px; font-size: 13px; }
-          tbody td:first-child { font-weight: 700; color: #1e3a8a; }
-          .center { text-align: center; }
-          .right { text-align: right; }
-          .footer { background: linear-gradient(to right, #1f2937, #111827); border-top: 4px solid #ea580c; padding: 25px 30px; text-align: center; color: white; }
-          .footer-brand { color: #f97316; font-weight: 900; font-size: 16px; letter-spacing: 1px; margin-bottom: 5px; }
-          .footer-subtitle { color: #cbd5e1; font-size: 11px; font-weight: 600; margin-bottom: 12px; }
-          .footer-text { color: #94a3b8; font-size: 11px; line-height: 1.6; border-top: 1px solid #374151; padding-top: 12px; margin-top: 12px; }
-          /* Estilos para los bloques adicionales */
-          .bloque-ejemplar, .cuentas-pago, .tiempo-entrega { page-break-inside: avoid; margin-top: 2rem; }
-          .bloque-ejemplar { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
-          .bloque-ejemplar-header { background: #f3f4f6; padding: 10px; font-weight: bold; }
-          .bloque-ejemplar-img { padding: 20px; text-align: center; }
-          .bloque-ejemplar-img img { max-width: 250px; height: auto; }
-          .cuentas-pago { text-align: center; }
-          .img-cuenta { max-width: 100%; height: auto; margin-bottom: 1rem; }
-          .tiempo-entrega { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 15px; border-radius: 8px; text-align: center; font-size: 14px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <div class="header-content">
-              <img src=""Servigaco Logo" class="logo" />
-              <h1>Cotización de Tesis</h1>
-              <div class="header-divider"></div>
-              <p>ID: ${datos.idCotizacion}</p>
-              <div class="header-badge">
-                📅 ${datos.fecha} | ✓ Presupuesto Válido
-              </div>
-            </div>
-          </div>
-          <div class="content">
-            <table>
-              <thead>
-                <tr>
-                  <th>Concepto</th>
-                  <th>Detalle</th>
-                  <th class="center">Cantidad</th>
-                  <th class="right">Precio Unit.</th>
-                  <th class="right">Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>${tableBody}</tbody>
-              <tfoot>${resumenHTML}</tfoot>
-            </table>
-            ${generarBloqueEjemplar(datos.tipoEmp, datos.colorTapa)}
-            ${BLOQUE_CUENTAS.replace('{{TIEMPO_ENTREGA}}', generarTiempoEntrega(datos.tipoEmp))}
-          </div>
-          <div class="footer">
-            <div class="footer-brand">ServiGaco®</div>
-            <div class="footer-subtitle">CALIDAD Y RAPIDEZ</div>
-            <div class="footer-text">Cotización generada automáticamente. Válida por 30 días.</div>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-
-    const response = await fetch('/generar-pdf', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ html: html, filename: filename })
-    });
-
-    if (!response.ok) {
-      // Verificar si la respuesta es JSON
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'El servidor no pudo generar el PDF.');
-      } else {
-        // Si recibimos HTML (ej. 404 de Live Server), lanzamos un error explicativo
-        throw new Error(`Error ${response.status}: El endpoint /generar-pdf no existe.\n\n⚠️ CAUSA PROBABLE: No estás ejecutando 'node server.js' o estás usando otro servidor (como Live Server) en el puerto 3000.`);
-      }
-    }
-
-    const pdfBlob = await response.blob();
+    const pdfBlob = await getPDFBlob(datos);
     const archivo = new File([pdfBlob], filename, { type: 'application/pdf' });
 
     if (share && navigator.canShare && navigator.canShare({ files: [archivo] })) {
@@ -1017,7 +1022,14 @@ function inicializar() {
   elementos.btnCalcular.addEventListener('click', calcular);
   elementos.btnGenerar.addEventListener('click', imprimir);
   if (elementos.btnDescargarPdf) {
-    elementos.btnDescargarPdf.addEventListener('click', () => generarPDFDesdeBackend(false));
+    elementos.btnDescargarPdf.addEventListener('click', () => {
+      if (!ultimaCotizacion || !datosUltimaCotizacion) {
+        mostrarNotificacion('Primero genera la cotización', 'warning');
+        return;
+      }
+      const filename = nombreArchivoPDF(datosUltimaCotizacion.idCotizacion, datosUltimaCotizacion.colorTapa);
+      descargarPDF(datosUltimaCotizacion, filename);
+    });
   }
   if (elementos.btnCompartir) {
     elementos.btnCompartir.addEventListener('click', () => generarPDFDesdeBackend(true));
