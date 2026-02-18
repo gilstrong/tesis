@@ -1019,10 +1019,12 @@ function inicializar() {
   elementos.llevaCd.addEventListener('change', toggleSeccionCD);
 
   // Eventos de botones
-  elementos.btnCalcular.addEventListener('click', calcular);
-  elementos.btnGenerar.addEventListener('click', imprimir);
+  elementos.btnCalcular.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); calcular(); });
+  elementos.btnGenerar.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); imprimir(); });
   if (elementos.btnDescargarPdf) {
-    elementos.btnDescargarPdf.addEventListener('click', () => {
+    elementos.btnDescargarPdf.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       if (!ultimaCotizacion || !datosUltimaCotizacion) {
         mostrarNotificacion('Primero genera la cotización', 'warning');
         return;
@@ -1032,16 +1034,20 @@ function inicializar() {
     });
   }
   if (elementos.btnCompartir) {
-    elementos.btnCompartir.addEventListener('click', () => generarPDFDesdeBackend(true));
+    elementos.btnCompartir.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      generarPDFDesdeBackend(true);
+    });
   }
-  elementos.btnReiniciar.addEventListener('click', reiniciar);
+  elementos.btnReiniciar.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); reiniciar(); });
 
   // Eventos Firebase
   if (elementos.btnGuardarTesis) {
-    elementos.btnGuardarTesis.addEventListener('click', guardarTesisEnFirebase);
+    elementos.btnGuardarTesis.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); guardarTesisEnFirebase(); });
   }
   if (elementos.btnVerGuardadas) {
-    elementos.btnVerGuardadas.addEventListener('click', abrirModalCotizaciones);
+    elementos.btnVerGuardadas.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); abrirModalCotizaciones(); });
   }
 
   // Evento tabla de precios (opcional)
