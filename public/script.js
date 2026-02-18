@@ -191,7 +191,6 @@ const elementos = {
   btnCalcular: document.getElementById('btnCalcular'),
   btnDescargarPdf: document.getElementById('btnDescargarPdf'),
   btnGenerar: document.getElementById('btnGenerar'),
-  btnCompartir: document.getElementById('btnCompartir'),
   btnReiniciar: document.getElementById('btnReiniciar'),
   btnMostrarTabla: document.getElementById('btnMostrarTabla'),
   btnGuardarTesis: document.getElementById('btnGuardarTesis'),
@@ -828,118 +827,98 @@ async function getPDFBlob(datos) {
   return await response.blob();
 }
 
-async function descargarPDF(data, nombre) {
-  try {
-    const pdfBlob = await getPDFBlob(data);
-    const url = window.URL.createObjectURL(pdfBlob);
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = url;
-    a.download = nombre;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    a.remove();
-    mostrarNotificacion('PDF descargado correctamente', 'success');
-  } catch (error) {
-    console.error('Error al descargar PDF:', error);
-    mostrarNotificacion(error.message || 'Error al descargar el PDF', 'error');
-  }
-}
-
-async function imprimirPDF(data) {
-  try {
-    const pdfBlob = await getPDFBlob(data);
-    const url = window.URL.createObjectURL(pdfBlob);
-    const printWindow = window.open(url, '_blank');
-    if (printWindow) {
-      printWindow.focus();
-      // Esperar un poco para que el PDF cargue y luego intentar imprimir
-      setTimeout(() => {
-        try {
-          printWindow.print();
-        } catch (e) {
-          mostrarNotificacion('No se pudo imprimir automáticamente. Use Ctrl+P en la nueva pestaña.', 'warning');
-        }
-      }, 1000);
-    } else {
-      mostrarNotificacion('Bloqueado por el navegador. Abra el PDF manualmente para imprimir.', 'warning');
-    }
-  } catch (error) {
-    console.error('Error al imprimir PDF:', error);
-    mostrarNotificacion(error.message || 'Error al generar el PDF para imprimir', 'error');
-  }
-}
-
 function imprimir() {
   if (!ultimaCotizacion) {
     return mostrarNotificacion('Calcule primero la cotización', 'warning');
   }
-  imprimirPDF(datosUltimaCotizacion);
+  // Imprimir PDF en la misma página usando iframe
+  (async () => {
+    try {
+      const pdfBlob = await getPDFBlob(datosUltimaCotizacion);
+      const url = window.URL.createObjectURL(pdfBlob);
+
+      // Crear iframe temporal que ocupe toda la página
+      const iframe = document.createElement('iframe');
+      iframe.src = url;
+      iframe.style.position = 'fixed';
+      iframe.style.top = '0';
+      iframe.style.left = '0';
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.border = 'none';
+      iframe.style.zIndex = '9999';
+      iframe.style.background = 'white';
+
+      // Agregar al body
+      document.body.appendChild(iframe);
+
+      // Esperar a que cargue y luego imprimir
+      iframe.onload = () => {
+        setTimeout(() => {
+          try {
+            window.print();
+          } catch (e) {
+            mostrarNotificacion('No se pudo imprimir automáticamente. Use Ctrl+P.', 'warning');
+          } finally {
+            // Remover iframe después de imprimir
+            setTimeout(() => {
+              document.body.removeChild(iframe);
+              window.URL.revokeObjectURL(url);
+            }, 100);
+          }
+        }, 500);
+      };
+
+    } catch (error) {
+      console.error('Error al imprimir PDF:', error);
+      mostrarNotificacion(error.message || 'Error al generar el PDF para imprimir', 'error');
+    }
+  })();
 }
 
 
 /**
- * Genera y descarga/comparte el PDF usando el backend con Puppeteer
- * @param {boolean} share - Si es true, intenta compartir. Si es false, descarga.
+ * Genera y descarga el PDF usando el backend con Puppeteer
  */
-async function generarPDFDesdeBackend(share = false) {
+async function generarPDFDesdeBackend() {
   if (!ultimaCotizacion || !datosUltimaCotizacion) {
     mostrarNotificacion('Primero genera la cotización', 'warning');
     return;
   }
 
   const btnDescargar = document.getElementById('btnDescargarPdf');
-  const btnCompartir = document.getElementById('btnCompartir');
   const originalTextDescargar = btnDescargar.innerHTML;
-  const originalTextCompartir = btnCompartir.innerHTML;
 
   // Show loading state
-  [btnDescargar, btnCompartir].forEach(btn => {
-    if (btn) {
-      btn.disabled = true;
-      btn.innerHTML = `<span class="text-xl animate-spin">⚙️</span> Generando...`;
-    }
-  });
+  if (btnDescargar) {
+    btnDescargar.disabled = true;
+    btnDescargar.innerHTML = `<span class="text-xl animate-spin">⚙️</span> Generando...`;
+  }
 
   try {
     const datos = datosUltimaCotizacion;
     const filename = nombreArchivoPDF(datos.idCotizacion, datos.colorTapa);
 
     const pdfBlob = await getPDFBlob(datos);
-    const archivo = new File([pdfBlob], filename, { type: 'application/pdf' });
 
-    if (share && navigator.canShare && navigator.canShare({ files: [archivo] })) {
-      await navigator.share({
-        title: 'Cotización de Tesis',
-        text: 'Adjunto cotización en PDF',
-        files: [archivo]
-      });
-    } else {
-      // Fallback to download
-      const url = window.URL.createObjectURL(pdfBlob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove();
-    }
-
+    // Download
+    const url = window.URL.createObjectURL(pdfBlob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
   } catch (error) {
     console.error('Error al generar PDF desde backend:', error);
     mostrarNotificacion(error.message || 'Error al generar el PDF', 'error');
   } finally {
-    // Restore buttons
+    // Restore button
     if (btnDescargar) {
       btnDescargar.disabled = false;
       btnDescargar.innerHTML = originalTextDescargar;
-    }
-    if (btnCompartir) {
-      btnCompartir.disabled = false;
-      btnCompartir.innerHTML = originalTextCompartir;
     }
   }
 }
@@ -1025,19 +1004,7 @@ function inicializar() {
     elementos.btnDescargarPdf.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!ultimaCotizacion || !datosUltimaCotizacion) {
-        mostrarNotificacion('Primero genera la cotización', 'warning');
-        return;
-      }
-      const filename = nombreArchivoPDF(datosUltimaCotizacion.idCotizacion, datosUltimaCotizacion.colorTapa);
-      descargarPDF(datosUltimaCotizacion, filename);
-    });
-  }
-  if (elementos.btnCompartir) {
-    elementos.btnCompartir.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      generarPDFDesdeBackend(true);
+      generarPDFDesdeBackend();
     });
   }
   elementos.btnReiniciar.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); reiniciar(); });
