@@ -18,14 +18,28 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Evitar error 404 de favicon.ico
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
+// --- Ruta raíz: Servir index.html ---
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 
 // --- Rutas delegadas al Controlador ---
 app.post('/analizar-pdf', upload.single('pdf'), pdfController.analizarPDF);
 app.post('/generar-pdf', pdfController.generarPDF);
 
+// --- Middleware de manejo de errores global ---
+app.use((err, req, res, next) => {
+    console.error('Error global:', err);
+    if (!res.headersSent) {
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
 
 // --- Iniciar Servidor ---
 app.listen(port, () => {
-    console.log(`Servidor corriendo en http://localhost:${port}`);
+    console.log(`🚀 Servidor corriendo en http://localhost:${port}`);
+    console.log(`📁 Frontend servido desde: ${path.join(__dirname, 'public')}`);
     console.log(`⚠️  No abras el archivo index.html directamente. Usa la dirección de arriba.`);
 });

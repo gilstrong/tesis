@@ -13,14 +13,16 @@ const puppeteerArgs = [
     '--disable-dev-shm-usage',
     '--disable-accelerated-2d-canvas',
     '--no-first-run',
-    '--no-zygote',
-    '--single-process',
+    // '--no-zygote', // Descomentar solo si hay problemas en Render (Linux)
+    // '--single-process', // Descomentar solo si hay problemas en Render (Linux)
     '--font-render-hinting=none',
     '--disable-extensions',            // Nuevo: Desactiva extensiones
     '--disable-background-networking', // Nuevo: Evita tráfico de red oculto
     '--disable-default-apps',          // Nuevo
     '--disable-sync',                  // Nuevo: Evita sincronización de Google
-    '--mute-audio'                     // Nuevo: Ahorra recursos de audio
+    '--mute-audio',                    // Nuevo: Ahorra recursos de audio
+    '--disable-web-security',          // Nuevo: Para evitar cierres por seguridad
+    '--disable-features=VizDisplayCompositor' // Nuevo: Reduce uso de GPU
 ];
 
 // Función centralizada para iniciar el navegador
@@ -42,7 +44,8 @@ const initBrowser = async () => {
 (async () => {
     // 1. Cargar Logo en memoria UNA SOLA VEZ (Evita lectura de disco por petición)
     try {
-        const logoPath = path.join(__dirname, '../../../public/assets/logo.png');
+        // CORRECCIÓN: La ruta correcta es relativa al directorio del proyecto.
+        const logoPath = path.join(__dirname, 'public', 'assets', 'logo.png');
         if (fs.existsSync(logoPath)) {
             const bitmap = fs.readFileSync(logoPath);
             logoBase64Cache = `data:image/png;base64,${bitmap.toString('base64')}`;
