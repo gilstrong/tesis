@@ -691,21 +691,9 @@
     procesando: false
   };
 
-  // Inicializar Firebase Database
-  const db = firebase.database();
+  // db ya está inicializada en script.js, no necesitamos redeclararla aquí
   
-  // ── Abrir / cerrar modal ──────────────────────────────────────────────────────
-  function abrirModalAnalizadorPDF() {
-    document.getElementById('modalAnalizadorPDF').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-  
-  function cerrarModalAnalizadorPDF() {
-    const modal = document.getElementById('modalAnalizadorPDF');
-    modal.classList.add('hidden');
-    document.body.style.overflow = '';
-    if (!_PDF.procesando) pdfLimpiarTodo();
-  }
+  // abrirModalAnalizadorPDF y cerrarModalAnalizadorPDF están definidas en script.js para disponibilidad global
   
   function pdfClickOutside(e) {
     if (e.target.id === 'modalAnalizadorPDF') {

@@ -1610,3 +1610,18 @@ async function procesarLogin(e) {
     mostrarNotificacion('Credenciales incorrectas', 'error');
   }
 }
+
+// ============================================
+// 📄 ANALIZADOR DE PDF - FUNCIONES GLOBALES
+// ============================================
+
+function abrirModalAnalizadorPDF() {
+  document.getElementById('modalAnalizadorPDF').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function cerrarModalAnalizadorPDF() {
+  const modal = document.getElementById('modalAnalizadorPDF');
+  modal.classList.add('hidden');
+  document.body.style.overflow = '';
+}
