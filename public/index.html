@@ -48,6 +48,9 @@
       <header class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <h1>Calculadora de Tesis</h1>
         <div class="flex items-center gap-2">
+          <button type="button" id="btnDashboard" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-500 hover:to-indigo-700 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
+            <span class="text-lg">📊</span> Dashboard
+          </button>
           <button type="button" id="btnVerGuardadas" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-400 hover:to-teal-600 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
             <span class="text-lg">📂</span>
             Ver Guardadas
@@ -401,6 +404,69 @@
   </main>
 
   <!-- ========================================
+       📊 MODAL DASHBOARD
+       ======================================== -->
+  <div id="modalDashboard" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-[90] hidden animate-fade-in">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col animate-slide-in-up m-4 overflow-hidden">
+      <!-- Header -->
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-600 to-blue-600 flex justify-between items-center flex-shrink-0">
+        <div>
+          <h3 class="text-2xl font-bold text-white flex items-center gap-3"><span class="text-3xl">📊</span> Dashboard de Operaciones</h3>
+          <p class="text-indigo-100 text-sm mt-1">Resumen de Tesis y Trabajos realizados</p>
+        </div>
+        <div class="flex items-center gap-4">
+          <!-- Filtros de Fecha -->
+          <div class="flex items-center gap-2 bg-white/10 rounded-lg p-2">
+            <label for="dashFechaInicio" class="text-white text-sm font-medium">Desde:</label>
+            <input type="date" id="dashFechaInicio" class="px-2 py-1 rounded border border-white/20 bg-white/20 text-white text-sm focus:ring-2 focus:ring-white/50 outline-none">
+            <label for="dashFechaFin" class="text-white text-sm font-medium ml-2">Hasta:</label>
+            <input type="date" id="dashFechaFin" class="px-2 py-1 rounded border border-white/20 bg-white/20 text-white text-sm focus:ring-2 focus:ring-white/50 outline-none">
+            <button id="btnFiltrarDashboard" class="ml-2 px-3 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg font-medium text-sm transition-all">Filtrar</button>
+          </div>
+          <button id="btnCerrarDashboard" class="p-2 rounded-full text-white hover:bg-white/20 transition-all">✕</button>
+        </div>
+      </div>
+      <!-- Contenido -->
+      <div class="p-6 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex-1">
+        <!-- Tarjetas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+            <span class="text-4xl mb-2">💰</span><p class="text-gray-500 text-sm font-bold uppercase">Ventas Hoy</p>
+            <p class="text-3xl font-black text-gray-800 dark:text-white mt-1" id="dashVentasHoy">RD$0.00</p>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+            <span class="text-4xl mb-2">📅</span><p class="text-gray-500 text-sm font-bold uppercase">Ventas del Mes</p>
+            <p class="text-3xl font-black text-indigo-600 dark:text-indigo-400 mt-1" id="dashVentasMes">RD$0.00</p>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+            <span class="text-4xl mb-2">📊</span><p class="text-gray-500 text-sm font-bold uppercase">Ventas del Período</p>
+            <p class="text-3xl font-black text-green-600 dark:text-green-400 mt-1" id="dashVentasPeriodo">RD$0.00</p>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+            <span class="text-4xl mb-2">🎓</span><p class="text-gray-500 text-sm font-bold uppercase">Tesis Registradas</p>
+            <p class="text-3xl font-black text-blue-600 dark:text-blue-400 mt-1" id="dashTotalTesis">0</p>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+            <span class="text-4xl mb-2">🧾</span><p class="text-gray-500 text-sm font-bold uppercase">Facturas Emitidas</p>
+            <p class="text-3xl font-black text-purple-600 dark:text-purple-400 mt-1" id="dashTotalFacturas">0</p>
+          </div>
+        </div>
+        <!-- Listas -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20"><h4 class="font-bold text-blue-800 dark:text-blue-300">🎓 Últimas Tesis</h4></div>
+            <div id="dashListaTesis" class="divide-y divide-gray-100 dark:divide-gray-700 max-h-[400px] overflow-y-auto"></div>
+          </div>
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-purple-50 dark:bg-purple-900/20"><h4 class="font-bold text-purple-800 dark:text-purple-300">🧾 Últimos Trabajos</h4></div>
+            <div id="dashListaFacturas" class="divide-y divide-gray-100 dark:divide-gray-700 max-h-[400px] overflow-y-auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
        📂 MODAL PARA COTIZACIONES GUARDADAS
        ======================================== -->
   <div id="modalCotizacionesGuardadas" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden animate-fade-in">
@@ -459,36 +525,15 @@
   </div>
 
   <!-- ========================================
-       🚪 MODAL CONFIRMACIÓN LOGOUT (NUEVO)
-       ======================================== -->
-  <div id="modalConfirmarLogout" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-[3000] hidden animate-fade-in">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-6 animate-slide-in-up border border-gray-200 dark:border-gray-700 text-center">
-      <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-sm">👋</div>
-      <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">¿Cerrar Sesión?</h3>
-      <p class="text-gray-600 dark:text-gray-300 text-sm mb-6">¿Estás seguro de que deseas salir del sistema?</p>
-      
-      <div class="flex gap-3 justify-center">
-        <button id="btnCancelarLogout" class="flex-1 px-5 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancelar</button>
-        <button id="btnConfirmarLogout" class="flex-1 px-5 py-2.5 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all transform hover:-translate-y-1">Sí, Salir</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================
        🔐 MODAL LOGIN (EMPLEADOS)
        ======================================== -->
   <div id="modalLogin" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-[2000] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-8 animate-slide-in-up border border-blue-200 dark:border-blue-900">
       <div class="text-center mb-6">
-        <div id="loginAvatarContainer" class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 overflow-hidden border-4 border-white shadow-md transition-all duration-300 relative">
-          <span id="loginAvatarIcon">🔐</span>
-          <img id="loginAvatarImg" src="" alt="User" class="w-full h-full object-cover absolute inset-0 hidden">
-        </div>
+        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🔐</div>
         <h3 class="text-xl font-bold text-gray-800 dark:text-white">Acceso Autorizado</h3>
-        <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">Selecciona tu usuario o ingresa credenciales.</p>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">Ingresa tus credenciales.</p>
       </div>
-      
-      <div id="listaUsuariosLogin" class="flex justify-center gap-4 mb-6"></div>
 
       <form id="formLogin" class="space-y-4">
         <input type="text" id="usuarioLogin" placeholder="Usuario (ej: admin)" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>

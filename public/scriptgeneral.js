@@ -1073,6 +1073,10 @@ function inicializarEventListeners() {
   const btnVer = document.getElementById('btnVerGuardadas');
   if (btnVer) btnVer.addEventListener('click', abrirModalCotizaciones);
 
+  // --- EVENTO DASHBOARD ---
+  const btnDashboard = document.getElementById('btnDashboard');
+  if (btnDashboard) btnDashboard.addEventListener('click', abrirModalDashboard);
+
   const btnCerrarModal = document.getElementById('btnCerrarModal');
   if (btnCerrarModal) btnCerrarModal.addEventListener('click', cerrarModalCotizaciones);
 
@@ -1082,6 +1086,21 @@ function inicializarEventListeners() {
           cerrarModalCotizaciones();
       }
   });
+  
+  const btnCerrarDashboard = document.getElementById('btnCerrarDashboard');
+  if (btnCerrarDashboard) btnCerrarDashboard.addEventListener('click', () => {
+    document.getElementById('modalDashboard').classList.add('hidden');
+  });
+  const btnFiltrarDashboard = document.getElementById('btnFiltrarDashboard');
+  if (btnFiltrarDashboard) btnFiltrarDashboard.addEventListener('click', cargarDatosDashboard);
+
+  // Cerrar modal al hacer click fuera del contenido
+  const modalDash = document.getElementById('modalDashboard');
+  if (modalDash) {
+    modalDash.addEventListener('click', (e) => {
+      if (e.target === modalDash) document.getElementById('modalDashboard').classList.add('hidden');
+    });
+  }
 
   // Cerrar modal al hacer click fuera del contenido
   const modal = document.getElementById('modalCotizacionesGuardadas');
@@ -3102,6 +3121,166 @@ async function abrirModalCotizaciones() {
 function cerrarModalCotizaciones() {
   document.getElementById('modalCotizacionesGuardadas')?.classList.add('hidden');
   document.body.style.overflow = 'auto';
+}
+
+// ============================================
+// 📊 LÓGICA DEL DASHBOARD
+// ============================================
+
+async function abrirModalDashboard() {
+  // 🛡️ VERIFICACIÓN DE SEGURIDAD
+  if (!verificarPermisoAdmin()) return;
+
+  const modal = document.getElementById('modalDashboard');
+  modal.classList.remove('hidden');
+
+  // Establecer fechas por defecto (Mes Actual)
+  const date = new Date();
+  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  
+  const formatDate = (d) => d.toISOString().split('T')[0];
+  
+  const inputInicio = document.getElementById('dashFechaInicio');
+  const inputFin = document.getElementById('dashFechaFin');
+  
+  if (inputInicio && inputFin) {
+      inputInicio.value = formatDate(firstDay);
+      inputFin.value = formatDate(lastDay);
+  }
+
+  await cargarDatosDashboard();
+}
+
+async function cargarDatosDashboard() {
+  // Elementos de UI
+  const elVentasHoy = document.getElementById('dashVentasHoy');
+  const elVentasMes = document.getElementById('dashVentasMes');
+  const elTotalTesis = document.getElementById('dashTotalTesis');
+  const elTotalFacturas = document.getElementById('dashTotalFacturas');
+  const listaTesis = document.getElementById('dashListaTesis');
+  const listaFacturas = document.getElementById('dashListaFacturas');
+  
+  const fechaInicio = document.getElementById('dashFechaInicio').value;
+  const fechaFin = document.getElementById('dashFechaFin').value;
+
+  // Reset UI
+  elVentasHoy.textContent = '...';
+  elVentasMes.textContent = '...';
+  listaTesis.innerHTML = '<p class="p-6 text-center text-gray-400 animate-pulse">Cargando datos...</p>';
+  listaFacturas.innerHTML = '<p class="p-6 text-center text-gray-400 animate-pulse">Cargando datos...</p>';
+
+  try {
+    const startAt = fechaInicio;
+    const endAt = fechaFin + "T23:59:59";
+
+    // 1. Cargar Facturas
+    const snapFacturas = await db.ref("facturas")
+      .orderByChild("fecha_facturacion")
+      .startAt(startAt)
+      .endAt(endAt)
+      .once("value");
+      
+    const dataFacturas = snapFacturas.val() || {};
+    const facturasArray = Object.values(dataFacturas).sort((a, b) => new Date(b.fecha_facturacion) - new Date(a.fecha_facturacion));
+
+    // 2. Cargar Tesis
+    const snapCotizaciones = await db.ref("cotizaciones")
+      .orderByChild("fecha")
+      .startAt(startAt)
+      .endAt(endAt)
+      .once("value");
+      
+    const dataCotizaciones = snapCotizaciones.val() || {};
+    const tesisArray = Object.values(dataCotizaciones)
+      .filter(c => c.tipo === 'Tesis')
+      .sort((a, b) => new Date(b.fecha || b.timestamp) - new Date(a.fecha || a.timestamp));
+
+    // --- CÁLCULOS ---
+    const hoy = new Date().toISOString().slice(0, 10);
+    const mesActual = new Date().toISOString().slice(0, 7);
+
+    let totalHoy = 0;
+    let totalMes = 0;
+    let countFacturasMes = 0;
+    let totalPeriodo = 0;
+    let countFacturasPeriodo = 0;
+
+    facturasArray.forEach(f => {
+      if (f.estado === 'anulada') return;
+      const fechaF = f.fecha_facturacion.slice(0, 10);
+      const mesF = f.fecha_facturacion.slice(0, 7);
+      const monto = parseFloat(f.total || 0);
+
+      if (fechaF === hoy) totalHoy += monto;
+      if (mesF === mesActual) {
+        totalMes += monto;
+        countFacturasMes++;
+      }
+      
+      totalPeriodo += monto;
+      countFacturasPeriodo++;
+    });
+
+    // --- ACTUALIZAR UI ---
+    elVentasHoy.textContent = `RD$${totalHoy.toLocaleString('es-DO', {minimumFractionDigits: 2})}`;
+    elVentasMes.textContent = `RD$${totalPeriodo.toLocaleString('es-DO', {minimumFractionDigits: 2})}`;
+    elTotalTesis.textContent = tesisArray.length;
+    elTotalFacturas.textContent = countFacturasPeriodo;
+
+    // --- LISTA TESIS ---
+    if (tesisArray.length === 0) {
+      listaTesis.innerHTML = '<p class="p-4 text-center text-gray-400">No hay tesis recientes.</p>';
+    } else {
+      listaTesis.innerHTML = tesisArray.slice(0, 10).map(t => {
+        const fecha = new Date(t.fecha || t.timestamp).toLocaleDateString('es-DO');
+        return `
+          <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-100 dark:border-gray-700">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="font-bold text-gray-800 dark:text-gray-200 text-sm">${t.nombre}</p>
+                <p class="text-xs text-gray-500">${t.descripcion || 'Sin detalle'}</p>
+              </div>
+              <span class="text-xs font-mono text-gray-400">${fecha}</span>
+            </div>
+            <p class="text-right font-bold text-blue-600 text-sm mt-1">RD$${parseFloat(t.total).toLocaleString()}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- LISTA FACTURAS ---
+    if (facturasArray.length === 0) {
+      listaFacturas.innerHTML = '<p class="p-4 text-center text-gray-400">No hay facturas recientes.</p>';
+    } else {
+      listaFacturas.innerHTML = facturasArray.slice(0, 10).map(f => {
+        const fecha = new Date(f.fecha_facturacion).toLocaleDateString('es-DO');
+        const esAnulada = f.estado === 'anulada';
+        const colorMonto = esAnulada ? 'text-gray-400 line-through' : 'text-purple-600';
+        const estado = esAnulada ? '<span class="text-[10px] bg-red-100 text-red-600 px-1 rounded">Anulada</span>' : '';
+
+        return `
+          <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-100 dark:border-gray-700">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="font-bold text-gray-800 dark:text-gray-200 text-sm">${f.razon_social}</p>
+                <p class="text-xs text-gray-500 font-mono">${f.ncf}</p>
+              </div>
+              <div class="text-right">
+                <p class="font-bold ${colorMonto} text-sm">RD$${parseFloat(f.total).toLocaleString()}</p>
+                ${estado}
+              </div>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">${fecha}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+  } catch (error) {
+    console.error("Error dashboard:", error);
+    listaTesis.innerHTML = '<p class="text-red-500 p-4">Error al cargar datos.</p>';
+  }
 }
 
 // ============================================
