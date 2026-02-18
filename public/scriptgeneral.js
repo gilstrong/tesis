@@ -10,6 +10,7 @@ let todasLasFacturas = []; // Para el historial de facturas
 let searchDebounceTimer; // Timer para la búsqueda
 let idFacturaAAnular = null; // Variable temporal para anulación segura
 let idCotizacionAEliminar = null; // Variable temporal para eliminar cotización
+let isGeneratingPDF = false; // Flag para evitar doble click en la generación de PDF
 
 console.log('🚀 Script cargando...');
 
@@ -1453,16 +1454,23 @@ function inicializarPrecioTiempoReal() {
 // ============================================
 
 async function imprimirCotizacion() {
+  if (isGeneratingPDF) {
+    mostrarNotificacion('Ya se está generando un PDF, por favor espere.', 'warning');
+    return;
+  }
   if (cotizacion.length === 0) {
     mostrarNotificacion('Cotización vacía', 'warning');
     return;
   }
 
+  isGeneratingPDF = true;
   const btn = document.getElementById('generarPDF');
-  if (!btn) return;
-  const originalBtnHTML = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = `<span class="text-2xl animate-spin">⚙️</span> Generando PDF...`;
+  let originalBtnHTML = '';
+  if (btn) {
+    originalBtnHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="text-2xl animate-spin">⚙️</span> Generando PDF...`;
+  }
 
   const originalTable = document.getElementById('cotizacionTabla');
   if (!originalTable) { mostrarNotificacion('No se encontró la tabla', 'error'); return; }
@@ -1648,8 +1656,6 @@ async function imprimirCotizacion() {
       body: JSON.stringify({ html: html, filename: filename })
     });
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'El servidor no pudo generar el PDF.');
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {
         const errorData = await response.json();
@@ -1680,8 +1686,11 @@ async function imprimirCotizacion() {
     console.error('Error al generar PDF desde backend:', error);
     mostrarNotificacion(error.message || 'Error al generar el PDF', 'error');
   } finally {
-    btn.disabled = false;
-    btn.innerHTML = originalBtnHTML;
+    isGeneratingPDF = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalBtnHTML;
+    }
   }
 }
 
@@ -3502,66 +3511,3 @@ function mostrarBienvenida(nombre) {
     setTimeout(() => overlay.remove(), 500);
   }, 4000);
 }
-
-// ============================================
-// 🔐 LÓGICA DE AVATAR LOGIN
-// ============================================
-
-const USUARIOS_CONOCIDOS = {
-  'yulissa': { nombre: 'Yulissa', foto: 'yuli.png' },
-};
-
-function renderizarUsuariosLogin() {
-  const container = document.getElementById('listaUsuariosLogin');
-  if (!container) return;
-  
-  container.innerHTML = Object.keys(USUARIOS_CONOCIDOS).map(key => {
-    const u = USUARIOS_CONOCIDOS[key];
-    // Fallback: Si la imagen falla, usa un avatar generado con las iniciales
-    const fallback = `https://ui-avatars.com/api/?name=${u.nombre}&background=random`;
-    return `
-      <div class="flex flex-col items-center cursor-pointer group transition-transform hover:scale-105" onclick="seleccionarUsuarioLogin('${key}')">
-        <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 group-hover:border-blue-500 transition-all shadow-sm bg-gray-100">
-          <img src="${u.foto}" alt="${u.nombre}" class="w-full h-full object-cover" onerror="this.src='${fallback}'">
-        </div>
-        <span class="text-xs text-gray-500 group-hover:text-blue-600 mt-1 font-medium">${u.nombre}</span>
-      </div>
-    `;
-  }).join('');
-}
-
-window.seleccionarUsuarioLogin = function(usuario) {
-  const input = document.getElementById('usuarioLogin');
-  if(input) {
-      input.value = usuario;
-      actualizarAvatarLogin();
-      document.getElementById('passwordLogin')?.focus();
-  }
-};
-
-function actualizarAvatarLogin() {
-  const input = document.getElementById('usuarioLogin');
-  if(!input) return;
-  
-  const usuario = input.value.trim().toLowerCase();
-  const img = document.getElementById('loginAvatarImg');
-  const icon = document.getElementById('loginAvatarIcon');
-  
-  if (img && icon) {
-    if (USUARIOS_CONOCIDOS[usuario]) {
-      img.src = USUARIOS_CONOCIDOS[usuario].foto;
-      img.onerror = function() { this.src = `https://ui-avatars.com/api/?name=${USUARIOS_CONOCIDOS[usuario].nombre}&background=random`; };
-      img.classList.remove('hidden');
-      icon.classList.add('hidden');
-    } else {
-      img.classList.add('hidden');
-      icon.classList.remove('hidden');
-    }
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const inputUser = document.getElementById('usuarioLogin');
-  if(inputUser) inputUser.addEventListener('input', actualizarAvatarLogin);
-  renderizarUsuariosLogin();
-});

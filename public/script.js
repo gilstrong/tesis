@@ -205,6 +205,7 @@ let datosGlobales = {};
 let datosUltimaCotizacion = null; // Variable para almacenar los datos completos de la última cotización
 let datosParaGuardar = null; // Variable temporal para guardar en Sheets
 let todasLasCotizaciones = []; // Para el modal de Firebase
+let isProcessingAction = false; // Flag para evitar doble click en acciones
 let idCotizacionAEliminar = null; // Variable temporal para eliminación
 
 // Inicializar Firebase
@@ -842,10 +843,17 @@ async function getPDFBlob(datos) {
  * Este método es rápido, optimizado y no depende del backend.
  */
 function imprimir() {
+  if (isProcessingAction) {
+    return mostrarNotificacion('Espere a que la acción actual termine.', 'warning');
+  }
   if (!ultimaCotizacion || !datosUltimaCotizacion) {
     return mostrarNotificacion('Calcule primero la cotización', 'warning');
   }
 
+  isProcessingAction = true;
+  const btn = elementos.btnGenerar;
+  const originalBtnHTML = btn.innerHTML;
+  btn.disabled = true;
   try {
     // 1. Generamos el HTML optimizado para impresión, que es autocontenido.
     const htmlCompleto = generarHTMLParaImprimir(datosUltimaCotizacion);
@@ -872,6 +880,10 @@ function imprimir() {
   } catch (error) {
     console.error('Error al preparar la impresión:', error);
     mostrarNotificacion(error.message || 'Error al generar la vista de impresión', 'error');
+  } finally {
+    isProcessingAction = false;
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHTML;
   }
 }
 
@@ -880,20 +892,20 @@ function imprimir() {
  * Genera y descarga el PDF usando el backend con Puppeteer
  */
 async function generarPDFDesdeBackend() {
+  if (isProcessingAction) {
+    return mostrarNotificacion('Espere a que la acción actual termine.', 'warning');
+  }
   if (!ultimaCotizacion || !datosUltimaCotizacion) {
     mostrarNotificacion('Primero genera la cotización', 'warning');
     return;
   }
 
-  const btnDescargar = document.getElementById('btnDescargarPdf');
-  const originalTextDescargar = btnDescargar.innerHTML;
-
-  // Show loading state
-  if (btnDescargar) {
-    btnDescargar.disabled = true;
-    btnDescargar.innerHTML = `<span class="text-xl animate-spin">⚙️</span> Generando...`;
-  }
-
+  isProcessingAction = true;
+  const btn = document.getElementById('btnDescargarPdf');
+  const originalBtnHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="text-xl animate-spin">⚙️</span> Generando...`;
+  
   try {
     const datos = datosUltimaCotizacion;
     const filename = nombreArchivoPDF(datos.idCotizacion, datos.colorTapa);
@@ -914,11 +926,9 @@ async function generarPDFDesdeBackend() {
     console.error('Error al generar PDF desde backend:', error);
     mostrarNotificacion(error.message || 'Error al generar el PDF', 'error');
   } finally {
-    // Restore button
-    if (btnDescargar) {
-      btnDescargar.disabled = false;
-      btnDescargar.innerHTML = originalTextDescargar;
-    }
+    isProcessingAction = false;
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHTML;
   }
 }
 
@@ -1056,6 +1066,7 @@ function inicializar() {
 
   const btnCancelarGuardar = document.getElementById('btnCancelarGuardar');
   if (btnCancelarGuardar) btnCancelarGuardar.addEventListener('click', () => {
+    isProcessingAction = false; // Liberar si se cancela
     document.getElementById('modalGuardarTesis').classList.add('hidden');
   });
 
@@ -1168,10 +1179,15 @@ function enviarAGoogleSheets(datos) {
 // ============================================
 
 async function guardarTesisEnFirebase() {
+  if (isProcessingAction) {
+    return mostrarNotificacion('Espere a que la acción actual termine.', 'warning');
+  }
   if (!ultimaCotizacion) {
     calcular();
     if (!ultimaCotizacion) return;
   }
+
+  isProcessingAction = true; // Bloqueamos otras acciones
 
   // ABRIR MODAL EN LUGAR DE PROMPT
   const modal = document.getElementById('modalGuardarTesis');
@@ -1181,6 +1197,7 @@ async function guardarTesisEnFirebase() {
     input.value = "Cliente Tesis"; // Valor por defecto
     modal.classList.remove('hidden');
     setTimeout(() => input.focus(), 100);
+    // isProcessingAction se libera en confirmarGuardarTesis o al cerrar el modal
   }
 }
 
@@ -1222,6 +1239,8 @@ async function confirmarGuardarTesis() {
   } catch (error) {
     console.error("❌ Error:", error);
     mostrarNotificacion("Error al guardar: " + error.message, "error");
+  } finally {
+    isProcessingAction = false; // Liberar bloqueo
   }
 }
 
@@ -1259,6 +1278,7 @@ async function abrirModalCotizaciones() {
 function cerrarModalCotizaciones() {
   document.getElementById('modalCotizacionesGuardadas')?.classList.add('hidden');
   document.body.style.overflow = 'auto';
+  isProcessingAction = false; // Liberar si se cierra el modal sin guardar
 }
 
 function renderizarCotizacionesGuardadas() {
