@@ -704,11 +704,11 @@ function generarTiempoEntrega(tipoEmp) {
 // ============================================
 
 /**
- * Abre la cotización en una nueva ventana para usar la función de impresión del navegador.
+ * Genera el HTML completo y autocontenido para la cotización, ideal para PDF o impresión.
+ * @param {Object} datos - Los datos completos de la cotización.
+ * @returns {string} - El string HTML completo.
  */
-async function getPDFBlob(datos) {
-  const filename = nombreArchivoPDF(datos.idCotizacion, datos.colorTapa);
-
+function generarHTMLParaImprimir(datos) {
   // Generar filas de la tabla
   const filaImpresion = generarFilaImpresion(datos);
   const filaEmpastado = generarFilaEmpastado(datos);
@@ -725,7 +725,7 @@ async function getPDFBlob(datos) {
   `;
 
   // Construir el HTML completo para el PDF
-  const html = `
+  return `
     <!DOCTYPE html>
     <html lang="es">
     <head>
@@ -807,6 +807,16 @@ async function getPDFBlob(datos) {
     </body>
     </html>
   `;
+}
+
+/**
+ * Obtiene el PDF como un Blob desde el backend.
+ * @param {Object} datos - Los datos completos de la cotización.
+ * @returns {Promise<Blob>}
+ */
+async function getPDFBlob(datos) {
+  const filename = nombreArchivoPDF(datos.idCotizacion, datos.colorTapa);
+  const html = generarHTMLParaImprimir(datos); // Reutilizamos la función de generación de HTML
 
   const response = await fetch('/generar-pdf', {
     method: 'POST',
@@ -827,53 +837,42 @@ async function getPDFBlob(datos) {
   return await response.blob();
 }
 
+/**
+ * Abre una nueva ventana con la cotización formateada y activa el diálogo de impresión del navegador.
+ * Este método es rápido, optimizado y no depende del backend.
+ */
 function imprimir() {
-  if (!ultimaCotizacion) {
+  if (!ultimaCotizacion || !datosUltimaCotizacion) {
     return mostrarNotificacion('Calcule primero la cotización', 'warning');
   }
-  // Imprimir PDF en la misma página usando iframe
-  (async () => {
-    try {
-      const pdfBlob = await getPDFBlob(datosUltimaCotizacion);
-      const url = window.URL.createObjectURL(pdfBlob);
 
-      // Crear iframe temporal que ocupe toda la página
-      const iframe = document.createElement('iframe');
-      iframe.src = url;
-      iframe.style.position = 'fixed';
-      iframe.style.top = '0';
-      iframe.style.left = '0';
-      iframe.style.width = '100%';
-      iframe.style.height = '100%';
-      iframe.style.border = 'none';
-      iframe.style.zIndex = '9999';
-      iframe.style.background = 'white';
+  try {
+    // 1. Generamos el HTML optimizado para impresión, que es autocontenido.
+    const htmlCompleto = generarHTMLParaImprimir(datosUltimaCotizacion);
 
-      // Agregar al body
-      document.body.appendChild(iframe);
+    // 2. Abrimos una nueva ventana para la impresión.
+    const ventanaImpresion = window.open('', 'Imprimir Cotización', 'height=800,width=1200');
+    
+    // 3. Escribimos el contenido en la nueva ventana.
+    ventanaImpresion.document.write(htmlCompleto);
+    ventanaImpresion.document.close(); // Esencial para que 'onload' se dispare correctamente.
+    
+    // 4. Esperamos a que todo (incluyendo CSS e imágenes) se cargue antes de imprimir.
+    ventanaImpresion.onload = function() {
+      ventanaImpresion.focus(); // Asegura que la ventana de impresión esté al frente.
+      ventanaImpresion.print(); // Llama al diálogo de impresión del navegador.
+      
+      // 5. Cerramos la ventana auxiliar después de que el usuario interactúe con el diálogo.
+      // Usamos un pequeño timeout para dar tiempo a que el comando de impresión se envíe.
+      setTimeout(() => {
+        ventanaImpresion.close();
+      }, 250);
+    };
 
-      // Esperar a que cargue y luego imprimir
-      iframe.onload = () => {
-        setTimeout(() => {
-          try {
-            window.print();
-          } catch (e) {
-            mostrarNotificacion('No se pudo imprimir automáticamente. Use Ctrl+P.', 'warning');
-          } finally {
-            // Remover iframe después de imprimir
-            setTimeout(() => {
-              document.body.removeChild(iframe);
-              window.URL.revokeObjectURL(url);
-            }, 100);
-          }
-        }, 500);
-      };
-
-    } catch (error) {
-      console.error('Error al imprimir PDF:', error);
-      mostrarNotificacion(error.message || 'Error al generar el PDF para imprimir', 'error');
-    }
-  })();
+  } catch (error) {
+    console.error('Error al preparar la impresión:', error);
+    mostrarNotificacion(error.message || 'Error al generar la vista de impresión', 'error');
+  }
 }
 
 
