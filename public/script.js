@@ -435,7 +435,7 @@ function calcularServiciosAdicionales(tomos) {
 /**
  * Función principal de cálculo de cotización
  */
-function calcular() {
+async function calcular() {
   try {
 
     const idCotizacion = generarIdCotizacion();
@@ -493,6 +493,23 @@ ultimaCotizacion = generarHTMLCotizacion(datosUltimaCotizacion);
     elementos.resultado.innerHTML = ultimaCotizacion;
     elementos.resultado.style.display = 'block';
     mostrarNotificacion('Cotización calculada exitosamente', 'success');
+
+    // Guardar en Firebase para el dashboard
+    const datosDashboard = {
+      fecha: new Date().toISOString(),
+      timestamp: firebase.database.ServerValue.TIMESTAMP,
+      tipo: "Tesis",
+      nombre: idCotizacion, // Usar el ID como nombre
+      total: totalRedondeado.toFixed(2),
+      descripcion: `Cotización automática - ${tomos} tomos`
+    };
+
+    try {
+      await db.ref("cotizaciones").push(datosDashboard);
+      console.log("Tesis guardada en dashboard");
+    } catch (error) {
+      console.error("Error al guardar tesis:", error);
+    }
     
   } catch (error) {
     mostrarNotificacion(error.message, 'error');
@@ -1402,6 +1419,7 @@ async function cargarDatosDashboard() {
   const elVentasPeriodo = document.getElementById('dashVentasPeriodo');
   const elTotalTesis = document.getElementById('dashTotalTesis');
   const elTotalFacturas = document.getElementById('dashTotalFacturas');
+  const elTotalMontoTesis = document.getElementById('dashTotalMontoTesis');
   const listaTesis = document.getElementById('dashListaTesis');
   const listaFacturas = document.getElementById('dashListaFacturas');
   
@@ -1412,6 +1430,7 @@ async function cargarDatosDashboard() {
   elVentasHoy.textContent = '...';
   elVentasMes.textContent = '...';
   elVentasPeriodo.textContent = '...';
+  elTotalMontoTesis.textContent = '...';
   listaTesis.innerHTML = '<p class="p-6 text-center text-gray-400 animate-pulse">Cargando datos...</p>';
   listaFacturas.innerHTML = '<p class="p-6 text-center text-gray-400 animate-pulse">Cargando datos...</p>';
 
@@ -1440,6 +1459,10 @@ async function cargarDatosDashboard() {
     const tesisArray = Object.values(dataCotizaciones)
       .filter(c => c.tipo === 'Tesis')
       .sort((a, b) => new Date(b.fecha || b.timestamp) - new Date(a.fecha || a.timestamp));
+
+    // Calcular total monto de tesis
+    let totalMontoTesis = 0;
+    tesisArray.forEach(t => totalMontoTesis += parseFloat(t.total || 0));
 
     // --- CÁLCULOS ---
     const hoy = new Date().toISOString().slice(0, 10);
@@ -1473,6 +1496,7 @@ async function cargarDatosDashboard() {
     elVentasPeriodo.textContent = `RD$${totalPeriodo.toLocaleString('es-DO', {minimumFractionDigits: 2})}`;
     elTotalTesis.textContent = tesisArray.length;
     elTotalFacturas.textContent = countFacturasPeriodo;
+    elTotalMontoTesis.textContent = `RD$${totalMontoTesis.toLocaleString('es-DO', {minimumFractionDigits: 2})}`;
 
     // --- LISTA TESIS ---
     if (tesisArray.length === 0) {

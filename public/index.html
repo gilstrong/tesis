@@ -429,7 +429,7 @@
       <!-- Contenido -->
       <div class="p-6 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex-1">
         <!-- Tarjetas -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
           <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
             <span class="text-4xl mb-2">💰</span><p class="text-gray-500 text-sm font-bold uppercase">Ventas Hoy</p>
             <p class="text-3xl font-black text-gray-800 dark:text-white mt-1" id="dashVentasHoy">RD$0.00</p>
@@ -449,6 +449,10 @@
           <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
             <span class="text-4xl mb-2">🧾</span><p class="text-gray-500 text-sm font-bold uppercase">Facturas Emitidas</p>
             <p class="text-3xl font-black text-purple-600 dark:text-purple-400 mt-1" id="dashTotalFacturas">0</p>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+            <span class="text-4xl mb-2">📚</span><p class="text-gray-500 text-sm font-bold uppercase">Total Tesis Cotizadas</p>
+            <p class="text-3xl font-black text-teal-600 dark:text-teal-400 mt-1" id="dashTotalMontoTesis">RD$0.00</p>
           </div>
         </div>
         <!-- Listas -->
@@ -686,6 +690,9 @@
     archivo: null,
     procesando: false
   };
+
+  // Inicializar Firebase Database
+  const db = firebase.database();
   
   // ── Abrir / cerrar modal ──────────────────────────────────────────────────────
   function abrirModalAnalizadorPDF() {
@@ -943,7 +950,7 @@
   }
 
   // ── Usar datos en la calculadora ─────────────────────────────────────────────
-  function pdfUsarDatos() {
+  async function pdfUsarDatos() {
     const paginasColor = document.getElementById('pdfMetricColor').textContent;
     const paginasBN = document.getElementById('pdfMetricBW').textContent;
 
@@ -989,6 +996,26 @@
 
     mostrarNotificacion('✅ Datos aplicados en la calculadora.', 'success');
     cerrarModalAnalizadorPDF();
+
+    // Guardar datos del análisis en Firebase
+    const datosAnalisis = {
+      fecha: new Date().toISOString(),
+      timestamp: firebase.database.ServerValue.TIMESTAMP,
+      tipo: "AnalisisPDF",
+      nombre: _PDF.archivo.name,
+      totalPaginas: document.getElementById('pdfMetricTotal').textContent,
+      paginasColor: document.getElementById('pdfMetricColor').textContent,
+      paginasBN: document.getElementById('pdfMetricBW').textContent,
+      precioUnitarioBN: 0, // Se puede calcular si es necesario
+      precioUnitarioColor: 0
+    };
+
+    try {
+      await db.ref("analisis_pdf").push(datosAnalisis);
+      console.log("Datos del análisis guardados en Firebase");
+    } catch (error) {
+      console.error("Error al guardar análisis:", error);
+    }
   }
   </script>
 </body>
