@@ -1606,6 +1606,7 @@ async function imprimirCotizacion() {
         <div class="header">
           <div class="header-content">
             <img src="logo.png" alt="Servigaco Logo" class="logo" />
+            <img src="assets/logo.png" alt="Servigaco Logo" class="logo" />
             <div class="header-divider"></div>
             <p>COTIZACIÓN DE SERVICIOS PROFESIONALES</p>
             <div class="header-badge">

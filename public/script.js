@@ -79,14 +79,14 @@ const IMAGEN_EJEMPLAR_TAPA = {
   verde_botella: 'verde.png',
   amarillo_medicina: 'amarillo.png',
   blanco: 'blanco.png',
-  azul_cielo: 'azul.png'
+  azul_cielo: 'azulcielo.png'
 };
 
 const BLOQUE_CUENTAS = `
   <div class="cuentas-pago">
-    <img src="bhd.jpg" alt="Cuenta BHD" class="img-cuenta">
-    <img src="popular.jpg" alt="Cuenta Popular" class="img-cuenta">
-    <img src="banreservas.jpg" alt="Cuenta Banreservas" class="img-cuenta">
+    <img src="/bhd.jpg" alt="Cuenta BHD" class="img-cuenta">
+    <img src="/popular.jpg" alt="Cuenta Popular" class="img-cuenta">
+    <img src="/banreservas.jpg" alt="Cuenta Banreservas" class="img-cuenta">
   </div>
 
 
