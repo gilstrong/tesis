@@ -75,7 +75,7 @@ const IMAGEN_EJEMPLAR_TAPA = {
   beige: 'beige.png',
   morado: 'morado.png',
   azul_marino: 'mclcielo.png',
-  rojo: 'img/ejemplar-rojo.jpg',
+  rojo: 'rojo.png',
   verde_botella: 'verde.png',
   amarillo_medicina: 'amarillo.png',
   blanco: 'blanco.png',
@@ -560,7 +560,7 @@ function formatearMonto(valor) {
 function generarEncabezado(idCotizacion, fecha) {
   return `
     <div class="cotizacion-header">
-      <img src="s="logo" alt="Logo ServiGaco">
+      <img src="logo.png" class="logo" alt="Logo ServiGaco">
       <div class="empresa-info">
         <h1>Cotización de Tesis</h1>
         <p>
@@ -792,7 +792,7 @@ function generarHTMLParaImprimir(datos) {
       <div class="container">
         <div class="header">
           <div class="header-content">
-            <img src="Servigaco Logo" class="logo" />
+            <img src="logo.png" class="logo" alt="Logo ServiGaco" />
             <h1>Cotización de Tesis</h1>
             <div class="header-divider"></div>
             <p>ID: ${datos.idCotizacion}</p>
