@@ -114,7 +114,7 @@
 
 <body>
   <main class="container">
-    
+
     <!-- ========================================
          🧭 NAVEGACIÓN PRINCIPAL
          ======================================== -->
@@ -124,6 +124,7 @@
          📋 SECCIÓN: CALCULADORA GENERAL
          ======================================== -->
     <section class="form-card" aria-label="Calculadora de servicios">
+
       <!-- Logo -->
       <figure class="logo-container">
         <img src="logo.png" alt="Logo de la empresa" class="logo-form" width="150" height="80" />
@@ -136,135 +137,14 @@
       </header>
 
       <!-- ========================================
-           � TABLA DE COTIZACIÓN
-           ======================================== -->
-      <div class="cotizacion-section">
-        <div class="cotizacion-header flex flex-col md:flex-row justify-between items-center">
-          <h2>
-            <span class="cotizacion-icon">📊</span>
-            Cotización en Tiempo Real
-            <span class="cotizacion-count" id="cotizacionCount">0</span>
-          </h2>
-          <div class="flex flex-wrap gap-2 mt-3 md:mt-0">
-            <button type="button" id="btnDashboard" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-500 hover:to-indigo-700 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
-              <span class="text-lg">📊</span>
-              Dashboard
-            </button>
-            <button type="button" id="btnVerFacturas" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
-              <span class="text-lg">📜</span>
-              Ver Facturas
-            </button>
-            <button type="button" id="btnVerGuardadas" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-400 hover:to-teal-600 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
-              <span class="text-lg">📂</span>
-              Ver Guardadas
-            </button>
-            <button type="button" onclick="abrirModalAnalizadorPDF()" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-              Analizar PDF
-            </button>
-          </div>
-        </div>
-
-        <div class="cotizacion-tabla-container overflow-x-auto rounded-xl shadow-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 my-8">
-          <table class="w-full border-collapse cotizacion-tabla table-fixed" id="cotizacionTabla">
-            <thead>
-              <tr class="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-                <th class="px-6 py-4 text-left font-bold uppercase tracking-wider text-sm w-[20%]">Servicio</th>
-                <th class="px-6 py-4 text-left font-bold uppercase tracking-wider text-sm w-[30%]">Descripción</th>
-                <th class="px-6 py-4 text-center font-bold uppercase tracking-wider text-sm w-[15%]">Cantidad</th>
-                <th class="px-6 py-4 text-right font-bold uppercase tracking-wider text-sm w-[15%]">Precio Unit.</th>
-                <th class="px-6 py-4 text-right font-bold uppercase tracking-wider text-sm w-[15%]">Total</th>
-                <th class="px-6 py-4 text-center font-bold uppercase tracking-wider text-sm w-[5%]"></th>
-              </tr>
-            </thead>
-            <tbody id="cotizacionBody" class="divide-y divide-gray-100">
-              <tr class="cotizacion-vacia bg-gray-50">
-                <td colspan="6" class="p-12 text-center">
-                  <div class="flex flex-col items-center justify-center text-gray-500">
-                    <span class="text-6xl mb-4">📭</span>
-                    <p class="text-lg font-medium">No hay servicios en la cotización</p>
-                    <p class="text-sm text-gray-400 mt-1">Selecciona un servicio abajo para empezar</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-            <tfoot id="cotizacionFooter" style="display: none;" class="bg-gray-50 dark:bg-gray-800 border-t-2 border-gray-200 dark:border-gray-700">
-              <tr class="subtotal-row text-gray-600 dark:text-gray-300">
-                <td colspan="4" class="px-6 py-3 text-right font-bold">Subtotal:</td>
-                <td class="px-6 py-3 text-right font-bold text-gray-800 dark:text-gray-100 text-lg" id="subtotalAmount">RD$0.00</td>
-                <td></td>
-              </tr>
-              <tr class="impuesto-row text-orange-600" id="impuestoRow" style="display: none;">
-                <td colspan="4" class="px-6 py-3 text-right font-bold" id="impuestoLabel">ITBIS (18%):</td>
-                <td class="px-6 py-3 text-right font-bold text-lg" id="impuestoAmount">RD$0.00</td>
-                <td></td>
-              </tr>
-              <tr class="total-row bg-gradient-to-r from-orange-50 to-orange-100 dark:from-gray-700 dark:to-gray-600 border-t border-orange-200 dark:border-gray-600">
-                <td colspan="4" class="px-6 py-4 text-right font-black text-gray-800 dark:text-gray-100 text-xl">TOTAL:</td>
-                <td class="px-6 py-4 text-right font-black text-orange-600 text-2xl" id="totalAmount">RD$0.00</td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-
-        <!-- Botón para generar PDF -->
-        <div class="pdf-button-container">
-          <button id="generarPDF" class="w-full py-4 px-6 rounded-xl font-bold text-white text-lg bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 hover:from-orange-400 hover:to-orange-600 shadow-lg shadow-orange-500/40 transform transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] flex items-center justify-center gap-3 border border-orange-400/20">
-            <span class="text-2xl">📄</span>
-            Generar PDF de Cotización
-          </button>
-        </div>
-
-        <!-- ========================================
-             🧾 SECCIÓN: COMPROBANTE
-             ======================================== -->
-        <div class="comprobante-section" id="comprobanteSection" style="display: none;">
-          <h3 class="comprobante-title">
-            <span class="section-icon">🧾</span>
-            Tipo de Comprobante
-          </h3>
-          <div class="form-group">
-            <label for="tipoComprobante">
-              <span class="label-icon">📋</span>
-              Tipo de comprobante
-            </label>
-            <select id="tipoComprobante">
-              <option value="ninguno">Sin comprobante</option>
-              <option value="fiscal">Comprobante Fiscal (ITBIS 18%)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="acciones-cotizacion" id="cotizacionAcciones" style="display: none;">
-          <button type="button" id="btnWhatsapp" class="font-bold text-white bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 shadow-lg shadow-green-500/30 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
-            <span class="text-xl">💬</span>
-            Enviar a WhatsApp
-          </button>
-          <button type="button" id="btnLimpiarCotizacion" class="font-bold text-gray-700 bg-white border-2 border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
-            <span class="text-xl">🗑️</span>
-            Limpiar Cotización
-          </button>
-          <button type="button" id="btnGuardarCotizacion" class="font-bold text-white bg-gradient-to-r from-indigo-500 to-indigo-700 hover:from-indigo-400 hover:to-indigo-600 shadow-lg shadow-indigo-500/30 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2" title="Guardar la cotización actual para editarla en el futuro">
-            <span class="text-xl">💾</span>
-            Guardar
-          </button>
-          <button type="button" id="btnGuardarCambios" class="font-bold text-white bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 shadow-lg shadow-purple-500/30 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2" style="display: none;" title="Actualizar la cotización existente">
-            <span class="text-xl">📝</span>
-            Guardar Cambios
-          </button>
-        </div>
-      </div>
-
-      <!-- ========================================
-           ⚡ SECCIÓN: COMBOS Y PAQUETES (NUEVO)
+           ⚡ SECCIÓN: COMBOS Y PAQUETES
            ======================================== -->
       <div class="bg-white rounded-2xl shadow-sm border border-purple-100 p-6 mt-8 mb-8">
         <h2 class="text-2xl font-black text-gray-800 mb-4 flex items-center gap-3">
           <span class="bg-purple-600 text-white p-2 rounded-xl text-lg shadow-md shadow-purple-200">⚡</span>
           Combos Rápidos
         </h2>
-        
+
         <!-- Lista de botones de combos (Se llena desde Firebase) -->
         <div id="listaCombos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
           <p class="text-gray-400 text-sm col-span-full animate-pulse">Cargando paquetes...</p>
@@ -759,10 +639,9 @@
             Agregar a la cotizacion
           </button>
         </div>
-        
 
         <!-- ========================================
-             📘 FORMULARIO: LIBRO COMPLETO (MEJORADO)
+             📘 FORMULARIO: LIBRO COMPLETO
              ======================================== -->
         <div id="formLibro" class="form-servicio animate-fade-in-up" style="display: none;">
           <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
@@ -781,7 +660,6 @@
               <span class="bg-gray-200 text-gray-700 p-1 rounded text-xs">⚫</span>
               Páginas Blanco y Negro
             </h4>
-            
             <div>
               <label for="libroPaginasBN" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                 <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🔢</span>
@@ -798,7 +676,6 @@
               <span class="bg-pink-100 text-pink-600 p-1 rounded text-xs">🎨</span>
               Páginas a Color
             </h4>
-            
             <div>
               <label for="libroPaginasColor" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                 <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🔢</span>
@@ -815,7 +692,6 @@
               <span class="bg-purple-100 text-purple-600 p-1 rounded text-xs">🌈</span>
               Páginas Full Color
             </h4>
-            
             <div>
               <label for="libroPaginasFullColor" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                 <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🔢</span>
@@ -935,73 +811,169 @@
           </button>
         </div>
 
-      </div>
+      </div> <!-- Fin de agregar-servicio -->
 
-      
+      <!-- ========================================
+           📊 TABLA DE COTIZACIÓN
+           ======================================== -->
+      <div class="cotizacion-section">
+        <div class="cotizacion-header flex flex-col md:flex-row justify-between items-center">
+          <h2>
+            <span class="cotizacion-icon">📊</span>
+            Cotización en Tiempo Real
+            <span class="cotizacion-count" id="cotizacionCount">0</span>
+          </h2>
+          <div class="flex flex-wrap gap-2 mt-3 md:mt-0">
+            <button type="button" id="btnDashboard" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-500 hover:to-indigo-700 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
+              <span class="text-lg">📊</span> Dashboard
+            </button>
+            <button type="button" id="btnVerFacturas" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
+              <span class="text-lg">📜</span> Ver Facturas
+            </button>
+            <button type="button" id="btnVerGuardadas" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-400 hover:to-teal-600 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
+              <span class="text-lg">📂</span> Ver Guardadas
+            </button>
+            <button type="button" onclick="abrirModalAnalizadorPDF()" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+              Analizar PDF
+            </button>
+          </div>
+        </div>
+
+        <div class="cotizacion-tabla-container overflow-x-auto rounded-xl shadow-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 my-8">
+          <table class="w-full border-collapse cotizacion-tabla table-fixed" id="cotizacionTabla">
+            <thead>
+              <tr class="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+                <th class="px-6 py-4 text-left font-bold uppercase tracking-wider text-sm w-[20%]">Servicio</th>
+                <th class="px-6 py-4 text-left font-bold uppercase tracking-wider text-sm w-[30%]">Descripción</th>
+                <th class="px-6 py-4 text-center font-bold uppercase tracking-wider text-sm w-[15%]">Cantidad</th>
+                <th class="px-6 py-4 text-right font-bold uppercase tracking-wider text-sm w-[15%]">Precio Unit.</th>
+                <th class="px-6 py-4 text-right font-bold uppercase tracking-wider text-sm w-[15%]">Total</th>
+                <th class="px-6 py-4 text-center font-bold uppercase tracking-wider text-sm w-[5%]"></th>
+              </tr>
+            </thead>
+            <tbody id="cotizacionBody" class="divide-y divide-gray-100">
+              <tr class="cotizacion-vacia bg-gray-50">
+                <td colspan="6" class="p-12 text-center">
+                  <div class="flex flex-col items-center justify-center text-gray-500">
+                    <span class="text-6xl mb-4">📭</span>
+                    <p class="text-lg font-medium">No hay servicios en la cotización</p>
+                    <p class="text-sm text-gray-400 mt-1">Selecciona un servicio abajo para empezar</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot id="cotizacionFooter" style="display: none;" class="bg-gray-50 dark:bg-gray-800 border-t-2 border-gray-200 dark:border-gray-700">
+              <tr class="subtotal-row text-gray-600 dark:text-gray-300">
+                <td colspan="4" class="px-6 py-3 text-right font-bold">Subtotal:</td>
+                <td class="px-6 py-3 text-right font-bold text-gray-800 dark:text-gray-100 text-lg" id="subtotalAmount">RD$0.00</td>
+                <td></td>
+              </tr>
+              <tr class="impuesto-row text-orange-600" id="impuestoRow" style="display: none;">
+                <td colspan="4" class="px-6 py-3 text-right font-bold" id="impuestoLabel">ITBIS (18%):</td>
+                <td class="px-6 py-3 text-right font-bold text-lg" id="impuestoAmount">RD$0.00</td>
+                <td></td>
+              </tr>
+              <tr class="total-row bg-gradient-to-r from-orange-50 to-orange-100 dark:from-gray-700 dark:to-gray-600 border-t border-orange-200 dark:border-gray-600">
+                <td colspan="4" class="px-6 py-4 text-right font-black text-gray-800 dark:text-gray-100 text-xl">TOTAL:</td>
+                <td class="px-6 py-4 text-right font-black text-orange-600 text-2xl" id="totalAmount">RD$0.00</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Botón para generar PDF -->
+        <div class="pdf-button-container">
+          <button id="generarPDF" class="w-full py-4 px-6 rounded-xl font-bold text-white text-lg bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 hover:from-orange-400 hover:to-orange-600 shadow-lg shadow-orange-500/40 transform transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] flex items-center justify-center gap-3 border border-orange-400/20">
+            <span class="text-2xl">📄</span>
+            Generar PDF de Cotización
+          </button>
+        </div>
+
+        <!-- ========================================
+             🧾 SECCIÓN: COMPROBANTE
+             ======================================== -->
+        <div class="comprobante-section" id="comprobanteSection" style="display: none;">
+          <h3 class="comprobante-title">
+            <span class="section-icon">🧾</span>
+            Tipo de Comprobante
+          </h3>
+          <div class="form-group">
+            <label for="tipoComprobante">
+              <span class="label-icon">📋</span>
+              Tipo de comprobante
+            </label>
+            <select id="tipoComprobante">
+              <option value="ninguno">Sin comprobante</option>
+              <option value="fiscal">Comprobante Fiscal (ITBIS 18%)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="acciones-cotizacion" id="cotizacionAcciones" style="display: none;">
+          <button type="button" id="btnWhatsapp" class="font-bold text-white bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 shadow-lg shadow-green-500/30 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
+            <span class="text-xl">💬</span> Enviar a WhatsApp
+          </button>
+          <button type="button" id="btnLimpiarCotizacion" class="font-bold text-gray-700 bg-white border-2 border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
+            <span class="text-xl">🗑️</span> Limpiar Cotización
+          </button>
+          <button type="button" id="btnGuardarCotizacion" class="font-bold text-white bg-gradient-to-r from-indigo-500 to-indigo-700 hover:from-indigo-400 hover:to-indigo-600 shadow-lg shadow-indigo-500/30 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2" title="Guardar la cotización actual para editarla en el futuro">
+            <span class="text-xl">💾</span> Guardar
+          </button>
+          <button type="button" id="btnGuardarCambios" class="font-bold text-white bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 shadow-lg shadow-purple-500/30 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2" style="display: none;" title="Actualizar la cotización existente">
+            <span class="text-xl">📝</span> Guardar Cambios
+          </button>
+        </div>
+      </div> <!-- Fin de cotizacion-section -->
+
     </section>
 
     <servigaco-footer></servigaco-footer>
   </main>
 
   <!-- ========================================
-       📂 MODAL PARA COTIZACIONES GUARDADAS
+       📂 MODAL: COTIZACIONES GUARDADAS
        ======================================== -->
   <div id="modalCotizacionesGuardadas" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-slide-in-up m-4">
-      <!-- Header del Modal -->
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
         <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-3">
-          <span class="text-3xl">📂</span>
-          Cotizaciones Guardadas
+          <span class="text-3xl">📂</span> Cotizaciones Guardadas
         </h3>
         <button id="btnCerrarModal" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 transition-all" aria-label="Cerrar modal">
           <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
-      <!-- Contenido del Modal (lista) -->
-      <div class="p-2 md:p-6 overflow-y-auto" id="listaCotizacionesGuardadas">
-        <!-- La lista de cotizaciones se generará aquí con JavaScript -->
-      </div>
+      <div class="p-2 md:p-6 overflow-y-auto" id="listaCotizacionesGuardadas"></div>
     </div>
   </div>
 
   <!-- ========================================
-       🧾 MODAL DE FACTURACIÓN (NUEVO)
+       🧾 MODAL: FACTURACIÓN
        ======================================== -->
   <div id="modalFacturacion" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-[60] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg m-4 flex flex-col animate-slide-in-up border border-gray-200 dark:border-gray-700">
-      
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 to-blue-800 rounded-t-2xl">
         <h3 class="text-xl font-bold text-white flex items-center gap-2">
           <span>🧾</span> Generar Factura Fiscal
         </h3>
         <p class="text-blue-100 text-sm mt-1">Convierte la cotización en una factura válida para DGII</p>
       </div>
-
       <div class="p-6 space-y-5">
-        <!-- Búsqueda de RNC -->
         <div class="relative">
           <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Buscar Cliente (RNC o Nombre)</label>
           <div class="flex gap-2">
             <input type="text" id="inputRNCFactura" placeholder="Escribe nombre o RNC..." autocomplete="off" class="flex-1 px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none font-mono text-lg dark:text-white" />
             <button id="btnBuscarRNC" class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold">🔍</button>
           </div>
-          
-          <!-- 🔽 LISTA DE RESULTADOS (DROPDOWN) -->
-          <div id="listaResultadosClientes" class="absolute left-0 right-0 top-[85px] bg-white dark:bg-gray-800 shadow-2xl rounded-xl border border-gray-200 dark:border-gray-600 max-h-60 overflow-y-auto z-50 hidden">
-            <!-- Los resultados se inyectarán aquí con JS -->
-          </div>
-
+          <div id="listaResultadosClientes" class="absolute left-0 right-0 top-[85px] bg-white dark:bg-gray-800 shadow-2xl rounded-xl border border-gray-200 dark:border-gray-600 max-h-60 overflow-y-auto z-50 hidden"></div>
           <p id="infoClienteRNC" class="text-sm text-green-600 font-bold mt-2 hidden">✅ Cliente encontrado</p>
         </div>
-
-        <!-- Nombre / Razón Social -->
         <div>
           <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Razón Social / Nombre</label>
           <input type="text" id="inputNombreFactura" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 dark:text-white" />
         </div>
-
-        <!-- Tipo de NCF -->
         <div>
           <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Tipo de Comprobante (NCF)</label>
           <select id="selectTipoNCF" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
@@ -1012,14 +984,11 @@
           </select>
           <p id="previewProximoNCF" class="text-xs text-blue-600 font-bold mt-2 text-right">Cargando secuencia...</p>
         </div>
-
-        <!-- Resumen -->
         <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-xl text-right">
           <p class="text-sm text-gray-500 dark:text-gray-400">Monto a Facturar</p>
           <p class="text-2xl font-black text-gray-800 dark:text-white" id="montoTotalFactura">RD$0.00</p>
         </div>
       </div>
-
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex gap-3 justify-end bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl">
         <button id="btnCancelarFactura" class="px-5 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-200 transition-colors">Cancelar</button>
         <button id="btnConfirmarFactura" class="px-6 py-2.5 rounded-xl font-bold text-white bg-green-600 hover:bg-green-700 shadow-lg shadow-green-500/30 transition-all transform hover:-translate-y-1">✅ Emitir Factura</button>
@@ -1028,25 +997,19 @@
   </div>
 
   <!-- ========================================
-       📜 MODAL DE FACTURAS EMITIDAS (HISTORIAL)
+       📜 MODAL: HISTORIAL DE FACTURAS
        ======================================== -->
   <div id="modalFacturasEmitidas" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col animate-slide-in-up m-4">
-      <!-- Header -->
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0 bg-gradient-to-r from-purple-600 to-purple-800 rounded-t-2xl text-white">
         <div>
-          <h3 class="text-2xl font-bold flex items-center gap-3">
-            <span class="text-3xl">📜</span>
-            Historial de Facturas
-          </h3>
+          <h3 class="text-2xl font-bold flex items-center gap-3"><span class="text-3xl">📜</span> Historial de Facturas</h3>
           <p class="text-purple-100 text-sm mt-1">Registro de comprobantes fiscales emitidos</p>
         </div>
         <button id="btnCerrarModalFacturas" class="p-2 rounded-full text-white hover:bg-white/20 transition-all">
           <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
-      
-      <!-- Toolbar -->
       <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-wrap gap-4 justify-between items-center">
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-2">
@@ -1076,15 +1039,9 @@
           </button>
         </div>
       </div>
-
-      <!-- Lista -->
       <div class="p-0 overflow-y-auto flex-grow bg-gray-100 dark:bg-gray-900">
-        <div id="listaFacturas" class="p-4 space-y-3">
-          <!-- Items inyectados por JS -->
-        </div>
+        <div id="listaFacturas" class="p-4 space-y-3"></div>
       </div>
-      
-      <!-- Footer -->
       <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-b-2xl text-right">
         <span class="text-lg font-bold text-gray-700 dark:text-gray-200" id="totalFacturasMes">Total Facturado: RD$0.00</span>
       </div>
@@ -1092,29 +1049,20 @@
   </div>
 
   <!-- ========================================
-       📊 MODAL DASHBOARD (NUEVO)
+       📊 MODAL: DASHBOARD
        ======================================== -->
   <div id="modalDashboard" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-[90] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col animate-slide-in-up m-4 overflow-hidden">
-      
-      <!-- Header -->
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-600 to-blue-600 flex justify-between items-center flex-shrink-0">
         <div>
-          <h3 class="text-2xl font-bold text-white flex items-center gap-3">
-            <span class="text-3xl">📊</span>
-            Dashboard de Operaciones
-          </h3>
+          <h3 class="text-2xl font-bold text-white flex items-center gap-3"><span class="text-3xl">📊</span> Dashboard de Operaciones</h3>
           <p class="text-indigo-100 text-sm mt-1">Resumen de Tesis y Trabajos realizados</p>
         </div>
         <button id="btnCerrarDashboard" class="p-2 rounded-full text-white hover:bg-white/20 transition-all">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
-
-      <!-- Contenido Scrollable -->
       <div class="p-6 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex-1">
-        
-        <!-- 🔍 FILTRO DE FECHAS -->
         <div class="flex flex-wrap gap-4 mb-6 items-end bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
           <div>
             <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">Desde</label>
@@ -1126,8 +1074,6 @@
           </div>
           <button id="btnFiltrarDashboard" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm shadow-md transition-all h-[38px] flex items-center gap-2"><span class="text-lg">🔍</span> Filtrar</button>
         </div>
-
-        <!-- Tarjetas de Métricas -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center text-center">
             <span class="text-4xl mb-2">💰</span>
@@ -1150,10 +1096,7 @@
             <p class="text-3xl font-black text-purple-600 dark:text-purple-400 mt-1" id="dashTotalFacturas">0</p>
           </div>
         </div>
-
-        <!-- Tablas de Resumen -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <!-- Últimas Tesis -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20 flex justify-between items-center">
               <h4 class="font-bold text-blue-800 dark:text-blue-300 flex items-center gap-2"><span class="text-xl">🎓</span> Últimas Tesis</h4>
@@ -1163,8 +1106,6 @@
               <p class="p-6 text-center text-gray-400">Cargando...</p>
             </div>
           </div>
-
-          <!-- Últimos Trabajos (Facturas) -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-purple-50 dark:bg-purple-900/20 flex justify-between items-center">
               <h4 class="font-bold text-purple-800 dark:text-purple-300 flex items-center gap-2"><span class="text-xl">🧾</span> Últimos Trabajos Facturados</h4>
@@ -1175,13 +1116,12 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 
   <!-- ========================================
-       🚫 MODAL CONFIRMACIÓN ANULACIÓN (SEGURIDAD)
+       🚫 MODAL: CONFIRMACIÓN ANULACIÓN
        ======================================== -->
   <div id="modalConfirmarAnulacion" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-[70] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md m-4 p-6 animate-slide-in-up border border-red-200 dark:border-red-900">
@@ -1191,9 +1131,7 @@
         <p class="text-gray-600 dark:text-gray-300 text-sm">Esta acción es irreversible. Se generará una Nota de Crédito (B04).</p>
         <p class="text-gray-500 dark:text-gray-400 text-xs mt-2">Escribe <span class="font-bold text-red-600 select-all">anular</span> abajo para confirmar.</p>
       </div>
-      
       <input type="text" id="inputConfirmacionAnular" placeholder="Escribe 'anular'" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-red-500 outline-none text-center font-bold text-lg mb-6 dark:bg-gray-700 dark:border-gray-600 dark:text-white" autocomplete="off">
-      
       <div class="flex gap-3">
         <button id="btnCancelarAnulacion" class="flex-1 px-4 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancelar</button>
         <button id="btnEjecutarAnulacion" class="flex-1 px-4 py-2.5 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>🚫 Anular Factura</button>
@@ -1202,30 +1140,28 @@
   </div>
 
   <!-- ========================================
-       🗑️ MODAL CONFIRMACIÓN ELIMINAR COTIZACIÓN
+       🗑️ MODAL: CONFIRMAR ELIMINAR COTIZACIÓN
        ======================================== -->
   <div id="modalConfirmarEliminar" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-[80] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-6 animate-slide-in-up border border-gray-200 dark:border-gray-700 text-center">
       <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🗑️</div>
       <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">¿Eliminar Cotización?</h3>
       <p class="text-gray-600 dark:text-gray-300 text-sm mb-6">¿Estás seguro de eliminar <span id="nombreCotizacionEliminar" class="font-bold text-gray-800 dark:text-white">esta cotización</span>?<br>Esta acción no se puede deshacer.</p>
-      
       <div class="flex gap-3 justify-center">
-        <button id="btnCancelarEliminar" class="px-5 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancelar</button>
-        <button id="btnConfirmarEliminar" class="px-5 py-2.5 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all transform hover:-translate-y-1">Sí, Eliminar</button>
+        <button id="btnCancelarEliminar" class="flex-1 px-5 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancelar</button>
+        <button id="btnConfirmarEliminar" class="flex-1 px-5 py-2.5 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all transform hover:-translate-y-1">Sí, Eliminar</button>
       </div>
     </div>
   </div>
 
   <!-- ========================================
-       🧹 MODAL CONFIRMACIÓN LIMPIAR - Reemplazo de Confirm
+       🧹 MODAL: CONFIRMAR LIMPIAR
        ======================================== -->
   <div id="modalConfirmarLimpiar" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-[80] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-6 animate-slide-in-up border border-gray-200 dark:border-gray-700 text-center">
       <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🧹</div>
       <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">¿Limpiar Todo?</h3>
       <p id="textoConfirmarLimpiar" class="text-gray-600 dark:text-gray-300 text-sm mb-6">Se borrarán todos los datos actuales.</p>
-      
       <div class="flex gap-3 justify-center">
         <button id="btnCancelarLimpiar" class="flex-1 px-5 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancelar</button>
         <button id="btnEjecutarLimpiar" class="flex-1 px-5 py-2.5 rounded-xl font-bold text-white bg-orange-600 hover:bg-orange-700 shadow-lg shadow-orange-500/30 transition-all transform hover:-translate-y-1">Sí, Limpiar</button>
@@ -1234,7 +1170,7 @@
   </div>
 
   <!-- ========================================
-       🔐 MODAL LOGIN (EMPLEADOS)
+       🔐 MODAL: LOGIN
        ======================================== -->
   <div id="modalLogin" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-[2000] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-8 animate-slide-in-up border border-blue-200 dark:border-blue-900">
@@ -1243,7 +1179,6 @@
         <h3 class="text-xl font-bold text-gray-800 dark:text-white">Acceso Autorizado</h3>
         <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">Ingresa tus credenciales para facturar.</p>
       </div>
-      
       <form id="formLogin" class="space-y-4">
         <input type="text" id="usuarioLogin" placeholder="Usuario (ej: admin)" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
         <input type="password" id="passwordLogin" placeholder="Contraseña" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
@@ -1253,29 +1188,11 @@
     </div>
   </div>
 
-  <!-- EXCEL (SheetJS) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-  <!-- 🔥 FIREBASE SDK (Base de Datos) -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-
-  <script src="components.js"></script>
-  <script src="scriptgeneral.js"></script>
-
-  <!-- PDF.js para análisis local -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script>
-    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  </script>
-
-  <!-- ============================================ -->
-  <!-- 3. MODAL ANALIZADOR PDF (ESTILO NATIVO)      -->
-  <!-- ============================================ -->
+  <!-- ========================================
+       📄 MODAL: ANALIZADOR PDF
+       ======================================== -->
   <div id="modalAnalizadorPDF" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden animate-fade-in" onclick="pdfClickOutside(event)">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col animate-slide-in-up m-4">
-      <!-- Header -->
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-start">
         <div class="flex items-center gap-4">
           <div class="w-12 h-12 flex-shrink-0 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-xl flex items-center justify-center">
@@ -1292,9 +1209,7 @@
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
-      <!-- Body -->
       <div class="p-6 space-y-5">
-        <!-- Dropzone -->
         <div id="pdfDropzone" class="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
           <input type="file" accept=".pdf,application/pdf" id="pdfFileInput" onchange="pdfArchivoSeleccionado(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
           <div class="flex flex-col items-center justify-center gap-3 text-gray-500 dark:text-gray-400">
@@ -1305,7 +1220,6 @@
             <p class="text-xs">o haz clic para seleccionar un archivo</p>
           </div>
         </div>
-        <!-- File selected -->
         <div id="pdfFileSelected" class="hidden items-center gap-3 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
           <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path></svg>
           <span id="pdfFileName" class="flex-1 font-mono text-sm text-gray-700 dark:text-gray-200 truncate">archivo.pdf</span>
@@ -1313,12 +1227,10 @@
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
           </button>
         </div>
-        <!-- Error -->
         <div id="pdfError" class="hidden items-center gap-3 p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg border border-red-200 dark:border-red-700">
           <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path></svg>
           <span id="pdfErrorMsg" class="text-sm font-medium">Error al procesar.</span>
         </div>
-        <!-- Progress -->
         <div id="pdfProgressWrap" class="hidden space-y-2">
           <div class="flex justify-between text-xs font-mono text-gray-500 dark:text-gray-400">
             <span id="pdfProgressLabel">Analizando...</span>
@@ -1328,14 +1240,11 @@
             <div id="pdfProgressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
           </div>
         </div>
-        <!-- Process Button -->
         <button id="pdfBtnProcesar" onclick="pdfProcesar()" disabled class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-lg shadow-blue-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:shadow-none disabled:transform-none dark:disabled:bg-gray-600 disabled:cursor-not-allowed">
           <span id="pdfBtnIcon">▶</span>
           <span id="pdfBtnText" class="ml-2">PROCESAR ARCHIVO</span>
         </button>
-        <!-- Results -->
         <div id="pdfResults" class="hidden pt-4 mt-4 border-t border-gray-200 dark:border-gray-700 space-y-5">
-          <!-- Metrics -->
           <div class="grid grid-cols-3 gap-4">
             <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-center border-b-4 border-blue-500">
               <div class="text-3xl font-black text-blue-600 dark:text-blue-400" id="pdfMetricTotal">0</div>
@@ -1350,7 +1259,6 @@
               <div class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">B/N</div>
             </div>
           </div>
-          <!-- Distribution Bar -->
           <div>
             <div class="flex h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
               <div id="pdfDistColor" class="bg-green-500 transition-all duration-500" style="width:0%"></div>
@@ -1367,326 +1275,285 @@
               </div>
             </div>
           </div>
-          <!-- Use Data Button -->
           <button id="pdfBtnUsarDatos" onclick="pdfUsarDatos()" style="display: none;" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 shadow-lg shadow-green-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
             👇 USAR DATOS EN CALCULADORA
           </button>
         </div>
       </div>
-      <!-- Footer -->
       <div class="p-4 text-center border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl">
-        <p class="text-xs text-gray-500 dark:text-gray-400">
-          El análisis se realiza 100% en tu navegador. Ningún archivo se sube a servidores.
-        </p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">El análisis se realiza 100% en tu navegador. Ningún archivo se sube a servidores.</p>
       </div>
     </div>
   </div>
-<!-- ============================================ -->
-<!-- 4. SCRIPT — pegar al final del <body>       -->
-<!-- ============================================ -->
-<script>
-// ── Estado global del analizador ─────────────────────────────────────────────
-const _PDF = {
-  archivo: null,
-  procesando: false
-};
 
-// ── Abrir / cerrar modal ──────────────────────────────────────────────────────
-function abrirModalAnalizadorPDF() {
-  document.getElementById('modalAnalizadorPDF').classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-}
+  <!-- ========================================
+       📦 SCRIPTS EXTERNOS
+       ======================================== -->
+  <!-- EXCEL (SheetJS) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-function cerrarModalAnalizadorPDF() {
-  const modal = document.getElementById('modalAnalizadorPDF');
-  modal.classList.add('hidden');
-  document.body.style.overflow = '';
-  if (!_PDF.procesando) pdfLimpiarTodo();
-}
+  <!-- 🔥 FIREBASE SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
-function pdfClickOutside(e) {
-  if (e.target.id === 'modalAnalizadorPDF') {
-    cerrarModalAnalizadorPDF();
-  }
-}
+  <!-- COMPONENTES Y LÓGICA PRINCIPAL -->
+  <script src="components.js"></script>
+  <script src="scriptgeneral.js"></script>
 
-// ── Drag & Drop ───────────────────────────────────────────────────────────────
-(function() {
-  document.addEventListener('DOMContentLoaded', function() {
-    var dz = document.getElementById('pdfDropzone');
-    if (!dz) return;
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
 
-    dz.addEventListener('dragover',  function(e) { e.preventDefault(); dz.classList.add('dragging'); });
-    dz.addEventListener('dragleave', function()  { dz.classList.remove('dragging'); });
-    dz.addEventListener('drop', function(e) {
-      e.preventDefault();
-      dz.classList.remove('dragging');
-      var files = e.dataTransfer.files;
-      if (files.length > 0 && files[0].type === 'application/pdf') {
-        _PDF.archivo = files[0];
-        pdfMostrarArchivoSeleccionado(files[0].name);
-      } else {
-        pdfMostrarError('Solo se aceptan archivos PDF.');
-      }
-    });
-  });
-})();
+  <!-- ========================================
+       📄 LÓGICA: ANALIZADOR PDF (única definición)
+       ======================================== -->
+  <script>
+    // ── Estado global ─────────────────────────────────────────────────────────
+    const _PDF = {
+      archivo: null,
+      procesando: false
+    };
 
-// ── Archivo seleccionado por input ────────────────────────────────────────────
-function pdfArchivoSeleccionado(input) {
-  pdfOcultarError();
-  if (!input.files || input.files.length === 0) return;
-
-  var archivo = input.files[0];
-  if (archivo.type !== 'application/pdf') {
-    pdfMostrarError('El archivo seleccionado no es un PDF válido.');
-    return;
-  }
-
-  _PDF.archivo = archivo;
-  pdfMostrarArchivoSeleccionado(archivo.name);
-}
-
-function pdfMostrarArchivoSeleccionado(nombre) {
-  document.getElementById('pdfFileName').textContent = nombre;
-  document.getElementById('pdfFileSelected').classList.remove('hidden');
-  document.getElementById('pdfFileSelected').classList.add('flex');
-  document.getElementById('pdfDropzone').style.display = 'none';
-  document.getElementById('pdfBtnProcesar').disabled = false;
-  document.getElementById('pdfResults').classList.add('hidden');
-  pdfOcultarProgreso();
-}
-
-function pdfLimpiarArchivo() {
-  _PDF.archivo = null;
-  document.getElementById('pdfFileInput').value = '';
-  document.getElementById('pdfFileSelected').classList.add('hidden');
-  document.getElementById('pdfFileSelected').classList.remove('flex');
-  document.getElementById('pdfDropzone').style.display = '';
-  document.getElementById('pdfBtnProcesar').disabled = true;
-  document.getElementById('pdfBtnText').textContent = 'PROCESAR ARCHIVO';
-  document.getElementById('pdfBtnIcon').textContent = '▶';
-  document.getElementById('pdfResults').classList.add('hidden');
-  pdfOcultarProgreso();
-  pdfOcultarError();
-}
-
-function pdfLimpiarTodo() {
-  pdfLimpiarArchivo();
-}
-
-// ── Progreso ──────────────────────────────────────────────────────────────────
-function pdfMostrarProgreso() {
-  document.getElementById('pdfProgressWrap').classList.remove('hidden');
-}
-
-function pdfOcultarProgreso() {
-  document.getElementById('pdfProgressWrap').classList.add('hidden');
-}
-
-function pdfActualizarProgreso(actual, total) {
-  var pct = total > 0 ? Math.round((actual / total) * 100) : 0;
-  document.getElementById('pdfProgressBar').style.width = pct + '%';
-  document.getElementById('pdfProgressPct').textContent = pct + '%';
-  document.getElementById('pdfProgressLabel').textContent =
-    'Analizando página ' + actual + ' de ' + total + '...';
-}
-
-// ── Error ─────────────────────────────────────────────────────────────────────
-function pdfMostrarError(msg) {
-  document.getElementById('pdfErrorMsg').textContent = msg;
-  document.getElementById('pdfError').classList.remove('hidden');
-}
-
-function pdfOcultarError() {
-  document.getElementById('pdfError').classList.add('hidden');
-}
-
-// ── Procesamiento principal ───────────────────────────────────────────────────
-async function pdfProcesar() {
-  if (!_PDF.archivo || _PDF.procesando) return;
-
-  pdfOcultarError();
-  document.getElementById('pdfResults').classList.add('hidden');
-
-  // Verificar que pdf.js esté cargado
-  if (!window.pdfjsLib) {
-    pdfMostrarError('pdf.js aún no ha terminado de cargarse. Intenta de nuevo en unos segundos.');
-    return;
-  }
-
-  _PDF.procesando = true;
-  var btn = document.getElementById('pdfBtnProcesar');
-  var btnText = document.getElementById('pdfBtnText');
-  var btnIcon = document.getElementById('pdfBtnIcon');
-  btn.disabled = true;
-  btnText.textContent = 'ANALIZANDO...';
-  btnIcon.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
-  pdfMostrarProgreso();
-
-  try {
-    // Leer el archivo como ArrayBuffer
-    var buffer = await _PDF.archivo.arrayBuffer();
-    var pdfDoc = await window.pdfjsLib.getDocument({ data: buffer }).promise;
-    var totalPaginas = pdfDoc.numPages;
-
-    var paginasColor = 0;
-    var paginasBN    = 0;
-
-    // Canvas reutilizable (fuera del loop para no crear/destruir en cada iteración)
-    var canvas  = document.createElement('canvas');
-    var ctx     = canvas.getContext('2d', { willReadFrequently: true });
-
-    // Escala reducida para velocidad sin perder precisión de color
-    var ESCALA = 0.35;
-
-    for (var i = 1; i <= totalPaginas; i++) {
-      // Ceder control al navegador cada 3 páginas para no congelarlo
-      if (i % 3 === 0) {
-        await new Promise(function(r) { setTimeout(r, 0); });
-      }
-
-      pdfActualizarProgreso(i, totalPaginas);
-
-      var page = await pdfDoc.getPage(i);
-      var viewport = page.getViewport({ scale: ESCALA });
-
-      canvas.width  = viewport.width;
-      canvas.height = viewport.height;
-
-      await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-
-      var esColor = pdfAnalizarCanvas(ctx, canvas.width, canvas.height);
-
-      if (esColor) {
-        paginasColor++;
-      } else {
-        paginasBN++;
-      }
-
-      // Actualizar contador en tiempo real mientras avanza
-      pdfActualizarContadores(totalPaginas, paginasColor, paginasBN, false);
+    // ── Abrir / cerrar modal ──────────────────────────────────────────────────
+    function abrirModalAnalizadorPDF() {
+      document.getElementById('modalAnalizadorPDF').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
     }
 
-    // Mostrar resultado final
-    pdfActualizarContadores(totalPaginas, paginasColor, paginasBN, true);
-    document.getElementById('pdfResults').classList.remove('hidden');
+    function cerrarModalAnalizadorPDF() {
+      document.getElementById('modalAnalizadorPDF').classList.add('hidden');
+      document.body.style.overflow = '';
+      if (!_PDF.procesando) pdfLimpiarTodo();
+    }
 
-  } catch (err) {
-    console.error('[AnalizadorPDF]', err);
-    pdfMostrarError('No se pudo procesar el PDF. ¿Está protegido con contraseña?');
-  } finally {
-    _PDF.procesando = false;
-    btn.disabled = true; // Deshabilitado hasta que se limpie
-    btnText.textContent = 'ANÁLISIS COMPLETADO';
-    btnIcon.textContent = '✓';
-    pdfOcultarProgreso();
-  }
-}
+    function pdfClickOutside(e) {
+      if (e.target.id === 'modalAnalizadorPDF') cerrarModalAnalizadorPDF();
+    }
 
-// ── Detección de color en canvas ─────────────────────────────────────────────
-function pdfAnalizarCanvas(ctx, ancho, alto) {
-  var imageData = ctx.getImageData(0, 0, ancho, alto);
-  var data = imageData.data;
-  var totalPixeles = data.length / 4;
+    // ── Drag & Drop ───────────────────────────────────────────────────────────
+    (function () {
+      document.addEventListener('DOMContentLoaded', function () {
+        var dz = document.getElementById('pdfDropzone');
+        if (!dz) return;
+        dz.addEventListener('dragover',  function (e) { e.preventDefault(); dz.classList.add('dragging'); });
+        dz.addEventListener('dragleave', function ()  { dz.classList.remove('dragging'); });
+        dz.addEventListener('drop', function (e) {
+          e.preventDefault();
+          dz.classList.remove('dragging');
+          var files = e.dataTransfer.files;
+          if (files.length > 0 && files[0].type === 'application/pdf') {
+            _PDF.archivo = files[0];
+            pdfMostrarArchivoSeleccionado(files[0].name);
+          } else {
+            pdfMostrarError('Solo se aceptan archivos PDF.');
+          }
+        });
+      });
+    })();
 
-  // Umbral de tolerancia:
-  //   Si |R-G| + |R-B| + |G-B| > TOLERANCIA → pixel a color
-  // Esto maneja páginas con tinta levemente amarillenta o papel crema
-  var TOLERANCIA = 20;
-
-  // Para optimizar: muestrear 1 de cada 4 píxeles en páginas grandes
-  var paso = (totalPixeles > 40000) ? 4 : 2;
-
-  var pixelesColor = 0;
-  var muestras     = 0;
-
-  for (var i = 0; i < data.length; i += 4 * paso) {
-    var r = data[i];
-    var g = data[i + 1];
-    var b = data[i + 2];
-    var a = data[i + 3];
-
-    // Ignorar píxeles transparentes o blancos puros (fondo de página)
-    if (a < 30) { muestras++; continue; }
-    if (r > 250 && g > 250 && b > 250) { muestras++; continue; }
-
-    var diff = Math.abs(r - g) + Math.abs(r - b) + Math.abs(g - b);
-    if (diff > TOLERANCIA) pixelesColor++;
-    muestras++;
-  }
-
-  // Si más del 0.5% de las muestras tienen color → página a color
-  var porcentajeColor = muestras > 0 ? (pixelesColor / muestras) * 100 : 0;
-  return porcentajeColor > 0.5;
-}
-
-// ── Actualizar contadores en pantalla ────────────────────────────────────────
-function pdfActualizarContadores(total, color, bw, final) {
-  document.getElementById('pdfMetricTotal').textContent = total;
-  document.getElementById('pdfMetricColor').textContent = color;
-  document.getElementById('pdfMetricBW').textContent    = bw;
-
-  if (final && total > 0) {
-    var pctColor = Math.round((color / total) * 100);
-    var pctBW    = 100 - pctColor;
-
-    document.getElementById('pdfDistColor').style.width = pctColor + '%';
-    document.getElementById('pdfDistBW').style.width    = pctBW    + '%';
-
-    document.getElementById('pdfLegendColor').textContent = 'Color ('    + pctColor + '%)';
-    document.getElementById('pdfLegendBW').textContent    = 'B/N ('      + pctBW    + '%)';
-
-    // Mostrar botón de usar datos
-    const btnUsar = document.getElementById('pdfBtnUsarDatos');
-    if (btnUsar) btnUsar.style.display = 'flex';
-  }
-}
-
-  // ── Usar datos en la calculadora ─────────────────────────────────────────────
-  function pdfUsarDatos() {
-    const paginasColor = document.getElementById('pdfMetricColor').textContent;
-    const paginasBN = document.getElementById('pdfMetricBW').textContent;
-
-    // Detectar en qué página estamos para rellenar el formulario correcto
-    const esTesisPage = !!document.getElementById('formCotizacion'); // ID del form en index.html
-    const esGeneralPage = !!document.getElementById('formImpresion'); // ID de un form en calculadora_general.html
-
-    if (esTesisPage) {
-      const bnInput = document.getElementById('bn');
-      const colorInput = document.getElementById('color');
-      if (bnInput && colorInput) {
-        bnInput.value = paginasBN;
-        colorInput.value = paginasColor;
-
-        // Forzar la actualización de la vista si el papel es satinado
-        document.getElementById('papel').value = 'bond';
-        actualizarVista();
-
-        // Disparar evento para que otras lógicas (como guardar en localStorage) se activen
-        bnInput.dispatchEvent(new Event('input', { bubbles: true }));
-        colorInput.dispatchEvent(new Event('input', { bubbles: true }));
+    // ── Selección de archivo ──────────────────────────────────────────────────
+    function pdfArchivoSeleccionado(input) {
+      pdfOcultarError();
+      if (!input.files || input.files.length === 0) return;
+      var archivo = input.files[0];
+      if (archivo.type !== 'application/pdf') {
+        pdfMostrarError('El archivo seleccionado no es un PDF válido.');
+        return;
       }
-    } else if (esGeneralPage) {
-      // Lógica para calculadora_general.html
-      const tipoServicioSelect = document.getElementById('tipoServicio');
-      const libroBNInput = document.getElementById('libroPaginasBN');
-      const libroColorInput = document.getElementById('libroPaginasColor');
+      _PDF.archivo = archivo;
+      pdfMostrarArchivoSeleccionado(archivo.name);
+    }
 
-      if (tipoServicioSelect && libroBNInput && libroColorInput) {
-        tipoServicioSelect.value = 'libro';
-        tipoServicioSelect.dispatchEvent(new Event('change', { bubbles: true }));
-        libroBNInput.value = paginasBN;
-        libroColorInput.value = paginasColor;
-        document.getElementById('libroPaginasFullColor').value = 0;
-        libroBNInput.dispatchEvent(new Event('input', { bubbles: true }));
-        libroColorInput.dispatchEvent(new Event('input', { bubbles: true }));
+    function pdfMostrarArchivoSeleccionado(nombre) {
+      document.getElementById('pdfFileName').textContent = nombre;
+      document.getElementById('pdfFileSelected').classList.remove('hidden');
+      document.getElementById('pdfFileSelected').classList.add('flex');
+      document.getElementById('pdfDropzone').style.display = 'none';
+      document.getElementById('pdfBtnProcesar').disabled = false;
+      document.getElementById('pdfResults').classList.add('hidden');
+      pdfOcultarProgreso();
+    }
+
+    function pdfLimpiarArchivo() {
+      _PDF.archivo = null;
+      document.getElementById('pdfFileInput').value = '';
+      document.getElementById('pdfFileSelected').classList.add('hidden');
+      document.getElementById('pdfFileSelected').classList.remove('flex');
+      document.getElementById('pdfDropzone').style.display = '';
+      document.getElementById('pdfBtnProcesar').disabled = true;
+      document.getElementById('pdfBtnText').textContent = 'PROCESAR ARCHIVO';
+      document.getElementById('pdfBtnIcon').textContent = '▶';
+      document.getElementById('pdfResults').classList.add('hidden');
+      pdfOcultarProgreso();
+      pdfOcultarError();
+    }
+
+    function pdfLimpiarTodo() { pdfLimpiarArchivo(); }
+
+    // ── Progreso ──────────────────────────────────────────────────────────────
+    function pdfMostrarProgreso()  { document.getElementById('pdfProgressWrap').classList.remove('hidden'); }
+    function pdfOcultarProgreso()  { document.getElementById('pdfProgressWrap').classList.add('hidden'); }
+
+    function pdfActualizarProgreso(actual, total) {
+      var pct = total > 0 ? Math.round((actual / total) * 100) : 0;
+      document.getElementById('pdfProgressBar').style.width = pct + '%';
+      document.getElementById('pdfProgressPct').textContent = pct + '%';
+      document.getElementById('pdfProgressLabel').textContent =
+        'Analizando página ' + actual + ' de ' + total + '...';
+    }
+
+    // ── Error ─────────────────────────────────────────────────────────────────
+    function pdfMostrarError(msg) {
+      document.getElementById('pdfErrorMsg').textContent = msg;
+      document.getElementById('pdfError').classList.remove('hidden');
+      document.getElementById('pdfError').classList.add('flex');
+    }
+    function pdfOcultarError() {
+      document.getElementById('pdfError').classList.add('hidden');
+      document.getElementById('pdfError').classList.remove('flex');
+    }
+
+    // ── Procesamiento principal ───────────────────────────────────────────────
+    async function pdfProcesar() {
+      if (!_PDF.archivo || _PDF.procesando) return;
+      pdfOcultarError();
+      document.getElementById('pdfResults').classList.add('hidden');
+
+      if (!window.pdfjsLib) {
+        pdfMostrarError('pdf.js aún no ha terminado de cargarse. Intenta de nuevo en unos segundos.');
+        return;
+      }
+
+      _PDF.procesando = true;
+      var btn     = document.getElementById('pdfBtnProcesar');
+      var btnText = document.getElementById('pdfBtnText');
+      var btnIcon = document.getElementById('pdfBtnIcon');
+      btn.disabled = true;
+      btnText.textContent = 'ANALIZANDO...';
+      btnIcon.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+      pdfMostrarProgreso();
+
+      try {
+        var buffer      = await _PDF.archivo.arrayBuffer();
+        var pdfDoc      = await window.pdfjsLib.getDocument({ data: buffer }).promise;
+        var totalPaginas = pdfDoc.numPages;
+        var paginasColor = 0;
+        var paginasBN    = 0;
+        var canvas = document.createElement('canvas');
+        var ctx    = canvas.getContext('2d', { willReadFrequently: true });
+        var ESCALA = 0.35;
+
+        for (var i = 1; i <= totalPaginas; i++) {
+          if (i % 3 === 0) await new Promise(function (r) { setTimeout(r, 0); });
+          pdfActualizarProgreso(i, totalPaginas);
+          var page     = await pdfDoc.getPage(i);
+          var viewport = page.getViewport({ scale: ESCALA });
+          canvas.width  = viewport.width;
+          canvas.height = viewport.height;
+          await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+          if (pdfAnalizarCanvas(ctx, canvas.width, canvas.height)) {
+            paginasColor++;
+          } else {
+            paginasBN++;
+          }
+          pdfActualizarContadores(totalPaginas, paginasColor, paginasBN, false);
+        }
+
+        pdfActualizarContadores(totalPaginas, paginasColor, paginasBN, true);
+        document.getElementById('pdfResults').classList.remove('hidden');
+
+      } catch (err) {
+        console.error('[AnalizadorPDF]', err);
+        pdfMostrarError('No se pudo procesar el PDF. ¿Está protegido con contraseña?');
+      } finally {
+        _PDF.procesando = false;
+        btn.disabled = true;
+        btnText.textContent = 'ANÁLISIS COMPLETADO';
+        btnIcon.textContent = '✓';
+        pdfOcultarProgreso();
       }
     }
-    mostrarNotificacion('✅ Datos aplicados en la calculadora.', 'success');
-    cerrarModalAnalizadorPDF();
-  }
-</script>
-  
+
+    // ── Detección de color ────────────────────────────────────────────────────
+    function pdfAnalizarCanvas(ctx, ancho, alto) {
+      var imageData = ctx.getImageData(0, 0, ancho, alto);
+      var data      = imageData.data;
+      var total     = data.length / 4;
+      var TOLERANCIA = 20;
+      var paso = (total > 40000) ? 4 : 2;
+      var pixelesColor = 0;
+      var muestras     = 0;
+
+      for (var i = 0; i < data.length; i += 4 * paso) {
+        var r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+        if (a < 30) { muestras++; continue; }
+        if (r > 250 && g > 250 && b > 250) { muestras++; continue; }
+        if (Math.abs(r - g) + Math.abs(r - b) + Math.abs(g - b) > TOLERANCIA) pixelesColor++;
+        muestras++;
+      }
+      return muestras > 0 ? (pixelesColor / muestras) * 100 > 0.5 : false;
+    }
+
+    // ── Actualizar contadores ─────────────────────────────────────────────────
+    function pdfActualizarContadores(total, color, bw, final) {
+      document.getElementById('pdfMetricTotal').textContent = total;
+      document.getElementById('pdfMetricColor').textContent = color;
+      document.getElementById('pdfMetricBW').textContent    = bw;
+
+      if (final && total > 0) {
+        var pctColor = Math.round((color / total) * 100);
+        var pctBW    = 100 - pctColor;
+        document.getElementById('pdfDistColor').style.width = pctColor + '%';
+        document.getElementById('pdfDistBW').style.width    = pctBW    + '%';
+        document.getElementById('pdfLegendColor').textContent = 'Color (' + pctColor + '%)';
+        document.getElementById('pdfLegendBW').textContent    = 'B/N ('   + pctBW    + '%)';
+        var btnUsar = document.getElementById('pdfBtnUsarDatos');
+        if (btnUsar) btnUsar.style.display = 'flex';
+      }
+    }
+
+    // ── Usar datos en calculadora ─────────────────────────────────────────────
+    function pdfUsarDatos() {
+      var paginasColor = document.getElementById('pdfMetricColor').textContent;
+      var paginasBN    = document.getElementById('pdfMetricBW').textContent;
+
+      var esTesisPage   = !!document.getElementById('formCotizacion');
+      var esGeneralPage = !!document.getElementById('formImpresion');
+
+      if (esTesisPage) {
+        var bnInput    = document.getElementById('bn');
+        var colorInput = document.getElementById('color');
+        if (bnInput && colorInput) {
+          bnInput.value    = paginasBN;
+          colorInput.value = paginasColor;
+          document.getElementById('papel').value = 'bond';
+          actualizarVista();
+          bnInput.dispatchEvent(new Event('input', { bubbles: true }));
+          colorInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      } else if (esGeneralPage) {
+        var tipoServicioSelect = document.getElementById('tipoServicio');
+        var libroBNInput       = document.getElementById('libroPaginasBN');
+        var libroColorInput    = document.getElementById('libroPaginasColor');
+        if (tipoServicioSelect && libroBNInput && libroColorInput) {
+          tipoServicioSelect.value = 'libro';
+          tipoServicioSelect.dispatchEvent(new Event('change', { bubbles: true }));
+          libroBNInput.value    = paginasBN;
+          libroColorInput.value = paginasColor;
+          document.getElementById('libroPaginasFullColor').value = 0;
+          libroBNInput.dispatchEvent(new Event('input', { bubbles: true }));
+          libroColorInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }
+
+      mostrarNotificacion('✅ Datos aplicados en la calculadora.', 'success');
+      cerrarModalAnalizadorPDF();
+    }
+  </script>
+
 </body>
 </html>
