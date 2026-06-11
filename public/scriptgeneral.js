@@ -53,8 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 const preciosBN = {
   'carta': [
     { min: 1, max: 50, precio: 2.50 },
-    { min: 51, max: 200, precio: 2.00 },
-    { min: 201, max: Infinity, precio: 1.75 }
+    { min: 51, max: Infinity, precio: 2.00 }
   ],
   'legal': [
     { min: 1, max: 50, precio: 10.00 },
