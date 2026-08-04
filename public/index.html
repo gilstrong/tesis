@@ -17,6 +17,9 @@
   <!-- ESTILOS -->
   <link rel="stylesheet" href="style.css" />
 
+  <!-- ICONOS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+
   <!-- TAILWIND CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -46,16 +49,16 @@
 
       <!-- Título principal -->
       <header class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-        <h1>Calculadora de Tesis</h1>
+        <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Calculadora de Tesis</h1>
         <div class="flex items-center gap-2">
-          <button type="button" id="btnDashboard" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-500 hover:to-indigo-700 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
+          <button type="button" id="btnDashboard" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-500 to-indigo-700 hover:from-indigo-400 hover:to-indigo-600 shadow-md shadow-indigo-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 text-sm">
             <span class="text-lg">📊</span> Dashboard
           </button>
-          <button type="button" id="btnVerGuardadas" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-400 hover:to-teal-600 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
+          <button type="button" id="btnVerGuardadas" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-400 hover:to-teal-600 shadow-md shadow-teal-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 text-sm">
             <span class="text-lg">📂</span>
             Ver Guardadas
           </button>
-          <button type="button" onclick="abrirModalAnalizadorPDF()" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
+          <button type="button" onclick="abrirModalAnalizadorPDF()" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-500 to-indigo-700 hover:from-indigo-400 hover:to-indigo-600 shadow-md shadow-indigo-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 text-sm">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
             Analizar PDF
           </button>
@@ -73,6 +76,7 @@
           </label>
           <select id="tamano" name="tamano" required aria-describedby="alertaTabloide">
             <option value="carta">Carta (8.5 x 11)</option>
+            <option value="legal">Legal (8.5 x 14)</option>
             <option value="tabloide">11 x 17</option>
           </select>
         </div>
@@ -177,6 +181,7 @@
           <select id="tipoEmpastado" name="tipoEmpastado" required>
             <option value="tapa_dura">Tapa dura</option>
             <option value="vinil">Vinil</option>
+            <option value="espiral">Espiral</option>
           </select>
         </div>
 
@@ -245,27 +250,27 @@
 
         <!-- Grupo de botones -->
         <div class="button-group">
-          <button type="button" id="btnCalcular" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-lg shadow-blue-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
+          <button type="button" id="btnCalcular" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-500 via-indigo-600 to-indigo-700 hover:from-indigo-400 hover:to-indigo-500 shadow-lg shadow-indigo-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2">
             <span class="text-xl">🧮</span>
             Calcular Total
           </button>
 
-          <button type="button" id="btnGuardarTesis" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-500 via-indigo-600 to-indigo-700 hover:from-indigo-400 hover:to-indigo-600 shadow-lg shadow-indigo-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
+          <button type="button" id="btnGuardarTesis" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-violet-500 via-violet-600 to-violet-700 hover:from-violet-400 hover:to-violet-550 shadow-lg shadow-violet-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2">
             <span class="text-xl">💾</span>
             Guardar en Nube
           </button>
 
-          <button type="button" id="btnGenerar" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 shadow-lg shadow-emerald-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
+          <button type="button" id="btnGenerar" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 hover:from-emerald-400 hover:to-emerald-550 shadow-lg shadow-emerald-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2">
             <span class="text-xl">🖨️</span>
             Imprimir
           </button>
 
-          <button type="button" id="btnDescargarPdf" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 hover:from-orange-400 hover:to-orange-600 shadow-lg shadow-orange-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
+          <button type="button" id="btnDescargarPdf" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700 hover:from-rose-400 hover:to-rose-550 shadow-lg shadow-rose-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2">
             <span class="text-xl">📄</span>
             Descargar PDF
           </button>
 
-          <button type="button" id="btnReiniciar" class="w-full py-3 px-6 rounded-xl font-bold text-gray-700 bg-white border-2 border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
+          <button type="button" id="btnReiniciar" class="w-full py-3 px-6 rounded-xl font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 shadow-sm transform transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2">
             <span class="text-xl">🔄</span>
             Reiniciar
           </button>
@@ -406,7 +411,7 @@
   <!-- ========================================
        📊 MODAL DASHBOARD
        ======================================== -->
-  <div id="modalDashboard" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-[90] hidden animate-fade-in">
+  <div id="modalDashboard" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[90] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col animate-slide-in-up m-4 overflow-hidden">
       <!-- Header -->
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-600 to-blue-600 flex justify-between items-center flex-shrink-0">
@@ -473,7 +478,7 @@
   <!-- ========================================
        📂 MODAL PARA COTIZACIONES GUARDADAS
        ======================================== -->
-  <div id="modalCotizacionesGuardadas" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden animate-fade-in">
+  <div id="modalCotizacionesGuardadas" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-slide-in-up m-4">
       <!-- Header del Modal -->
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
@@ -495,7 +500,7 @@
   <!-- ========================================
        💾 MODAL GUARDAR TESIS (NOMBRE) - Reemplazo de Prompt
        ======================================== -->
-  <div id="modalGuardarTesis" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-[70] hidden animate-fade-in">
+  <div id="modalGuardarTesis" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[70] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md m-4 p-6 animate-slide-in-up border border-indigo-200 dark:border-indigo-900">
       <div class="text-center mb-6">
         <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">💾</div>
@@ -515,7 +520,7 @@
   <!-- ========================================
        🗑️ MODAL CONFIRMACIÓN ELIMINAR - Reemplazo de Confirm
        ======================================== -->
-  <div id="modalConfirmarEliminar" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-[80] hidden animate-fade-in">
+  <div id="modalConfirmarEliminar" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[80] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-6 animate-slide-in-up border border-gray-200 dark:border-gray-700 text-center">
       <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🗑️</div>
       <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">¿Eliminar Cotización?</h3>
@@ -531,7 +536,7 @@
   <!-- ========================================
        🔐 MODAL LOGIN (EMPLEADOS)
        ======================================== -->
-  <div id="modalLogin" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-[2000] hidden animate-fade-in">
+  <div id="modalLogin" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[2000] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-8 animate-slide-in-up border border-blue-200 dark:border-blue-900">
       <div class="text-center mb-6">
         <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🔐</div>
@@ -573,7 +578,7 @@
   <!-- ============================================ -->
   <!-- 3. MODAL ANALIZADOR PDF (ESTILO NATIVO)      -->
   <!-- ============================================ -->
-  <div id="modalAnalizadorPDF" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden animate-fade-in" onclick="pdfClickOutside(event)">
+  <div id="modalAnalizadorPDF" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 hidden animate-fade-in" onclick="pdfClickOutside(event)">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col animate-slide-in-up m-4">
       <!-- Header -->
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-start">

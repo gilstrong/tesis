@@ -29,6 +29,25 @@ const PRECIOS = {
   }
 };
 
+// Rangos de precios para tamaño Legal tomados de la calculadora general
+const PRECIOS_LEGAL_BN = [
+  { min: 1, max: 50, precio: 10 },
+  { min: 51, max: 200, precio: 8 },
+  { min: 201, max: Infinity, precio: 6 }
+];
+
+const PRECIOS_LEGAL_COLOR = [
+  { min: 1, max: 50, precio: 30 },
+  { min: 51, max: 200, precio: 25 },
+  { min: 201, max: Infinity, precio: 20 }
+];
+
+const PRECIOS_LEGAL_SATINADO = [
+  { min: 1, max: 50, precio: 45 },
+  { min: 51, max: 200, precio: 40 },
+  { min: 201, max: Infinity, precio: 35 }
+];
+
 const TAPA_DURA = {
   beige: 600,
   morado: 500,
@@ -42,8 +61,18 @@ const TAPA_DURA = {
 
 const VINIL = {
   carta: 1200,
+  legal: 1200,
   tabloide: 1500
 };
+
+const PRECIOS_ENCUADERNADO = [
+  { min: 1, max: 50, precio: 60 },
+  { min: 51, max: 80, precio: 70 },
+  { min: 81, max: 100, precio: 100 },
+  { min: 101, max: 150, precio: 120 },
+  { min: 151, max: 200, precio: 150 },
+  { min: 201, max: Infinity, precio: 250 }
+];
 
 // Constantes de servicios adicionales
 const PRECIOS_SERVICIOS = {
@@ -117,6 +146,26 @@ function redondearA5(num) {
 }
 
 /**
+ * Obtiene el precio unitario correspondiente a una cantidad según una tabla de rangos
+ * @param {Array} tabla - Tabla de rangos de precios
+ * @param {number} cantidad - Cantidad a buscar
+ * @returns {number} Precio unitario
+ */
+function obtenerPrecioRango(tabla, cantidad) {
+  const rango = tabla.find(r => cantidad >= r.min && cantidad <= r.max);
+  return rango ? rango.precio : 0;
+}
+
+/**
+ * Calcula el precio de encuadernación según el número de páginas
+ * @param {number} paginas - Número de páginas
+ * @returns {number} Precio unitario del encuadernado
+ */
+function calcularPrecioEncuadernado(paginas) {
+  return obtenerPrecioRango(PRECIOS_ENCUADERNADO, paginas);
+}
+
+/**
  * Formatea un número como moneda dominicana
  * @param {number} valor - Valor a formatear
  * @returns {string} Valor formateado
@@ -148,9 +197,14 @@ function fechaFormateada() {
   });
 }
 
-function nombreArchivoPDF(id, colorTapa) {
-  const color = colorTapa ? colorTapa.replace(/_/g, '-') : 'vinil';
-  return `${id}-${color}.pdf`;
+function nombreArchivoPDF(id, colorTapa, tipoEmp) {
+  let sub = 'vinil';
+  if (tipoEmp === 'espiral') {
+    sub = 'espiral';
+  } else if (colorTapa) {
+    sub = colorTapa.replace(/_/g, '-');
+  }
+  return `${id}-${sub}.pdf`;
 }
 
 
@@ -237,14 +291,29 @@ function actualizarVista() {
   // 🔥 AHORA sí leemos los valores reales
   const esSatinado = elementos.papel.value === 'satinado';
   const esTapaDura = elementos.tipoEmpastado.value === 'tapa_dura';
+  const esEspiral = elementos.tipoEmpastado.value === 'espiral';
 
   // Mostrar/ocultar secciones según papel
   elementos.bnColorSection.style.display = esSatinado ? 'none' : 'block';
   elementos.soloPaginas.style.display = esSatinado ? 'block' : 'none';
 
-  // Color de tapa SOLO carta + tapa dura
+  // Color de tapa SOLO carta/legal + tapa dura
   elementos.colorTapaSection.style.display =
-    (esTapaDura && tamano === 'carta') ? 'block' : 'none';
+    (esTapaDura && (tamano === 'carta' || tamano === 'legal')) ? 'block' : 'none';
+
+  // Ocultar Lomo si es Espiral y resetear a 'no'
+  const lomoSelect = document.getElementById('lomo');
+  if (lomoSelect) {
+    const lomoGroup = lomoSelect.closest('.form-group');
+    if (lomoGroup) {
+      if (esEspiral) {
+        lomoGroup.style.display = 'none';
+        lomoSelect.value = 'no';
+      } else {
+        lomoGroup.style.display = 'block';
+      }
+    }
+  }
 }
 
 
@@ -340,7 +409,12 @@ function calcularImpresionSatinado() {
     throw new Error('Debe ingresar la cantidad de páginas');
   }
 
-  const precio = PRECIOS[elementos.tamano.value].satinado.precio;
+  let precio;
+  if (elementos.tamano.value === 'legal') {
+    precio = obtenerPrecioRango(PRECIOS_LEGAL_SATINADO, paginas);
+  } else {
+    precio = PRECIOS[elementos.tamano.value].satinado.precio;
+  }
   
   return {
     impresion: paginas * precio,
@@ -360,10 +434,28 @@ function calcularImpresionBondHilo() {
     throw new Error('Debe ingresar páginas en blanco y negro o color');
   }
 
-  const precios = PRECIOS[elementos.tamano.value][elementos.papel.value];
+  let precioBN, precioColor;
+  const tamano = elementos.tamano.value;
+  
+  if (tamano === 'legal') {
+    const baseBN = obtenerPrecioRango(PRECIOS_LEGAL_BN, bn);
+    const baseColor = obtenerPrecioRango(PRECIOS_LEGAL_COLOR, color);
+    
+    if (elementos.papel.value === 'hilo') {
+      precioBN = baseBN + 2;
+      precioColor = baseColor + 3;
+    } else {
+      precioBN = baseBN;
+      precioColor = baseColor;
+    }
+  } else {
+    const precios = PRECIOS[tamano][elementos.papel.value];
+    precioBN = precios.bn;
+    precioColor = precios.color;
+  }
   
   return {
-    impresion: bn * precios.bn + color * precios.color,
+    impresion: bn * precioBN + color * precioColor,
     detalleImpresion: `${bn} B/N + ${color} Color`
   };
 }
@@ -373,15 +465,20 @@ function calcularImpresionBondHilo() {
  * @param {number} tomos - Cantidad de tomos
  * @returns {Object} {empastado, tipoEmp, colorTapa}
  */
-function calcularEmpastado(tomos) {
+function calcularEmpastado(tomos, totalPaginas) {
   const tipoEmp = elementos.tipoEmpastado.value;
   const colorTapa = tipoEmp === 'tapa_dura' 
     ? document.getElementById('colorTapa').value 
     : '';
 
-  const costoUnitario = tipoEmp === 'vinil'
-    ? VINIL[elementos.tamano.value]
-    : TAPA_DURA[colorTapa];
+  let costoUnitario = 0;
+  if (tipoEmp === 'vinil') {
+    costoUnitario = VINIL[elementos.tamano.value];
+  } else if (tipoEmp === 'espiral') {
+    costoUnitario = calcularPrecioEncuadernado(totalPaginas);
+  } else {
+    costoUnitario = elementos.tamano.value === 'legal' ? 800 : TAPA_DURA[colorTapa];
+  }
 
   return {
     empastado: costoUnitario * tomos,
@@ -446,8 +543,10 @@ async function calcular() {
     // Cálculo de impresión
     const { impresion, detalleImpresion } = calcularImpresion();
     
-    // Cálculo de empastado
-    const { empastado, tipoEmp, colorTapa, costoUnitario } = calcularEmpastado(tomos);
+    // Cálculo de empastado/encuadernación
+    const esSatinado = elementos.papel.value === 'satinado';
+    const totalPaginas = esSatinado ? obtenerValorNumerico('paginas') : (obtenerValorNumerico('bn') + obtenerValorNumerico('color'));
+    const { empastado, tipoEmp, colorTapa, costoUnitario } = calcularEmpastado(tomos, totalPaginas);
     
     // Servicios adicionales
     const { lomoVal, cdVal, lomo, cd, cantidadCd } = calcularServiciosAdicionales(tomos);
@@ -631,18 +730,22 @@ function generarFilaImpresion(datos) {
  * @returns {string}
  */
 function generarFilaEmpastado(datos) {
-  const detalle = datos.tipoEmp === 'tapa_dura'
-    ? `Tapa dura (${nombreColor(datos.colorTapa)})`
-    : 'Vinil';
+  let detalle = 'Vinil';
+  let concepto = 'Empastado';
+  if (datos.tipoEmp === 'tapa_dura') {
+    detalle = `Tapa dura (${nombreColor(datos.colorTapa)})`;
+  } else if (datos.tipoEmp === 'espiral') {
+    detalle = 'Encuadernado Espiral';
+    concepto = 'Encuadernado';
+  }
 
   return `
     <tr>
-      <td><strong>Empastado</strong></td>
+      <td><strong>${concepto}</strong></td>
       <td>${detalle}</td>
       <td class="center">${datos.tomos}</td>
       <td class="right">RD$${formatearMonto(datos.costoUnitario)}</td>
       <td class="right">RD$${formatearMonto(datos.empastado)}</td>
-
     </tr>
   `;
 }
@@ -708,6 +811,14 @@ function generarTablaTotal(total) {
  * @returns {string}
  */
 function generarTiempoEntrega(tipoEmp) {
+  if (tipoEmp === 'espiral') {
+    return `
+      <div class="tiempo-entrega">
+        ⏰ Tiempo de entrega: encuadernado espiral se entrega de inmediato.
+      </div>
+    `;
+  }
+
   const tiempo = tipoEmp === 'tapa_dura' 
     ? TIEMPO_ENTREGA.TAPA_DURA 
     : TIEMPO_ENTREGA.VINIL;
@@ -835,10 +946,11 @@ function generarHTMLParaImprimir(datos) {
  * @returns {Promise<Blob>}
  */
 async function getPDFBlob(datos) {
-  const filename = nombreArchivoPDF(datos.idCotizacion, datos.colorTapa);
+  const filename = nombreArchivoPDF(datos.idCotizacion, datos.colorTapa, datos.tipoEmp);
   const html = generarHTMLParaImprimir(datos); // Reutilizamos la función de generación de HTML
 
-  const response = await fetch('/generar-pdf', {
+  const apiUrl = window.location.port === '5500' ? 'http://localhost:3000/generar-pdf' : '/generar-pdf';
+  const response = await fetch(apiUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ html: html, filename: filename })
@@ -880,6 +992,10 @@ function imprimir() {
     // 2. Abrimos una nueva ventana para la impresión.
     const ventanaImpresion = window.open('', 'Imprimir Cotización', 'height=800,width=1200');
     
+    if (!ventanaImpresion) {
+        throw new Error('El navegador bloqueó la ventana emergente. Por favor, permite los popups para imprimir.');
+    }
+
     // 3. Escribimos el contenido en la nueva ventana.
     ventanaImpresion.document.write(htmlCompleto);
     ventanaImpresion.document.close(); // Esencial para que 'onload' se dispare correctamente.
@@ -927,7 +1043,7 @@ async function generarPDFDesdeBackend() {
   
   try {
     const datos = datosUltimaCotizacion;
-    const filename = nombreArchivoPDF(datos.idCotizacion, datos.colorTapa);
+    const filename = nombreArchivoPDF(datos.idCotizacion, datos.colorTapa, datos.tipoEmp);
 
     const pdfBlob = await getPDFBlob(datos);
 
