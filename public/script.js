@@ -224,6 +224,7 @@ function obtenerValorNumerico(id, valorDefecto = 0) {
 
 const elementos = {
   // Selectores principales
+  itlaCheckbox: document.getElementById('itlaCheckbox'),
   tamano: document.getElementById('tamano'),
   papel: document.getElementById('papel'),
   tipoEmpastado: document.getElementById('tipoEmpastado'),
@@ -410,7 +411,9 @@ function calcularImpresionSatinado() {
   }
 
   let precio;
-  if (elementos.tamano.value === 'legal') {
+  if (elementos.itlaCheckbox?.checked) {
+    precio = 30;
+  } else if (elementos.tamano.value === 'legal') {
     precio = obtenerPrecioRango(PRECIOS_LEGAL_SATINADO, paginas);
   } else {
     precio = PRECIOS[elementos.tamano.value].satinado.precio;
@@ -478,6 +481,9 @@ function calcularEmpastado(tomos, totalPaginas) {
     costoUnitario = calcularPrecioEncuadernado(totalPaginas);
   } else {
     costoUnitario = elementos.tamano.value === 'legal' ? 800 : TAPA_DURA[colorTapa];
+    if (elementos.itlaCheckbox?.checked) {
+      costoUnitario = 700;
+    }
   }
 
   return {
@@ -557,6 +563,8 @@ async function calcular() {
     
     // Guardar datos completos para la generación de PDF
     datosUltimaCotizacion = {
+      itlaAplicado: elementos.itlaCheckbox?.checked,
+      esSatinado,
       tomos,
       impresion,
       detalleImpresion,
@@ -712,9 +720,10 @@ function generarTablaDetalle(datos) {
  * @returns {string}
  */
 function generarFilaImpresion(datos) {
+  const badgeItla = (datos.itlaAplicado && datos.esSatinado) ? ' <span style="background:#4f46e5;color:white;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:bold;vertical-align:middle;margin-left:4px;">ITLA</span>' : '';
   return `
     <tr>
-      <td><strong>Impresión</strong></td>
+      <td><strong>Impresión${badgeItla}</strong></td>
       <td>${datos.detalleImpresion}</td>
       <td class="center">${datos.tomos}</td>
       <td class="right">RD$${formatearMonto(datos.impresion)}</td>
@@ -732,8 +741,9 @@ function generarFilaImpresion(datos) {
 function generarFilaEmpastado(datos) {
   let detalle = 'Vinil';
   let concepto = 'Empastado';
+  const badgeItla = (datos.itlaAplicado && datos.tipoEmp === 'tapa_dura') ? ' <span style="background:#4f46e5;color:white;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:bold;vertical-align:middle;margin-left:4px;">ITLA</span>' : '';
   if (datos.tipoEmp === 'tapa_dura') {
-    detalle = `Tapa dura (${nombreColor(datos.colorTapa)})`;
+    detalle = `Tapa dura (${nombreColor(datos.colorTapa)})${badgeItla}`;
   } else if (datos.tipoEmp === 'espiral') {
     detalle = 'Encuadernado Espiral';
     concepto = 'Encuadernado';
