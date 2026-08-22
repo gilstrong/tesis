@@ -855,6 +855,9 @@
             <button type="button" id="btnVerGuardadas" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-400 hover:to-teal-600 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
               <span class="text-lg">📂</span> Ver Guardadas
             </button>
+            <button type="button" onclick="cotizacion_exportarExcel()" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-green-600 to-green-800 hover:from-green-500 hover:to-green-700 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
+              <span class="text-lg">📊</span> Exportar Excel
+            </button>
             <button type="button" onclick="abrirModalAnalizadorPDF()" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
               Analizar PDF
@@ -1467,6 +1470,79 @@
   <script>
     window.pdfjsLib.GlobalWorkerOptions.workerSrc =
       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
+
+  <!-- ========================================
+       📊 LÓGICA: EXPORTAR COTIZACIÓN A EXCEL
+       Reutiliza SheetJS (xlsx.full.min.js), ya cargado arriba.
+       Lee directamente la tabla real de la cotización (#cotizacionTabla),
+       así funciona sin importar qué función haya armado las filas.
+       ======================================== -->
+  <script>
+    function cotizacion_exportarExcel() {
+      var body = document.getElementById('cotizacionBody');
+      if (!body) { alert('No se encontró la tabla de cotización.'); return; }
+
+      var filas = Array.from(body.querySelectorAll('tr')).filter(function (tr) {
+        // Salta la fila "vacía" (placeholder de "No hay servicios en la cotización")
+        return !tr.classList.contains('cotizacion-vacia');
+      });
+
+      if (filas.length === 0) {
+        alert('La cotización está vacía. Agregá al menos un servicio antes de exportar.');
+        return;
+      }
+
+      // Convierte texto tipo "RD$1,225.00" a número 1225 (para que Excel lo trate como número)
+      function aNumero(texto) {
+        if (!texto) return 0;
+        var limpio = texto.replace(/[^0-9.\-]/g, '');
+        var n = parseFloat(limpio);
+        return isNaN(n) ? texto.trim() : n;
+      }
+
+      var datos = [['Servicio', 'Descripción', 'Cantidad', 'Precio Unit.', 'Total']];
+
+      filas.forEach(function (tr) {
+        var celdas = tr.querySelectorAll('td');
+        if (celdas.length < 5) return; // fila inesperada, se ignora
+        datos.push([
+          celdas[0].textContent.trim(),
+          celdas[1].textContent.trim(),
+          aNumero(celdas[2].textContent),
+          aNumero(celdas[3].textContent),
+          aNumero(celdas[4].textContent)
+        ]);
+      });
+
+      // Fila en blanco + Subtotal / ITBIS (si aplica) / Total, tomados del pie real de la tabla
+      var subtotalEl  = document.getElementById('subtotalAmount');
+      var impuestoRow = document.getElementById('impuestoRow');
+      var impuestoEl  = document.getElementById('impuestoAmount');
+      var impuestoLbl = document.getElementById('impuestoLabel');
+      var totalEl     = document.getElementById('totalAmount');
+
+      datos.push(['', '', '', '', '']);
+      if (subtotalEl) datos.push(['', '', '', 'Subtotal:', aNumero(subtotalEl.textContent)]);
+      if (impuestoRow && impuestoRow.style.display !== 'none' && impuestoEl) {
+        var etiquetaImp = (impuestoLbl ? impuestoLbl.textContent.trim().replace(/:$/, '') : 'ITBIS');
+        datos.push(['', '', '', etiquetaImp + ':', aNumero(impuestoEl.textContent)]);
+      }
+      if (totalEl) datos.push(['', '', '', 'TOTAL:', aNumero(totalEl.textContent)]);
+
+      var hoja = XLSX.utils.aoa_to_sheet(datos);
+      hoja['!cols'] = [{ wch: 22 }, { wch: 38 }, { wch: 12 }, { wch: 14 }, { wch: 14 }];
+
+      var libro = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(libro, hoja, 'Cotización');
+
+      var fecha = new Date();
+      var fechaStr = fecha.getFullYear() + '-' +
+        String(fecha.getMonth() + 1).padStart(2, '0') + '-' +
+        String(fecha.getDate()).padStart(2, '0');
+
+      XLSX.writeFile(libro, 'Cotizacion_' + fechaStr + '.xlsx');
+    }
   </script>
 
   <!-- ========================================
