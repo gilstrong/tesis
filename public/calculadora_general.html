@@ -1674,7 +1674,8 @@
         case 'analizando':
           badge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">' +
             '<svg class="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>' +
-            '<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Analizando</span>';
+            '<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Analizando' +
+            '<span id="pdfq-badge-progreso-' + item.id + '" class="font-mono"></span></span>';
           break;
         case 'completado':
           badge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">✅ Listo</span>';
@@ -1834,6 +1835,13 @@
       tb.innerHTML = pdfq_filaHTML(item, idx + 1);
     }
 
+    // ── Actualiza SOLO el texto "(pág X/Y)" dentro del badge "Analizando" de una fila ──
+    // Se llama en cada página procesada; es liviano porque no re-renderiza toda la fila.
+    function pdfq_actualizarProgresoFila(id, paginaActual, totalPaginas) {
+      var span = document.getElementById('pdfq-badge-progreso-' + id);
+      if (span) span.textContent = ' (pág ' + paginaActual + '/' + totalPaginas + ')';
+    }
+
     // ── Eliminar archivo individual ───────────────────────────────────────────
     function pdfq_eliminarArchivo(id) {
       var item = _PDFQ.archivos.find(function (a) { return a.id === id; });
@@ -1918,7 +1926,16 @@
           Math.round(((procesados - 1) / totalCola) * 100) + '%';
 
         try {
-          var resultado = await pdfq_procesarUno(item.file);
+          var resultado = await pdfq_procesarUno(item.file, function (paginaActual, totalPaginasArchivo) {
+            // Progreso dentro de la fila (badge "Analizando (pág X/Y)")
+            pdfq_actualizarProgresoFila(item.id, paginaActual, totalPaginasArchivo);
+            // Progreso dentro de la barra/label general, interpolando entre archivos
+            document.getElementById('pdfqProgressLabel').textContent =
+              'Analizando ' + procesados + ' de ' + totalCola + ' — pág ' + paginaActual + '/' + totalPaginasArchivo + '...';
+            var fraccion = ((procesados - 1) + (paginaActual / totalPaginasArchivo)) / totalCola;
+            document.getElementById('pdfqProgressBar').style.width =
+              Math.round(fraccion * 100) + '%';
+          });
           item.estado       = 'completado';
           item.resultado    = resultado;
           item.terminacion  = 'ninguna';
@@ -1954,7 +1971,8 @@
     }
 
     // ── Procesar un único PDF (reutiliza pdfAnalizarCanvas sin cambios) ───────
-    async function pdfq_procesarUno(file) {
+    // onProgress(paginaActual, totalPaginas) se llama después de cada página, opcional.
+    async function pdfq_procesarUno(file, onProgress) {
       var buffer       = await file.arrayBuffer();
       var pdfDoc       = await window.pdfjsLib.getDocument({ data: buffer }).promise;
       var totalPaginas = pdfDoc.numPages;
@@ -1976,6 +1994,7 @@
         } else {
           paginasBN++;
         }
+        if (onProgress) onProgress(i, totalPaginas);
       }
 
       return { total: totalPaginas, color: paginasColor, bn: paginasBN };
