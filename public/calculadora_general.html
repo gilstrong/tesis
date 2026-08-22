@@ -17,6 +17,9 @@
   <!-- ESTILOS -->
   <link rel="stylesheet" href="style.css" />
 
+  <!-- ICONOS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+
   <!-- TAILWIND CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -41,14 +44,20 @@
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background: #6c63ff;
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-dark) 100%);
       color: #fff;
       border: none;
-      padding: 12px 20px;
+      padding: 12px 24px;
       border-radius: 30px;
       font-weight: bold;
       cursor: pointer;
       z-index: 9999;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+      transition: all var(--transition-fast);
+    }
+    .btn-admin-precios:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
     }
 
     /* FONDO MODAL */
@@ -56,10 +65,12 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.7);
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(8px);
       z-index: 10000;
       justify-content: center;
       align-items: center;
+      transition: all var(--transition-normal);
     }
 
     .modal-precios.show {
@@ -68,23 +79,27 @@
 
     /* CONTENIDO */
     .modal-precios-content {
-      background: #fff;
+      background: var(--bg-secondary);
       width: 95%;
       max-width: 1100px;
       max-height: 90vh;
-      border-radius: 12px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      box-shadow: var(--shadow-xl);
+      animation: modalZoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     .modal-precios-header {
-      background: #6c63ff;
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-dark) 100%);
       color: white;
       padding: 16px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .modal-precios-body {
@@ -131,9 +146,16 @@
       </figure>
 
       <!-- Título principal -->
-      <header>
-        <h1>Calculadora de Servicios</h1>
-        <p class="subtitle">Cotiza impresiones, ploteos, encuadernados y más</p>
+      <header class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+        <div>
+          <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Calculadora de Servicios</h1>
+          <p class="subtitle mt-2">Cotiza impresiones, ploteos, encuadernados y más</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="abrirModalCalculoHojas()" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-400 hover:to-blue-600 shadow-md shadow-blue-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 text-sm">
+            <span class="text-lg">📄</span> Cálculo de Hojas
+          </button>
+        </div>
       </header>
 
       <!-- ========================================
@@ -999,7 +1021,7 @@
   <!-- ========================================
        📜 MODAL: HISTORIAL DE FACTURAS
        ======================================== -->
-  <div id="modalFacturasEmitidas" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden animate-fade-in">
+  <div id="modalFacturasEmitidas" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col animate-slide-in-up m-4">
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0 bg-gradient-to-r from-purple-600 to-purple-800 rounded-t-2xl text-white">
         <div>
@@ -1051,7 +1073,7 @@
   <!-- ========================================
        📊 MODAL: DASHBOARD
        ======================================== -->
-  <div id="modalDashboard" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-[90] hidden animate-fade-in">
+  <div id="modalDashboard" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[90] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col animate-slide-in-up m-4 overflow-hidden">
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-600 to-blue-600 flex justify-between items-center flex-shrink-0">
         <div>
@@ -1123,7 +1145,7 @@
   <!-- ========================================
        🚫 MODAL: CONFIRMACIÓN ANULACIÓN
        ======================================== -->
-  <div id="modalConfirmarAnulacion" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-[70] hidden animate-fade-in">
+  <div id="modalConfirmarAnulacion" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[70] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md m-4 p-6 animate-slide-in-up border border-red-200 dark:border-red-900">
       <div class="text-center mb-6">
         <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">⚠️</div>
@@ -1142,7 +1164,7 @@
   <!-- ========================================
        🗑️ MODAL: CONFIRMAR ELIMINAR COTIZACIÓN
        ======================================== -->
-  <div id="modalConfirmarEliminar" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-[80] hidden animate-fade-in">
+  <div id="modalConfirmarEliminar" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[80] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-6 animate-slide-in-up border border-gray-200 dark:border-gray-700 text-center">
       <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🗑️</div>
       <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">¿Eliminar Cotización?</h3>
@@ -1157,7 +1179,7 @@
   <!-- ========================================
        🧹 MODAL: CONFIRMAR LIMPIAR
        ======================================== -->
-  <div id="modalConfirmarLimpiar" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-[80] hidden animate-fade-in">
+  <div id="modalConfirmarLimpiar" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[80] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-6 animate-slide-in-up border border-gray-200 dark:border-gray-700 text-center">
       <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🧹</div>
       <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">¿Limpiar Todo?</h3>
@@ -1172,7 +1194,7 @@
   <!-- ========================================
        🔐 MODAL: LOGIN
        ======================================== -->
-  <div id="modalLogin" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-[2000] hidden animate-fade-in">
+  <div id="modalLogin" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[2000] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-8 animate-slide-in-up border border-blue-200 dark:border-blue-900">
       <div class="text-center mb-6">
         <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🔐</div>
@@ -1189,11 +1211,84 @@
   </div>
 
   <!-- ========================================
-       📄 MODAL: ANALIZADOR PDF
+       📄 MODAL: CÁLCULO DE HOJAS
        ======================================== -->
-  <div id="modalAnalizadorPDF" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden animate-fade-in" onclick="pdfClickOutside(event)">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col animate-slide-in-up m-4">
-      <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-start">
+  <div id="modalCalculoHojas" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[80] hidden animate-fade-in" onclick="if(event.target.id==='modalCalculoHojas') cerrarModalCalculoHojas()">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg m-4 p-6 animate-slide-in-up border border-gray-200 dark:border-gray-700">
+      <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 dark:border-gray-700">
+        <h3 class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+          <span class="text-2xl">📄</span> Cálculo de Hojas
+        </h3>
+        <button onclick="cerrarModalCalculoHojas()" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="space-y-5">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Tipo de impresión</label>
+            <select id="calcHojasTipo" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" onchange="calcularHojas()">
+              <option value="una_cara">Una cara</option>
+              <option value="doble_cara">Doble cara</option>
+              <option value="folleto">Folleto (Booklet)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Copias</label>
+            <input type="number" id="calcHojasCopias" min="1" value="1" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-center font-bold" oninput="calcularHojas()">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Cantidad de páginas (del original)</label>
+          <input type="number" id="calcHojasPaginas" min="1" value="0" placeholder="Ej: 100" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-center font-bold text-lg" oninput="calcularHojas()">
+        </div>
+
+        <div class="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-5">
+          <h4 class="text-sm font-bold text-blue-800 dark:text-blue-300 mb-3 uppercase tracking-wider text-center">Resultados</h4>
+          <div class="grid grid-cols-2 gap-3 text-sm">
+            <div class="flex justify-between p-2 bg-white dark:bg-gray-800 rounded shadow-sm">
+              <span class="text-gray-500 dark:text-gray-400">Hojas por copia:</span>
+              <span class="font-bold text-gray-800 dark:text-gray-200" id="resHojasCopia">0</span>
+            </div>
+            <div class="flex justify-between p-2 bg-white dark:bg-gray-800 rounded shadow-sm">
+              <span class="text-gray-500 dark:text-gray-400">Hojas totales:</span>
+              <span class="font-bold text-blue-600 dark:text-blue-400" id="resHojasTotales">0</span>
+            </div>
+            <div class="flex justify-between p-2 bg-white dark:bg-gray-800 rounded shadow-sm">
+              <span class="text-gray-500 dark:text-gray-400">Resmas exactas:</span>
+              <span class="font-bold text-gray-800 dark:text-gray-200" id="resRemasExactas">0.00</span>
+            </div>
+            <div class="flex justify-between p-2 bg-white dark:bg-gray-800 rounded shadow-sm">
+              <span class="text-gray-500 dark:text-gray-400">Resmas neces.:</span>
+              <span class="font-bold text-green-600 dark:text-green-400" id="resRemasNecesarias">0</span>
+            </div>
+            <div class="flex justify-between p-2 bg-white dark:bg-gray-800 rounded shadow-sm">
+              <span class="text-gray-500 dark:text-gray-400">Cajas exactas:</span>
+              <span class="font-bold text-gray-800 dark:text-gray-200" id="resCajasExactas">0.00</span>
+            </div>
+            <div class="flex justify-between p-2 bg-white dark:bg-gray-800 rounded shadow-sm">
+              <span class="text-gray-500 dark:text-gray-400">Cajas neces.:</span>
+              <span class="font-bold text-purple-600 dark:text-purple-400" id="resCajasNecesarias">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-6">
+        <button onclick="cerrarModalCalculoHojas()" class="w-full py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg transition-all transform hover:-translate-y-1">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       📄 MODAL: ANALIZADOR PDF (MÚLTIPLES ARCHIVOS)
+       ======================================== -->
+  <div id="modalAnalizadorPDF" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 hidden animate-fade-in" onclick="pdfClickOutside(event)">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl flex flex-col animate-slide-in-up m-4" style="max-height:90vh;">
+
+      <!-- Cabecera -->
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-start flex-shrink-0">
         <div class="flex items-center gap-4">
           <div class="w-12 h-12 flex-shrink-0 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-xl flex items-center justify-center">
             <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -1202,87 +1297,151 @@
           </div>
           <div>
             <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">Analizador de PDF</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Detecta páginas a color vs. blanco y negro</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Detecta páginas a color vs. blanco y negro — múltiples archivos</p>
           </div>
         </div>
         <button onclick="cerrarModalAnalizadorPDF()" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Cerrar">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
-      <div class="p-6 space-y-5">
-        <div id="pdfDropzone" class="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-          <input type="file" accept=".pdf,application/pdf" id="pdfFileInput" onchange="pdfArchivoSeleccionado(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-          <div class="flex flex-col items-center justify-center gap-3 text-gray-500 dark:text-gray-400">
-            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-full flex items-center justify-center">
-              <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"></path></svg>
+
+      <!-- Cuerpo con scroll -->
+      <div class="p-6 space-y-4 overflow-y-auto flex-1">
+
+        <!-- Dropzone multi-archivo -->
+        <div id="pdfqDropzone" class="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+          <input type="file" accept=".pdf,application/pdf" id="pdfqFileInput" multiple onchange="pdfq_agregarArchivos(this.files)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+          <div class="flex flex-col items-center justify-center gap-2 text-gray-500 dark:text-gray-400 pointer-events-none">
+            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"></path></svg>
             </div>
-            <p class="font-semibold text-gray-700 dark:text-gray-200">Arrastra tu PDF aquí</p>
-            <p class="text-xs">o haz clic para seleccionar un archivo</p>
+            <p class="font-semibold text-gray-700 dark:text-gray-200">Arrastra tus PDFs aquí</p>
+            <p class="text-xs">o haz clic para seleccionar uno o varios archivos</p>
           </div>
         </div>
-        <div id="pdfFileSelected" class="hidden items-center gap-3 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-          <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path></svg>
-          <span id="pdfFileName" class="flex-1 font-mono text-sm text-gray-700 dark:text-gray-200 truncate">archivo.pdf</span>
-          <button onclick="pdfLimpiarArchivo()" class="p-1 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-800/50 dark:hover:text-red-400 transition-colors" title="Quitar archivo">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-          </button>
+
+        <!-- Aviso de volumen grande (no bloqueante) -->
+        <div id="pdfqAvisoVolumen" class="hidden items-center gap-3 p-3 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-lg border border-amber-200 dark:border-amber-700 text-sm">
+          <span class="text-xl flex-shrink-0">⏱️</span>
+          <span id="pdfqAvisoVolumenMsg"></span>
         </div>
-        <div id="pdfError" class="hidden items-center gap-3 p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg border border-red-200 dark:border-red-700">
-          <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path></svg>
-          <span id="pdfErrorMsg" class="text-sm font-medium">Error al procesar.</span>
-        </div>
-        <div id="pdfProgressWrap" class="hidden space-y-2">
-          <div class="flex justify-between text-xs font-mono text-gray-500 dark:text-gray-400">
-            <span id="pdfProgressLabel">Analizando...</span>
-            <span id="pdfProgressPct">0%</span>
+
+        <!-- Progreso global de la cola -->
+        <div id="pdfqProgressWrap" class="hidden space-y-2">
+          <div class="flex justify-between items-center">
+            <span id="pdfqProgressLabel" class="text-xs font-mono text-gray-500 dark:text-gray-400">Analizando...</span>
+            <button id="pdfqBtnCancelar" onclick="pdfq_cancelarCola()" class="text-xs font-bold text-red-600 hover:text-red-700 dark:text-red-400 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">⏹ Cancelar</button>
           </div>
           <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-            <div id="pdfProgressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            <div id="pdfqProgressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width:0%"></div>
           </div>
         </div>
-        <button id="pdfBtnProcesar" onclick="pdfProcesar()" disabled class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-lg shadow-blue-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:shadow-none disabled:transform-none dark:disabled:bg-gray-600 disabled:cursor-not-allowed">
-          <span id="pdfBtnIcon">▶</span>
-          <span id="pdfBtnText" class="ml-2">PROCESAR ARCHIVO</span>
+
+        <!-- Tabla de documentos cargados -->
+        <div id="pdfqTablaWrap" class="hidden">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm font-bold text-gray-700 dark:text-gray-300">📋 Documentos cargados</span>
+            <button onclick="pdfq_limpiarTodo()" class="text-xs font-bold text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors flex items-center gap-1">🗑️ Limpiar todo</button>
+          </div>
+
+          <!-- Panel de precio maestro: aplica un precio/página a todos los documentos de una sola vez -->
+          <div class="mb-3 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <span class="text-xs font-bold text-indigo-700 dark:text-indigo-300 whitespace-nowrap">💲 Aplicar precio a todos:</span>
+              <div class="flex items-center gap-1">
+                <span class="text-xs text-gray-500 dark:text-gray-400 font-semibold">B/N RD$/pág</span>
+                <input type="number" step="0.01" min="0" id="pdfqMasterBN" placeholder="—"
+                  class="text-xs w-16 px-1.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-right">
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="text-xs text-green-600 dark:text-green-400 font-semibold">Color RD$/pág</span>
+                <input type="number" step="0.01" min="0" id="pdfqMasterColor" placeholder="—"
+                  class="text-xs w-16 px-1.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-right">
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="text-xs text-blue-600 dark:text-blue-400 font-semibold whitespace-nowrap">Terminación</span>
+                <select id="pdfqMasterTerminacionTipo"
+                  class="text-xs px-1.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none">
+                  <option value="">No cambiar</option>
+                  <option value="ninguna">Sin terminación</option>
+                  <option value="espiral">Encuadernado espiral</option>
+                  <option value="tapa_dura">Empastado tapa dura</option>
+                  <option value="tapa_blanda">Empastado tapa blanda</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="text-xs text-blue-600 dark:text-blue-400 font-semibold whitespace-nowrap">Term. (total RD$)</span>
+                <input type="number" step="0.01" min="0" id="pdfqMasterCostoTerm" placeholder="—"
+                  class="text-xs w-20 px-1.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-right">
+              </div>
+              <label class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 cursor-pointer whitespace-nowrap">
+                <input type="checkbox" id="pdfqMasterRespetarManual" checked class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500">
+                No pisar los que ya edité a mano ✏️
+              </label>
+              <button onclick="pdfq_aplicarPrecioATodos()"
+                class="ml-auto text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600 px-3 py-1.5 rounded-lg shadow-sm transition-colors whitespace-nowrap">
+                ⚡ Aplicar a todas
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+            <table class="w-full text-sm" id="pdfqTabla">
+              <thead class="bg-gray-100 dark:bg-gray-700/50">
+                <tr>
+                  <th class="px-3 py-2 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase w-8">#</th>
+                  <th class="px-3 py-2 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Documento</th>
+                  <th class="px-3 py-2 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase w-32">Estado</th>
+                  <th class="px-3 py-2 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase w-14">Págs.</th>
+                  <th class="px-3 py-2 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase w-14">Color</th>
+                  <th class="px-3 py-2 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase w-14">B/N</th>
+                  <th class="px-3 py-2 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase w-24"></th>
+                </tr>
+              </thead>
+              <!-- tbody dinámicos: un <tbody id="pdfq-group-{id}"> por ítem, insertado por JS -->
+            </table>
+          </div>
+        </div>
+
+        <!-- Botón iniciar cola -->
+        <button id="pdfqBtnIniciar" onclick="pdfq_iniciarCola()" disabled class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-lg shadow-blue-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 disabled:from-gray-300 disabled:to-gray-400 disabled:shadow-none disabled:transform-none dark:disabled:from-gray-600 dark:disabled:to-gray-700 disabled:cursor-not-allowed">
+          <span id="pdfqBtnIniciarIcon">▶</span>
+          <span id="pdfqBtnIniciarText">ANALIZAR PDF(s)</span>
         </button>
-        <div id="pdfResults" class="hidden pt-4 mt-4 border-t border-gray-200 dark:border-gray-700 space-y-5">
-          <div class="grid grid-cols-3 gap-4">
-            <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-center border-b-4 border-blue-500">
-              <div class="text-3xl font-black text-blue-600 dark:text-blue-400" id="pdfMetricTotal">0</div>
-              <div class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Págs.</div>
+
+        <!-- Resumen general (solo PDFs completados) -->
+        <div id="pdfqResumen" class="hidden pt-4 mt-2 border-t border-gray-200 dark:border-gray-700">
+          <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wider">📊 Resumen General</h4>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-center border-b-4 border-indigo-500">
+              <div class="text-2xl font-black text-indigo-600 dark:text-indigo-400" id="pdfqResDocumentos">0/0</div>
+              <div class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">Documentos</div>
             </div>
-            <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-center border-b-4 border-green-500">
-              <div class="text-3xl font-black text-green-600 dark:text-green-400" id="pdfMetricColor">0</div>
-              <div class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">A Color</div>
+            <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-center border-b-4 border-blue-500">
+              <div class="text-2xl font-black text-blue-600 dark:text-blue-400" id="pdfqResTotalPags">0</div>
+              <div class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">Total Págs.</div>
             </div>
-            <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-center border-b-4 border-gray-500">
-              <div class="text-3xl font-black text-gray-600 dark:text-gray-300" id="pdfMetricBW">0</div>
-              <div class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">B/N</div>
+            <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-center border-b-4 border-green-500">
+              <div class="text-2xl font-black text-green-600 dark:text-green-400" id="pdfqResTotalColor">0</div>
+              <div class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">A Color</div>
             </div>
-          </div>
-          <div>
-            <div class="flex h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-              <div id="pdfDistColor" class="bg-green-500 transition-all duration-500" style="width:0%"></div>
-              <div id="pdfDistBW" class="bg-gray-500 transition-all duration-500" style="width:0%"></div>
-            </div>
-            <div class="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
-              <div class="flex items-center gap-1.5">
-                <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                <span id="pdfLegendColor">Color (0%)</span>
-              </div>
-              <div class="flex items-center gap-1.5">
-                <div class="w-2.5 h-2.5 rounded-full bg-gray-500"></div>
-                <span id="pdfLegendBW">B/N (0%)</span>
-              </div>
+            <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-center border-b-4 border-gray-500">
+              <div class="text-2xl font-black text-gray-600 dark:text-gray-300" id="pdfqResTotalBN">0</div>
+              <div class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">B/N</div>
             </div>
           </div>
-          <button id="pdfBtnUsarDatos" onclick="pdfUsarDatos()" style="display: none;" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 shadow-lg shadow-green-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
-            👇 USAR DATOS EN CALCULADORA
+          <button id="pdfqBtnCotizar" onclick="pdfq_cotizarTodos()" disabled class="w-full mt-4 py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 shadow-lg shadow-green-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 disabled:from-gray-300 disabled:to-gray-400 disabled:shadow-none disabled:transform-none dark:disabled:from-gray-600 dark:disabled:to-gray-700 disabled:cursor-not-allowed">
+            👇 COTIZAR TODOS (usar datos en calculadora)
           </button>
         </div>
+
       </div>
-      <div class="p-4 text-center border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl">
+
+      <!-- Pie -->
+      <div class="p-4 text-center border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl flex-shrink-0">
         <p class="text-xs text-gray-500 dark:text-gray-400">El análisis se realiza 100% en tu navegador. Ningún archivo se sube a servidores.</p>
       </div>
+
     </div>
   </div>
 
@@ -1300,6 +1459,8 @@
   <!-- COMPONENTES Y LÓGICA PRINCIPAL -->
   <script src="components.js"></script>
   <script src="scriptgeneral.js"></script>
+  <!-- 📦 Notion Sync — cliente frontend para sincronización con Notion -->
+  <script src="notion-sync.js"></script>
 
   <!-- PDF.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -1309,13 +1470,17 @@
   </script>
 
   <!-- ========================================
-       📄 LÓGICA: ANALIZADOR PDF (única definición)
+       📄 LÓGICA: ANALIZADOR PDF — MÚLTIPLES ARCHIVOS
        ======================================== -->
   <script>
-    // ── Estado global ─────────────────────────────────────────────────────────
-    const _PDF = {
-      archivo: null,
-      procesando: false
+    // ── Estado global (_PDFQ — no pisa ninguna variable anterior) ─────────────
+    // Cada ítem de archivos: { id, file, nombre, estado, resultado,
+    //   terminacion, precioManual (bool), precioFinal }
+    const _PDFQ = {
+      archivos: [],
+      procesando: false,
+      cancelar: false,
+      idCounter: 0
     };
 
     // ── Abrir / cerrar modal ──────────────────────────────────────────────────
@@ -1325,9 +1490,9 @@
     }
 
     function cerrarModalAnalizadorPDF() {
+      if (_PDFQ.procesando) return; // no cerrar mientras procesa
       document.getElementById('modalAnalizadorPDF').classList.add('hidden');
       document.body.style.overflow = '';
-      if (!_PDF.procesando) pdfLimpiarTodo();
     }
 
     function pdfClickOutside(e) {
@@ -1337,148 +1502,912 @@
     // ── Drag & Drop ───────────────────────────────────────────────────────────
     (function () {
       document.addEventListener('DOMContentLoaded', function () {
-        var dz = document.getElementById('pdfDropzone');
+        var dz = document.getElementById('pdfqDropzone');
         if (!dz) return;
-        dz.addEventListener('dragover',  function (e) { e.preventDefault(); dz.classList.add('dragging'); });
-        dz.addEventListener('dragleave', function ()  { dz.classList.remove('dragging'); });
+        dz.addEventListener('dragover', function (e) {
+          e.preventDefault();
+          dz.classList.add('bg-blue-50', 'dark:bg-blue-900/20');
+        });
+        dz.addEventListener('dragleave', function () {
+          dz.classList.remove('bg-blue-50', 'dark:bg-blue-900/20');
+        });
         dz.addEventListener('drop', function (e) {
           e.preventDefault();
-          dz.classList.remove('dragging');
-          var files = e.dataTransfer.files;
-          if (files.length > 0 && files[0].type === 'application/pdf') {
-            _PDF.archivo = files[0];
-            pdfMostrarArchivoSeleccionado(files[0].name);
-          } else {
-            pdfMostrarError('Solo se aceptan archivos PDF.');
+          dz.classList.remove('bg-blue-50', 'dark:bg-blue-900/20');
+          if (e.dataTransfer.files.length > 0) {
+            pdfq_agregarArchivos(e.dataTransfer.files);
           }
         });
       });
     })();
 
-    // ── Selección de archivo ──────────────────────────────────────────────────
-    function pdfArchivoSeleccionado(input) {
-      pdfOcultarError();
-      if (!input.files || input.files.length === 0) return;
-      var archivo = input.files[0];
-      if (archivo.type !== 'application/pdf') {
-        pdfMostrarError('El archivo seleccionado no es un PDF válido.');
+    // ── Agregar archivos (valida tipo y duplicados) ───────────────────────────
+    function pdfq_agregarArchivos(files) {
+      var agregados = 0;
+      for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        // Validar tipo por MIME y extensión
+        if (f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) {
+          mostrarNotificacion('❌ "' + f.name + '" no es un PDF y fue ignorado.', 'error');
+          continue;
+        }
+        // Detectar duplicado por nombre
+        var duplicado = _PDFQ.archivos.some(function (a) { return a.nombre === f.name; });
+        if (duplicado) {
+          mostrarNotificacion('⚠️ "' + f.name + '" ya está en la lista y fue ignorado.', 'warning');
+          continue;
+        }
+        _PDFQ.archivos.push({
+          id: _PDFQ.idCounter++,
+          file: f,
+          nombre: f.name,
+          estado: 'pendiente',
+          resultado: null
+        });
+        agregados++;
+      }
+      // Reset input para permitir reseleccionar el mismo archivo si fue eliminado
+      document.getElementById('pdfqFileInput').value = '';
+
+      if (agregados > 0) {
+        pdfq_renderTabla();
+        pdfq_actualizarBotones();
+        // Aviso informativo si hay muchos archivos
+        if (_PDFQ.archivos.length > 30) {
+          var aviso = document.getElementById('pdfqAvisoVolumen');
+          document.getElementById('pdfqAvisoVolumenMsg').textContent =
+            'Cargaste ' + _PDFQ.archivos.length + ' archivos. El análisis puede tardar varios minutos.';
+          aviso.classList.remove('hidden');
+          aviso.classList.add('flex');
+        }
+      }
+    }
+
+    // ── Renderizar tabla completa ─────────────────────────────────────────────
+    function pdfq_renderTabla() {
+      var wrap  = document.getElementById('pdfqTablaWrap');
+      var tabla = document.getElementById('pdfqTabla');
+      if (_PDFQ.archivos.length === 0) {
+        wrap.classList.add('hidden');
+        // Limpiar todos los tbody dinámicos
+        Array.from(tabla.querySelectorAll('tbody')).forEach(function (tb) { tb.remove(); });
         return;
       }
-      _PDF.archivo = archivo;
-      pdfMostrarArchivoSeleccionado(archivo.name);
+      wrap.classList.remove('hidden');
+
+      // Reconstruir todos los tbody de una sola vez para mantener el orden correcto
+      Array.from(tabla.querySelectorAll('tbody')).forEach(function (tb) { tb.remove(); });
+      _PDFQ.archivos.forEach(function (item, idx) {
+        var tb = document.createElement('tbody');
+        tb.id = 'pdfq-group-' + item.id;
+        tb.className = 'divide-y divide-gray-100 dark:divide-gray-700';
+        tb.innerHTML = pdfq_filaHTML(item, idx + 1);
+        tabla.appendChild(tb);
+      });
     }
 
-    function pdfMostrarArchivoSeleccionado(nombre) {
-      document.getElementById('pdfFileName').textContent = nombre;
-      document.getElementById('pdfFileSelected').classList.remove('hidden');
-      document.getElementById('pdfFileSelected').classList.add('flex');
-      document.getElementById('pdfDropzone').style.display = 'none';
-      document.getElementById('pdfBtnProcesar').disabled = false;
-      document.getElementById('pdfResults').classList.add('hidden');
-      pdfOcultarProgreso();
+    // ── HTML de una o dos filas de la tabla ───────────────────────────────────
+    // Completados → 2 <tr>: datos + fila de controles (terminación, páginas, precio, agregar)
+    // Resto       → 1 <tr>
+    function pdfq_filaHTML(item, num) {
+      var badge = '';
+      switch (item.estado) {
+        case 'pendiente':
+          badge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">⏳ Pendiente</span>';
+          break;
+        case 'analizando':
+          badge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">' +
+            '<svg class="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>' +
+            '<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Analizando</span>';
+          break;
+        case 'completado':
+          badge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">✅ Listo</span>';
+          break;
+        case 'error':
+          badge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">❌ Error</span>';
+          break;
+      }
+
+      var totalP = item.resultado ? item.resultado.total : '—';
+      var colorP = item.resultado ? item.resultado.color : '—';
+      var bnP    = item.resultado ? item.resultado.bn    : '—';
+
+      var accion = '';
+      if (item.estado === 'error') {
+        accion = '<button onclick="pdfq_reintentar(' + item.id + ')" class="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 px-2 py-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">🔄 Reintentar</button>';
+      } else if (item.estado === 'completado' || item.estado !== 'analizando') {
+        accion = '<button onclick="pdfq_eliminarArchivo(' + item.id + ')" class="text-xs font-bold text-gray-400 hover:text-red-600 dark:hover:text-red-400 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="Eliminar">🗑️</button>';
+      }
+
+      // ── Fila de datos principal (IDs en celdas para actualización puntual) ────
+      var trDatos = '<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">' +
+        '<td class="px-3 py-2 text-xs text-gray-400 dark:text-gray-500">' + num + '</td>' +
+        '<td class="px-3 py-2 font-mono text-xs text-gray-700 dark:text-gray-300 max-w-[200px]"><div class="truncate" title="' + item.nombre + '">' + item.nombre + '</div></td>' +
+        '<td class="px-3 py-2 text-center">' + badge + '</td>' +
+        '<td id="pdfq-total-' + item.id + '" class="px-3 py-2 text-center font-bold text-gray-700 dark:text-gray-300 text-sm">' + totalP + '</td>' +
+        '<td id="pdfq-color-' + item.id + '" class="px-3 py-2 text-center font-bold text-green-600 dark:text-green-400 text-sm">' + colorP + '</td>' +
+        '<td id="pdfq-bn-' + item.id + '" class="px-3 py-2 text-center font-bold text-gray-600 dark:text-gray-400 text-sm">' + bnP + '</td>' +
+        '<td class="px-3 py-2 text-center">' + accion + '</td>' +
+        '</tr>';
+
+      // Los ítems no completados sólo tienen una fila
+      if (item.estado !== 'completado') return trDatos;
+
+      // ── Fila de controles (sólo para completados) ─────────────────────────────
+      var terminacion  = item.terminacion  || 'ninguna';
+      var precioFinal  = (item.precioFinal !== undefined) ? item.precioFinal : 0;
+      var precioManual = !!item.precioManual;
+      var res          = item.resultado;
+
+      // Select de terminación (mismas opciones que libroTerminacion en Libro Completo)
+      var optsTerminacion = [
+        { val: 'ninguna',    label: 'Sin terminación' },
+        { val: 'espiral',    label: 'Encuadernado espiral' },
+        { val: 'tapa_dura',  label: 'Empastado tapa dura' },
+        { val: 'tapa_blanda',label: 'Empastado tapa blanda' }
+      ];
+      var selectHtml = '<select id="pdfq-sel-term-' + item.id + '" onchange="pdfq_cambiarTerminacion(' + item.id + ', this.value)" ' +
+        'class="text-xs px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none">';
+      optsTerminacion.forEach(function (o) {
+        selectHtml += '<option value="' + o.val + '"' + (terminacion === o.val ? ' selected' : '') + '>' + o.label + '</option>';
+      });
+      selectHtml += '</select>';
+
+      var precioInputBorder = precioManual
+        ? 'border-orange-400 dark:border-orange-500'
+        : 'border-gray-200 dark:border-gray-600';
+      var labelManual = precioManual
+        ? ' <span class="text-orange-500 font-bold" title="Precio editado manualmente">✏️</span>'
+        : '';
+
+      // Clase compartida para inputs de páginas
+      var cls = 'text-xs w-16 px-1.5 py-1 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-center';
+
+      var trControles = '<tr class="bg-green-50/40 dark:bg-green-900/10">' +
+        '<td colspan="7" class="px-3 pb-3 pt-0">' +
+        '<div class="flex flex-col gap-2 pl-6 pt-2 border-t border-green-100 dark:border-green-900/30">' +
+
+        // ── Sub-fila 1: Terminación · Precio · Agregar ────────────────────────
+        '<div class="flex flex-wrap items-center gap-x-5 gap-y-2">' +
+        // Terminación
+        '<div class="flex items-center gap-1.5">' +
+        '<span class="text-xs font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap">Terminación:</span>' +
+        selectHtml +
+        '</div>' +
+        // Precio
+        '<div class="flex items-center gap-1.5">' +
+        '<span class="text-xs font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap">Precio (RD$):' + labelManual + '</span>' +
+        '<input type="number" step="0.01" min="0" id="pdfq-precio-' + item.id + '" value="' + precioFinal.toFixed(2) + '" ' +
+        'oninput="pdfq_editarPrecio(' + item.id + ', this.value)" ' +
+        'class="text-xs w-28 px-2 py-1 rounded-lg border ' + precioInputBorder + ' bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-right">' +
+        '</div>' +
+        // Botón individual
+        '<button onclick="pdfq_agregarUno(' + item.id + ')" ' +
+        'class="ml-auto text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 px-3 py-1 rounded-lg shadow-sm transition-colors flex items-center gap-1">' +
+        '➕ Agregar</button>' +
+        '</div>' +
+
+        // ── Sub-fila 2: Edición de composición de páginas ─────────────────────
+        '<div class="flex flex-wrap items-center gap-x-4 gap-y-2">' +
+        '<span class="text-xs font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap">Págs.:</span>' +
+        // Total
+        '<div class="flex items-center gap-1">' +
+        '<span class="text-xs text-gray-400 dark:text-gray-500">Total</span>' +
+        '<input type="number" min="0" id="pdfq-inp-total-' + item.id + '" value="' + res.total + '" ' +
+        'oninput="pdfq_editarPaginas(' + item.id + ',\'total\',this.value)" class="' + cls + '">' +
+        '</div>' +
+        // Color
+        '<div class="flex items-center gap-1">' +
+        '<span class="text-xs text-green-600 dark:text-green-400 font-semibold">Color</span>' +
+        '<input type="number" min="0" id="pdfq-inp-color-' + item.id + '" value="' + res.color + '" ' +
+        'oninput="pdfq_editarPaginas(' + item.id + ',\'color\',this.value)" class="' + cls + '">' +
+        '</div>' +
+        // B/N
+        '<div class="flex items-center gap-1">' +
+        '<span class="text-xs text-gray-500 dark:text-gray-400 font-semibold">B/N</span>' +
+        '<input type="number" min="0" id="pdfq-inp-bn-' + item.id + '" value="' + res.bn + '" ' +
+        'oninput="pdfq_editarPaginas(' + item.id + ',\'bn\',this.value)" class="' + cls + '">' +
+        '</div>' +
+        // Accesos rápidos
+        '<button onclick="pdfq_todoBN(' + item.id + ')" ' +
+        'class="text-xs font-bold px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors whitespace-nowrap">' +
+        'Todo B/N</button>' +
+        '<button onclick="pdfq_todoColor(' + item.id + ')" ' +
+        'class="text-xs font-bold px-2 py-1 rounded-lg border border-green-300 dark:border-green-700 bg-white dark:bg-gray-700 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors whitespace-nowrap">' +
+        'Todo Color</button>' +
+        '</div>' +
+
+        // ── Sub-fila 3: Precios editables (por página en B/N y Color, total en Terminación) ─
+        '<div class="flex flex-wrap items-center gap-x-4 gap-y-2">' +
+        '<span class="text-xs font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap">Precios:</span>' +
+        // Precio/página B/N + subtotal calculado (solo lectura)
+        '<div class="flex items-center gap-1">' +
+        '<span class="text-xs text-gray-500 dark:text-gray-400 font-semibold">B/N RD$/pág' + (item.precioUnitBNManual ? ' ✏️' : '') + '</span>' +
+        '<input type="number" step="0.01" min="0" id="pdfq-inp-unitbn-' + item.id + '" value="' + (item.precioUnitBN || 0).toFixed(2) + '" ' +
+        'oninput="pdfq_editarPrecioUnitBN(' + item.id + ', this.value)" ' +
+        'class="text-xs w-16 px-1.5 py-1 rounded-lg border ' + (item.precioUnitBNManual ? 'border-orange-400 dark:border-orange-500' : 'border-gray-200 dark:border-gray-600') + ' bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-right">' +
+        '<span class="text-xs text-gray-400 dark:text-gray-500">→ <span id="pdfq-sub-bn-' + item.id + '" class="font-bold text-gray-600 dark:text-gray-300">RD$' + (item.costoBN || 0).toFixed(2) + '</span></span>' +
+        '</div>' +
+        // Precio/página Color + subtotal calculado (solo lectura)
+        '<div class="flex items-center gap-1">' +
+        '<span class="text-xs text-green-600 dark:text-green-400 font-semibold">Color RD$/pág' + (item.precioUnitColorManual ? ' ✏️' : '') + '</span>' +
+        '<input type="number" step="0.01" min="0" id="pdfq-inp-unitcol-' + item.id + '" value="' + (item.precioUnitColor || 0).toFixed(2) + '" ' +
+        'oninput="pdfq_editarPrecioUnitColor(' + item.id + ', this.value)" ' +
+        'class="text-xs w-16 px-1.5 py-1 rounded-lg border ' + (item.precioUnitColorManual ? 'border-orange-400 dark:border-orange-500' : 'border-gray-200 dark:border-gray-600') + ' bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-right">' +
+        '<span class="text-xs text-gray-400 dark:text-gray-500">→ <span id="pdfq-sub-color-' + item.id + '" class="font-bold text-green-600 dark:text-green-400">RD$' + (item.costoColor || 0).toFixed(2) + '</span></span>' +
+        '</div>' +
+        // Terminación: sigue siendo un total editable (no es por página)
+        '<div class="flex items-center gap-1">' +
+        '<span class="text-xs text-blue-600 dark:text-blue-400 font-semibold">Terminación (total)' + (item.costoTerminacionManual ? ' ✏️' : '') + '</span>' +
+        '<input type="number" step="0.01" min="0" id="pdfq-inp-costoterm-' + item.id + '" value="' + (item.costoTerminacion || 0).toFixed(2) + '" ' +
+        'oninput="pdfq_editarCostoTerminacion(' + item.id + ', this.value)" ' +
+        'class="text-xs w-20 px-1.5 py-1 rounded-lg border ' + (item.costoTerminacionManual ? 'border-orange-400 dark:border-orange-500' : 'border-gray-200 dark:border-gray-600') + ' bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-right">' +
+        '</div>' +
+        '</div>' +
+
+        '</div></td></tr>';
+
+      return trDatos + trControles;
     }
 
-    function pdfLimpiarArchivo() {
-      _PDF.archivo = null;
-      document.getElementById('pdfFileInput').value = '';
-      document.getElementById('pdfFileSelected').classList.add('hidden');
-      document.getElementById('pdfFileSelected').classList.remove('flex');
-      document.getElementById('pdfDropzone').style.display = '';
-      document.getElementById('pdfBtnProcesar').disabled = true;
-      document.getElementById('pdfBtnText').textContent = 'PROCESAR ARCHIVO';
-      document.getElementById('pdfBtnIcon').textContent = '▶';
-      document.getElementById('pdfResults').classList.add('hidden');
-      pdfOcultarProgreso();
-      pdfOcultarError();
+    // ── Actualizar sólo el grupo de filas de un ítem (sin re-renderizar todo) ──
+    function pdfq_actualizarFila(item) {
+      var tb = document.getElementById('pdfq-group-' + item.id);
+      if (!tb) return;
+      var idx = _PDFQ.archivos.findIndex(function (a) { return a.id === item.id; });
+      tb.innerHTML = pdfq_filaHTML(item, idx + 1);
     }
 
-    function pdfLimpiarTodo() { pdfLimpiarArchivo(); }
-
-    // ── Progreso ──────────────────────────────────────────────────────────────
-    function pdfMostrarProgreso()  { document.getElementById('pdfProgressWrap').classList.remove('hidden'); }
-    function pdfOcultarProgreso()  { document.getElementById('pdfProgressWrap').classList.add('hidden'); }
-
-    function pdfActualizarProgreso(actual, total) {
-      var pct = total > 0 ? Math.round((actual / total) * 100) : 0;
-      document.getElementById('pdfProgressBar').style.width = pct + '%';
-      document.getElementById('pdfProgressPct').textContent = pct + '%';
-      document.getElementById('pdfProgressLabel').textContent =
-        'Analizando página ' + actual + ' de ' + total + '...';
+    // ── Eliminar archivo individual ───────────────────────────────────────────
+    function pdfq_eliminarArchivo(id) {
+      var item = _PDFQ.archivos.find(function (a) { return a.id === id; });
+      if (!item || item.estado === 'analizando') return;
+      _PDFQ.archivos = _PDFQ.archivos.filter(function (a) { return a.id !== id; });
+      pdfq_renderTabla();
+      pdfq_actualizarResumen();
+      pdfq_actualizarBotones();
+      if (_PDFQ.archivos.length <= 30) {
+        var av = document.getElementById('pdfqAvisoVolumen');
+        av.classList.add('hidden');
+        av.classList.remove('flex');
+      }
     }
 
-    // ── Error ─────────────────────────────────────────────────────────────────
-    function pdfMostrarError(msg) {
-      document.getElementById('pdfErrorMsg').textContent = msg;
-      document.getElementById('pdfError').classList.remove('hidden');
-      document.getElementById('pdfError').classList.add('flex');
-    }
-    function pdfOcultarError() {
-      document.getElementById('pdfError').classList.add('hidden');
-      document.getElementById('pdfError').classList.remove('flex');
+    // ── Limpiar todo ──────────────────────────────────────────────────────────
+    function pdfq_limpiarTodo() {
+      if (_PDFQ.procesando) return;
+      _PDFQ.archivos  = [];
+      _PDFQ.cancelar  = false;
+      _PDFQ.idCounter = 0;
+      pdfq_renderTabla();
+      pdfq_actualizarResumen();
+      pdfq_actualizarBotones();
+      document.getElementById('pdfqAvisoVolumen').classList.add('hidden');
+      document.getElementById('pdfqAvisoVolumen').classList.remove('flex');
+      document.getElementById('pdfqProgressWrap').classList.add('hidden');
+      document.getElementById('pdfqFileInput').value = '';
     }
 
-    // ── Procesamiento principal ───────────────────────────────────────────────
-    async function pdfProcesar() {
-      if (!_PDF.archivo || _PDF.procesando) return;
-      pdfOcultarError();
-      document.getElementById('pdfResults').classList.add('hidden');
+    // ── Habilitar / deshabilitar botones ──────────────────────────────────────
+    function pdfq_actualizarBotones() {
+      var hayPendientes  = _PDFQ.archivos.some(function (a) { return a.estado === 'pendiente'; });
+      var hayCompletados = _PDFQ.archivos.some(function (a) { return a.estado === 'completado'; });
+      var btnIniciar     = document.getElementById('pdfqBtnIniciar');
+      var btnCotizar     = document.getElementById('pdfqBtnCotizar');
+      var txtIniciar     = document.getElementById('pdfqBtnIniciarText');
 
+      btnIniciar.disabled = !hayPendientes || _PDFQ.procesando;
+      if (btnCotizar) btnCotizar.disabled = !hayCompletados || _PDFQ.procesando;
+
+      if (_PDFQ.procesando) {
+        txtIniciar.textContent = 'ANALIZANDO...';
+      } else if (hayPendientes) {
+        txtIniciar.textContent = 'ANALIZAR PDF(s)';
+      } else {
+        txtIniciar.textContent = 'ANÁLISIS COMPLETADO';
+      }
+    }
+
+    // ── Iniciar cola de procesamiento (secuencial) ────────────────────────────
+    async function pdfq_iniciarCola() {
+      if (_PDFQ.procesando) return;
       if (!window.pdfjsLib) {
-        pdfMostrarError('pdf.js aún no ha terminado de cargarse. Intenta de nuevo en unos segundos.');
+        mostrarNotificacion('pdf.js aún no terminó de cargarse. Intenta en unos segundos.', 'error');
         return;
       }
 
-      _PDF.procesando = true;
-      var btn     = document.getElementById('pdfBtnProcesar');
-      var btnText = document.getElementById('pdfBtnText');
-      var btnIcon = document.getElementById('pdfBtnIcon');
-      btn.disabled = true;
-      btnText.textContent = 'ANALIZANDO...';
-      btnIcon.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
-      pdfMostrarProgreso();
+      _PDFQ.procesando = true;
+      _PDFQ.cancelar   = false;
 
-      try {
-        var buffer      = await _PDF.archivo.arrayBuffer();
-        var pdfDoc      = await window.pdfjsLib.getDocument({ data: buffer }).promise;
-        var totalPaginas = pdfDoc.numPages;
-        var paginasColor = 0;
-        var paginasBN    = 0;
-        var canvas = document.createElement('canvas');
-        var ctx    = canvas.getContext('2d', { willReadFrequently: true });
-        var ESCALA = 0.35;
+      document.getElementById('pdfqProgressWrap').classList.remove('hidden');
+      pdfq_actualizarBotones();
 
-        for (var i = 1; i <= totalPaginas; i++) {
-          if (i % 3 === 0) await new Promise(function (r) { setTimeout(r, 0); });
-          pdfActualizarProgreso(i, totalPaginas);
-          var page     = await pdfDoc.getPage(i);
-          var viewport = page.getViewport({ scale: ESCALA });
-          canvas.width  = viewport.width;
-          canvas.height = viewport.height;
-          await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-          if (pdfAnalizarCanvas(ctx, canvas.width, canvas.height)) {
-            paginasColor++;
-          } else {
-            paginasBN++;
-          }
-          pdfActualizarContadores(totalPaginas, paginasColor, paginasBN, false);
+      var pendientes  = _PDFQ.archivos.filter(function (a) { return a.estado === 'pendiente'; });
+      var totalCola   = pendientes.length;
+      var procesados  = 0;
+
+      for (var i = 0; i < pendientes.length; i++) {
+        if (_PDFQ.cancelar) break;
+
+        var item = pendientes[i];
+        procesados++;
+
+        // Marcar como analizando
+        item.estado = 'analizando';
+        pdfq_actualizarFila(item);
+
+        document.getElementById('pdfqProgressLabel').textContent =
+          'Analizando ' + procesados + ' de ' + totalCola + '...';
+        document.getElementById('pdfqProgressBar').style.width =
+          Math.round(((procesados - 1) / totalCola) * 100) + '%';
+
+        try {
+          var resultado = await pdfq_procesarUno(item.file);
+          item.estado       = 'completado';
+          item.resultado    = resultado;
+          item.terminacion  = 'ninguna';
+          item.precioManual = false;
+          item.precioFinal  = pdfq_calcularPrecioPDF(item);
+        } catch (err) {
+          console.error('[PDFQ] Error en "' + item.nombre + '":', err);
+          item.estado = 'error';
         }
 
-        pdfActualizarContadores(totalPaginas, paginasColor, paginasBN, true);
-        document.getElementById('pdfResults').classList.remove('hidden');
+        pdfq_actualizarFila(item);
+        pdfq_actualizarResumen();
 
-      } catch (err) {
-        console.error('[AnalizadorPDF]', err);
-        pdfMostrarError('No se pudo procesar el PDF. ¿Está protegido con contraseña?');
-      } finally {
-        _PDF.procesando = false;
-        btn.disabled = true;
-        btnText.textContent = 'ANÁLISIS COMPLETADO';
-        btnIcon.textContent = '✓';
-        pdfOcultarProgreso();
+        document.getElementById('pdfqProgressBar').style.width =
+          Math.round((procesados / totalCola) * 100) + '%';
+      }
+
+      _PDFQ.procesando = false;
+      document.getElementById('pdfqProgressWrap').classList.add('hidden');
+      pdfq_actualizarBotones();
+
+      if (_PDFQ.cancelar) {
+        mostrarNotificacion('⏹ Cola cancelada. Los PDFs ya completados conservan sus resultados.', 'warning');
+        _PDFQ.cancelar = false;
+      } else {
+        var errores = _PDFQ.archivos.filter(function (a) { return a.estado === 'error'; }).length;
+        if (errores > 0) {
+          mostrarNotificacion('⚠️ ' + errores + ' PDF(s) no pudieron analizarse. Podés reintentarlos individualmente.', 'warning');
+        } else {
+          mostrarNotificacion('✅ Análisis completado correctamente.', 'success');
+        }
       }
     }
 
-    // ── Detección de color ────────────────────────────────────────────────────
+    // ── Procesar un único PDF (reutiliza pdfAnalizarCanvas sin cambios) ───────
+    async function pdfq_procesarUno(file) {
+      var buffer       = await file.arrayBuffer();
+      var pdfDoc       = await window.pdfjsLib.getDocument({ data: buffer }).promise;
+      var totalPaginas = pdfDoc.numPages;
+      var paginasColor = 0;
+      var paginasBN    = 0;
+      var canvas = document.createElement('canvas');
+      var ctx    = canvas.getContext('2d', { willReadFrequently: true });
+      var ESCALA = 0.35;
+
+      for (var i = 1; i <= totalPaginas; i++) {
+        if (i % 3 === 0) await new Promise(function (r) { setTimeout(r, 0); });
+        var page     = await pdfDoc.getPage(i);
+        var viewport = page.getViewport({ scale: ESCALA });
+        canvas.width  = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+        if (pdfAnalizarCanvas(ctx, canvas.width, canvas.height)) {
+          paginasColor++;
+        } else {
+          paginasBN++;
+        }
+      }
+
+      return { total: totalPaginas, color: paginasColor, bn: paginasBN };
+    }
+
+    // ── Cancelar cola ─────────────────────────────────────────────────────────
+    function pdfq_cancelarCola() {
+      if (!_PDFQ.procesando) return;
+      _PDFQ.cancelar = true;
+      document.getElementById('pdfqProgressLabel').textContent = 'Cancelando...';
+    }
+
+    // ── Reintentar un PDF fallido (sin afectar los demás) ────────────────────
+    function pdfq_reintentar(id) {
+      var item = _PDFQ.archivos.find(function (a) { return a.id === id; });
+      if (!item || _PDFQ.procesando) return;
+      item.estado       = 'pendiente';
+      item.resultado    = null;
+      item.terminacion  = undefined;
+      item.precioManual = false;
+      item.precioFinal  = 0;
+      item.costoBN                = 0;
+      item.costoColor             = 0;
+      item.costoTerminacion       = 0;
+      item.precioUnitBN           = 0;
+      item.precioUnitColor        = 0;
+      item.precioUnitBNManual     = false;
+      item.precioUnitColorManual  = false;
+      item.costoTerminacionManual = false;
+      pdfq_actualizarFila(item);
+      pdfq_actualizarBotones();
+      pdfq_iniciarCola();
+    }
+
+    // ── Actualizar resumen general (solo completados) ─────────────────────────
+    function pdfq_actualizarResumen() {
+      var completados = _PDFQ.archivos.filter(function (a) { return a.estado === 'completado'; });
+      var resumen     = document.getElementById('pdfqResumen');
+
+      if (completados.length === 0) {
+        resumen.classList.add('hidden');
+        return;
+      }
+
+      resumen.classList.remove('hidden');
+
+      var totalPags  = completados.reduce(function (s, a) { return s + a.resultado.total; }, 0);
+      var totalColor = completados.reduce(function (s, a) { return s + a.resultado.color; }, 0);
+      var totalBN    = completados.reduce(function (s, a) { return s + a.resultado.bn;    }, 0);
+
+      document.getElementById('pdfqResDocumentos').textContent = completados.length + '/' + _PDFQ.archivos.length;
+      document.getElementById('pdfqResTotalPags').textContent  = totalPags;
+      document.getElementById('pdfqResTotalColor').textContent = totalColor;
+      document.getElementById('pdfqResTotalBN').textContent    = totalBN;
+    }
+
+    // ── Calcular precio de un ítem según páginas + terminación ────────────────
+    // Misma lógica que agregarLibro() — reutiliza calcularPrecioImpresion,
+    // calcularPrecioEncuadernado, calcularPrecioEmpastado de scriptgeneral.js
+    //
+    // B/N y Color se calculan como PRECIO POR PÁGINA × CANTIDAD DE PÁGINAS.
+    // Por defecto el precio por página sale de dividir lo que calcula el sistema
+    // (calcularPrecioImpresion) entre la cantidad de páginas. Si el usuario edita
+    // el precio por página a mano (ej. tarifa preferente 1.75 en vez de 2.00),
+    // ese precio por página se multiplica por la cantidad de páginas vigente cada
+    // vez que se recalcula — nunca se toma como total directo.
+    // Terminación sigue siendo un valor total editable (no es por página).
+    // Efecto secundario: guarda item.precioUnitBN / item.precioUnitColor /
+    // item.costoBN / item.costoColor / item.costoTerminacion para que la fila
+    // de controles siempre pueda mostrar el desglose y el precio/página vigente.
+    function pdfq_calcularPrecioPDF(item) {
+      if (!item.resultado) return 0;
+      var res    = item.resultado;
+      var TAMANO = 'carta';
+      var term   = item.terminacion || 'ninguna';
+
+      // ── B/N: precio por página × cantidad de páginas ──────────────────────
+      var precioUnitBN;
+      if (item.precioUnitBNManual) {
+        precioUnitBN = item.precioUnitBN || 0;
+      } else {
+        precioUnitBN = res.bn > 0 ? (calcularPrecioImpresion(res.bn, 'bn', TAMANO) / res.bn) : 0;
+      }
+      var costoBN = precioUnitBN * res.bn;
+
+      // ── Color: precio por página × cantidad de páginas ─────────────────────
+      var precioUnitColor;
+      if (item.precioUnitColorManual) {
+        precioUnitColor = item.precioUnitColor || 0;
+      } else {
+        precioUnitColor = res.color > 0 ? (calcularPrecioImpresion(res.color, 'color', TAMANO) / res.color) : 0;
+      }
+      var costoColor = precioUnitColor * res.color;
+
+      // ── Terminación: valor total (no es por página) ────────────────────────
+      var costoTerminacion;
+      if (item.costoTerminacionManual) {
+        costoTerminacion = item.costoTerminacion || 0;
+      } else {
+        costoTerminacion = 0;
+        if (term === 'espiral')     costoTerminacion = calcularPrecioEncuadernado(res.total);
+        if (term === 'tapa_dura')   costoTerminacion = calcularPrecioEmpastado('Tapa Dura',  TAMANO);
+        if (term === 'tapa_blanda') costoTerminacion = calcularPrecioEmpastado('Tapa Blanda', TAMANO);
+      }
+
+      // Guardar el desglose para que los inputs de la fila reflejen el valor vigente
+      item.precioUnitBN     = precioUnitBN;
+      item.precioUnitColor  = precioUnitColor;
+      item.costoBN          = costoBN;
+      item.costoColor        = costoColor;
+      item.costoTerminacion  = costoTerminacion;
+
+      return costoBN + costoColor + costoTerminacion;
+    }
+
+    // Refresca en pantalla los inputs de la fila (precio/página BN, precio/página Color,
+    // costo terminación) y los subtotales de solo-lectura, sin re-renderizar toda la fila.
+    // Se llama después de cualquier recálculo.
+    function pdfq_refrescarInputsCosto(id, item) {
+      var inpUnitBN  = document.getElementById('pdfq-inp-unitbn-'   + id);
+      var inpUnitCol = document.getElementById('pdfq-inp-unitcol-'  + id);
+      var inpTerm    = document.getElementById('pdfq-inp-costoterm-' + id);
+      var selTerm    = document.getElementById('pdfq-sel-term-' + id);
+      var subBN      = document.getElementById('pdfq-sub-bn-'    + id);
+      var subCol     = document.getElementById('pdfq-sub-color-' + id);
+      if (inpUnitBN)  inpUnitBN.value  = (item.precioUnitBN    || 0).toFixed(2);
+      if (inpUnitCol) inpUnitCol.value = (item.precioUnitColor || 0).toFixed(2);
+      if (inpTerm)    inpTerm.value    = (item.costoTerminacion || 0).toFixed(2);
+      if (selTerm)    selTerm.value    = item.terminacion || 'ninguna';
+      if (subBN)  subBN.textContent  = 'RD$' + (item.costoBN    || 0).toFixed(2);
+      if (subCol) subCol.textContent = 'RD$' + (item.costoColor || 0).toFixed(2);
+    }
+
+    // ── Aplicar precio por página (B/N y/o Color) a TODOS los documentos completados ──
+    // Lee los campos maestros de arriba de la tabla y los propaga a cada fila,
+    // reutilizando el mismo cálculo (precio/página × cantidad) que la edición fila por fila.
+    // Por defecto respeta (no pisa) las filas que ya fueron editadas a mano.
+    function pdfq_aplicarPrecioATodos() {
+      var inpBN       = document.getElementById('pdfqMasterBN');
+      var inpColor    = document.getElementById('pdfqMasterColor');
+      var selTermTipo = document.getElementById('pdfqMasterTerminacionTipo');
+      var inpCostoTerm= document.getElementById('pdfqMasterCostoTerm');
+      var respetar    = document.getElementById('pdfqMasterRespetarManual').checked;
+
+      var valBN    = parseFloat(inpBN.value);
+      var valColor = parseFloat(inpColor.value);
+      var valCostoTerm = parseFloat(inpCostoTerm.value);
+      var tieneBN        = !isNaN(valBN)    && valBN    >= 0 && inpBN.value    !== '';
+      var tieneColor     = !isNaN(valColor) && valColor >= 0 && inpColor.value !== '';
+      var tieneTermTipo  = selTermTipo.value !== '';
+      var tieneCostoTerm = !isNaN(valCostoTerm) && valCostoTerm >= 0 && inpCostoTerm.value !== '';
+
+      if (!tieneBN && !tieneColor && !tieneTermTipo && !tieneCostoTerm) {
+        alert('Escribí o elegí al menos un valor (precio B/N, Color, tipo de terminación o costo de terminación) para aplicar.');
+        return;
+      }
+
+      var afectados = 0;
+      var saltadosBN = 0, saltadosColor = 0, saltadosTerm = 0;
+
+      _PDFQ.archivos.forEach(function (item) {
+        if (item.estado !== 'completado') return; // solo hay precio/página en filas completadas
+
+        var tocado = false;
+
+        if (tieneBN) {
+          if (respetar && item.precioUnitBNManual) {
+            saltadosBN++;
+          } else {
+            item.precioUnitBN       = valBN;
+            item.precioUnitBNManual = true;
+            tocado = true;
+          }
+        }
+
+        if (tieneColor) {
+          if (respetar && item.precioUnitColorManual) {
+            saltadosColor++;
+          } else {
+            item.precioUnitColor       = valColor;
+            item.precioUnitColorManual = true;
+            tocado = true;
+          }
+        }
+
+        // ── Terminación: tipo (select) y/o costo total ──────────────────────
+        // Si el costo de terminación ya fue editado a mano en esta fila y "respetar" está
+        // activo, no tocamos NI el tipo NI el costo de esa fila (para no romper una config manual).
+        var termProtegida = respetar && item.costoTerminacionManual;
+
+        if ((tieneTermTipo || tieneCostoTerm) && termProtegida) {
+          saltadosTerm++;
+        } else {
+          if (tieneTermTipo) {
+            item.terminacion = selTermTipo.value;
+            tocado = true;
+          }
+          if (tieneCostoTerm) {
+            item.costoTerminacion       = valCostoTerm;
+            item.costoTerminacionManual = true;
+            tocado = true;
+          } else if (tieneTermTipo) {
+            // Cambió el tipo pero no dieron un costo fijo → que se recalcule automático
+            item.costoTerminacionManual = false;
+          }
+        }
+
+        if (!tocado) return;
+
+        var total = pdfq_calcularPrecioPDF(item);
+        pdfq_refrescarInputsCosto(item.id, item);
+
+        // El precio TOTAL de la fila sólo se pisa si el usuario no lo sobreescribió a mano
+        if (!item.precioManual) {
+          item.precioFinal = total;
+          var inpPrecio = document.getElementById('pdfq-precio-' + item.id);
+          if (inpPrecio) inpPrecio.value = item.precioFinal.toFixed(2);
+        }
+        afectados++;
+      });
+
+      var msg = '✅ Cambios aplicados a ' + afectados + ' documento(s).';
+      var saltados = saltadosBN + saltadosColor + saltadosTerm;
+      if (saltados > 0) {
+        msg += ' Se dejaron sin tocar valores editados a mano en algunas filas (desmarcá la casilla si querés pisarlos también).';
+      }
+      alert(msg);
+    }
+
+    // ── Cambiar terminación (recalcula precio si no fue editado manualmente) ──
+    function pdfq_cambiarTerminacion(id, valor) {
+      var item = _PDFQ.archivos.find(function (a) { return a.id === id; });
+      if (!item) return;
+      item.terminacion = valor;
+      // Al cambiar el TIPO de terminación, un costo manual de la terminación anterior
+      // ya no aplica al nuevo tipo — se resetea para que vuelva a calcularse solo.
+      item.costoTerminacionManual = false;
+
+      var total = pdfq_calcularPrecioPDF(item); // siempre recalcula el desglose (BN/Color/Terminación)
+      pdfq_refrescarInputsCosto(id, item);
+
+      // El precio TOTAL sólo se pisa si el usuario no lo sobreescribió a mano
+      if (!item.precioManual) {
+        item.precioFinal = total;
+        var input = document.getElementById('pdfq-precio-' + id);
+        if (input) input.value = item.precioFinal.toFixed(2);
+      }
+    }
+
+    // ── Registrar edición manual del precio ───────────────────────────────────
+    // Una vez marcado como manual, cambios de terminación no pisarán el precio.
+    function pdfq_editarPrecio(id, valor) {
+      var item = _PDFQ.archivos.find(function (a) { return a.id === id; });
+      if (!item) return;
+      var precio = parseFloat(valor);
+      if (!isNaN(precio) && precio >= 0) {
+        item.precioFinal  = precio;
+        item.precioManual = true;
+      } else {
+        // Si el valor es inválido, volver al calculado automáticamente
+        item.precioManual = false;
+        item.precioFinal  = pdfq_calcularPrecioPDF(item);
+      }
+    }
+
+    // ── Editar composición de páginas (total / color / bn) ────────────────────
+    // Mantiene la invariante: color + bn === total.
+    // Si !precioManual, recalcula el precio automáticamente tras el cambio.
+    function pdfq_editarPaginas(id, campo, valor) {
+      var item = _PDFQ.archivos.find(function (a) { return a.id === id; });
+      if (!item || !item.resultado) return;
+      var v   = parseInt(valor, 10);
+      if (isNaN(v) || v < 0) v = 0;
+      var res = item.resultado;
+
+      if (campo === 'total') {
+        // Ajustar color/bn proporcionalmente al nuevo total
+        var nuevoColor = Math.min(res.color, v);
+        var nuevoBN    = v - nuevoColor;
+        res.total = v;
+        res.color = nuevoColor;
+        res.bn    = nuevoBN;
+        // Actualizar inputs dependientes
+        var inpC = document.getElementById('pdfq-inp-color-' + id);
+        var inpB = document.getElementById('pdfq-inp-bn-' + id);
+        if (inpC) inpC.value = nuevoColor;
+        if (inpB) inpB.value = nuevoBN;
+      } else if (campo === 'color') {
+        // Recalcular bn; si color > total, caparlo al total
+        var nuevoColor = Math.min(v, res.total);
+        res.color = nuevoColor;
+        res.bn    = res.total - nuevoColor;
+        var inpB = document.getElementById('pdfq-inp-bn-' + id);
+        if (inpB) inpB.value = res.bn;
+        // Corregir el propio input si fue capado
+        if (v > res.total) {
+          var inpC = document.getElementById('pdfq-inp-color-' + id);
+          if (inpC) inpC.value = nuevoColor;
+        }
+      } else if (campo === 'bn') {
+        // Recalcular color; si bn > total, caparlo al total
+        var nuevoBN = Math.min(v, res.total);
+        res.bn    = nuevoBN;
+        res.color = res.total - nuevoBN;
+        var inpC = document.getElementById('pdfq-inp-color-' + id);
+        if (inpC) inpC.value = res.color;
+        if (v > res.total) {
+          var inpB = document.getElementById('pdfq-inp-bn-' + id);
+          if (inpB) inpB.value = nuevoBN;
+        }
+      }
+
+      // Actualizar las celdas de la fila de datos puntualmente (sin re-render)
+      var cellT = document.getElementById('pdfq-total-' + id);
+      var cellC = document.getElementById('pdfq-color-' + id);
+      var cellB = document.getElementById('pdfq-bn-' + id);
+      if (cellT) cellT.textContent = res.total;
+      if (cellC) cellC.textContent = res.color;
+      if (cellB) cellB.textContent = res.bn;
+
+      // Recalcular desglose de costos y precio total
+      var total = pdfq_calcularPrecioPDF(item);
+      pdfq_refrescarInputsCosto(id, item);
+      if (!item.precioManual) {
+        item.precioFinal = total;
+        var inpPrecio = document.getElementById('pdfq-precio-' + id);
+        if (inpPrecio) inpPrecio.value = item.precioFinal.toFixed(2);
+      }
+
+      // El resumen general lee de item.resultado → ya refleja los cambios
+      pdfq_actualizarResumen();
+    }
+
+    // ── Atajo rápido: Todo B/N (color = 0, bn = total) ────────────────────────
+    function pdfq_todoBN(id) {
+      var item = _PDFQ.archivos.find(function (a) { return a.id === id; });
+      if (!item || !item.resultado) return;
+      item.resultado.color = 0;
+      item.resultado.bn    = item.resultado.total;
+      var inpC = document.getElementById('pdfq-inp-color-' + id);
+      var inpB = document.getElementById('pdfq-inp-bn-' + id);
+      var cellC = document.getElementById('pdfq-color-' + id);
+      var cellB = document.getElementById('pdfq-bn-' + id);
+      if (inpC)  inpC.value          = 0;
+      if (inpB)  inpB.value          = item.resultado.total;
+      if (cellC) cellC.textContent   = 0;
+      if (cellB) cellB.textContent   = item.resultado.total;
+      var total = pdfq_calcularPrecioPDF(item);
+      pdfq_refrescarInputsCosto(id, item);
+      if (!item.precioManual) {
+        item.precioFinal = total;
+        var inpP = document.getElementById('pdfq-precio-' + id);
+        if (inpP) inpP.value = item.precioFinal.toFixed(2);
+      }
+      pdfq_actualizarResumen();
+    }
+
+    // ── Atajo rápido: Todo Color (color = total, bn = 0) ─────────────────────
+    function pdfq_todoColor(id) {
+      var item = _PDFQ.archivos.find(function (a) { return a.id === id; });
+      if (!item || !item.resultado) return;
+      item.resultado.color = item.resultado.total;
+      item.resultado.bn    = 0;
+      var inpC = document.getElementById('pdfq-inp-color-' + id);
+      var inpB = document.getElementById('pdfq-inp-bn-' + id);
+      var cellC = document.getElementById('pdfq-color-' + id);
+      var cellB = document.getElementById('pdfq-bn-' + id);
+      if (inpC)  inpC.value          = item.resultado.total;
+      if (inpB)  inpB.value          = 0;
+      if (cellC) cellC.textContent   = item.resultado.total;
+      if (cellB) cellB.textContent   = 0;
+      var total = pdfq_calcularPrecioPDF(item);
+      pdfq_refrescarInputsCosto(id, item);
+      if (!item.precioManual) {
+        item.precioFinal = total;
+        var inpP = document.getElementById('pdfq-precio-' + id);
+        if (inpP) inpP.value = item.precioFinal.toFixed(2);
+      }
+      pdfq_actualizarResumen();
+    }
+
+    // ── Editar precio POR PÁGINA de B/N manualmente ───────────────────────────
+    // El total se recalcula multiplicando este precio × cantidad de páginas B/N
+    // vigente (nunca se toma como total directo).
+    function pdfq_editarPrecioUnitBN(id, valor) {
+      var item = _PDFQ.archivos.find(function (a) { return a.id === id; });
+      if (!item) return;
+      var v = parseFloat(valor);
+      if (!isNaN(v) && v >= 0) {
+        item.precioUnitBN       = v;
+        item.precioUnitBNManual = true;
+      } else {
+        item.precioUnitBNManual = false; // valor inválido → vuelve a automático
+      }
+      var total = pdfq_calcularPrecioPDF(item);
+      pdfq_refrescarInputsCosto(id, item);
+      if (!item.precioManual) {
+        item.precioFinal = total;
+        var inpPrecio = document.getElementById('pdfq-precio-' + id);
+        if (inpPrecio) inpPrecio.value = item.precioFinal.toFixed(2);
+      }
+    }
+
+    // ── Editar precio POR PÁGINA de Color manualmente ─────────────────────────
+    function pdfq_editarPrecioUnitColor(id, valor) {
+      var item = _PDFQ.archivos.find(function (a) { return a.id === id; });
+      if (!item) return;
+      var v = parseFloat(valor);
+      if (!isNaN(v) && v >= 0) {
+        item.precioUnitColor       = v;
+        item.precioUnitColorManual = true;
+      } else {
+        item.precioUnitColorManual = false;
+      }
+      var total = pdfq_calcularPrecioPDF(item);
+      pdfq_refrescarInputsCosto(id, item);
+      if (!item.precioManual) {
+        item.precioFinal = total;
+        var inpPrecio = document.getElementById('pdfq-precio-' + id);
+        if (inpPrecio) inpPrecio.value = item.precioFinal.toFixed(2);
+      }
+    }
+
+    // ── Editar costo de Terminación manualmente (sobreescribe sólo este componente) ─
+    function pdfq_editarCostoTerminacion(id, valor) {
+      var item = _PDFQ.archivos.find(function (a) { return a.id === id; });
+      if (!item) return;
+      var v = parseFloat(valor);
+      if (!isNaN(v) && v >= 0) {
+        item.costoTerminacion       = v;
+        item.costoTerminacionManual = true;
+      } else {
+        item.costoTerminacionManual = false;
+      }
+      var total = pdfq_calcularPrecioPDF(item);
+      if (!item.precioManual) {
+        item.precioFinal = total;
+        var inpPrecio = document.getElementById('pdfq-precio-' + id);
+        if (inpPrecio) inpPrecio.value = item.precioFinal.toFixed(2);
+      }
+    }
+
+    // ── Lógica compartida: construir objeto de cotización y agregarlo ─────────
+    function pdfq_agregarItemACotizacion(item) {
+      var res          = item.resultado;
+      var totalPags    = res.total;
+      var paginasBN    = res.bn;
+      var paginasColor = res.color;
+      var precio       = item.precioFinal || 0;
+
+      if (totalPags === 0) return false; // ítem sin páginas, skip
+
+      var terminacionTexto = {
+        'espiral':    'Encuadernado espiral',
+        'tapa_dura':  'Empastado tapa dura',
+        'tapa_blanda':'Empastado tapa blanda',
+        'ninguna':    'Sin terminación'
+      };
+      var term = item.terminacion || 'ninguna';
+
+      // Descripción — mismo patrón que agregarLibro()
+      var desglose = [];
+      if (paginasBN    > 0) desglose.push(paginasBN    + ' B/N');
+      if (paginasColor > 0) desglose.push(paginasColor + ' Color');
+
+      var descripcion = totalPags + ' páginas totales · Carta';
+      if (desglose.length > 0) descripcion += '\n(' + desglose.join(' + ') + ')';
+      descripcion += '\n' + terminacionTexto[term];
+      if (item.precioManual) descripcion += ' · Precio personalizado';
+
+      agregarACotizacion({
+        nombre: '📄 ' + item.nombre,
+        descripcion: descripcion,
+        cantidad: 1,
+        precioUnitario: precio,
+        precio: precio
+      });
+      return true;
+    }
+
+    // ── Agregar un único PDF completado a la cotización (botón por fila) ──────
+    function pdfq_agregarUno(id) {
+      var item = _PDFQ.archivos.find(function (a) { return a.id === id; });
+      if (!item || item.estado !== 'completado') return;
+      if (pdfq_agregarItemACotizacion(item)) {
+        mostrarNotificacion('✅ "' + item.nombre + '" agregado a la cotización.', 'success');
+      }
+    }
+
+    // ── Cotizar todos: delega en pdfq_agregarItemACotizacion por cada PDF ─────
+    function pdfq_cotizarTodos() {
+      var completados = _PDFQ.archivos.filter(function (a) { return a.estado === 'completado'; });
+      if (completados.length === 0) return;
+      var agregados = 0;
+      completados.forEach(function (item) {
+        if (pdfq_agregarItemACotizacion(item)) agregados++;
+      });
+      if (agregados > 0) {
+        mostrarNotificacion('✅ ' + agregados + ' PDF(s) agregados a la cotización.', 'success');
+        cerrarModalAnalizadorPDF();
+      } else {
+        mostrarNotificacion('⚠️ Ningún PDF pudo agregarse (sin páginas).', 'warning');
+      }
+    }
+
+
+    // ── Detección de color por canvas ─────────────────────────────────────────
+    // ⚠️ ALGORITMO ORIGINAL — NO MODIFICAR
     function pdfAnalizarCanvas(ctx, ancho, alto) {
       var imageData = ctx.getImageData(0, 0, ancho, alto);
       var data      = imageData.data;
@@ -1497,63 +2426,9 @@
       }
       return muestras > 0 ? (pixelesColor / muestras) * 100 > 0.5 : false;
     }
-
-    // ── Actualizar contadores ─────────────────────────────────────────────────
-    function pdfActualizarContadores(total, color, bw, final) {
-      document.getElementById('pdfMetricTotal').textContent = total;
-      document.getElementById('pdfMetricColor').textContent = color;
-      document.getElementById('pdfMetricBW').textContent    = bw;
-
-      if (final && total > 0) {
-        var pctColor = Math.round((color / total) * 100);
-        var pctBW    = 100 - pctColor;
-        document.getElementById('pdfDistColor').style.width = pctColor + '%';
-        document.getElementById('pdfDistBW').style.width    = pctBW    + '%';
-        document.getElementById('pdfLegendColor').textContent = 'Color (' + pctColor + '%)';
-        document.getElementById('pdfLegendBW').textContent    = 'B/N ('   + pctBW    + '%)';
-        var btnUsar = document.getElementById('pdfBtnUsarDatos');
-        if (btnUsar) btnUsar.style.display = 'flex';
-      }
-    }
-
-    // ── Usar datos en calculadora ─────────────────────────────────────────────
-    function pdfUsarDatos() {
-      var paginasColor = document.getElementById('pdfMetricColor').textContent;
-      var paginasBN    = document.getElementById('pdfMetricBW').textContent;
-
-      var esTesisPage   = !!document.getElementById('formCotizacion');
-      var esGeneralPage = !!document.getElementById('formImpresion');
-
-      if (esTesisPage) {
-        var bnInput    = document.getElementById('bn');
-        var colorInput = document.getElementById('color');
-        if (bnInput && colorInput) {
-          bnInput.value    = paginasBN;
-          colorInput.value = paginasColor;
-          document.getElementById('papel').value = 'bond';
-          actualizarVista();
-          bnInput.dispatchEvent(new Event('input', { bubbles: true }));
-          colorInput.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-      } else if (esGeneralPage) {
-        var tipoServicioSelect = document.getElementById('tipoServicio');
-        var libroBNInput       = document.getElementById('libroPaginasBN');
-        var libroColorInput    = document.getElementById('libroPaginasColor');
-        if (tipoServicioSelect && libroBNInput && libroColorInput) {
-          tipoServicioSelect.value = 'libro';
-          tipoServicioSelect.dispatchEvent(new Event('change', { bubbles: true }));
-          libroBNInput.value    = paginasBN;
-          libroColorInput.value = paginasColor;
-          document.getElementById('libroPaginasFullColor').value = 0;
-          libroBNInput.dispatchEvent(new Event('input', { bubbles: true }));
-          libroColorInput.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-      }
-
-      mostrarNotificacion('✅ Datos aplicados en la calculadora.', 'success');
-      cerrarModalAnalizadorPDF();
-    }
   </script>
+
+
 
 </body>
 </html>
