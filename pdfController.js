@@ -13,16 +13,14 @@ const puppeteerArgs = [
     '--disable-dev-shm-usage',
     '--disable-accelerated-2d-canvas',
     '--no-first-run',
-    // '--no-zygote', // Descomentar solo si hay problemas en Render (Linux)
-    // '--single-process', // Descomentar solo si hay problemas en Render (Linux)
     '--font-render-hinting=none',
-    '--disable-extensions',            // Nuevo: Desactiva extensiones
-    '--disable-background-networking', // Nuevo: Evita tráfico de red oculto
-    '--disable-default-apps',          // Nuevo
-    '--disable-sync',                  // Nuevo: Evita sincronización de Google
-    '--mute-audio',                    // Nuevo: Ahorra recursos de audio
-    '--disable-web-security',          // Nuevo: Para evitar cierres por seguridad
-    '--disable-features=VizDisplayCompositor' // Nuevo: Reduce uso de GPU
+    '--disable-extensions',
+    '--disable-background-networking',
+    '--disable-default-apps',
+    '--disable-sync',
+    '--mute-audio',
+    '--disable-web-security',
+    '--disable-features=VizDisplayCompositor'
 ];
 
 // Función centralizada para iniciar el navegador
@@ -34,15 +32,43 @@ const initBrowser = async () => {
             headless: true,
             args: puppeteerArgs
         });
+
+        browser.on('disconnected', () => {
+            console.error('⚠️ [CRÍTICO] BROWSER DISCONNECTED: El proceso de Chromium se ha cerrado inesperadamente.');
+        });
+
         console.log("✅ Navegador listo.");
     } catch (e) {
         console.error("❌ Error iniciando navegador:", e);
     }
 };
 
+// Función para limpiar archivos PDF residuales en public/temp
+const limpiarCarpetaTemporal = () => {
+    try {
+        const tempDir = path.join(__dirname, 'public', 'temp');
+        if (fs.existsSync(tempDir)) {
+            const files = fs.readdirSync(tempDir);
+            let contador = 0;
+            for (const file of files) {
+                if (file.endsWith('.pdf')) {
+                    fs.unlinkSync(path.join(tempDir, file));
+                    contador++;
+                }
+            }
+            if (contador > 0) console.log(`🧹 Limpieza de inicio: ${contador} archivos temporales eliminados.`);
+        }
+    } catch (e) {
+        console.error("⚠️ Advertencia en limpieza de temporales:", e.message);
+    }
+};
+
 // Inicialización al arranque (Browser + Logo Caché)
 (async () => {
-    // 1. Cargar Logo en memoria UNA SOLA VEZ (Evita lectura de disco por petición)
+    // 1. Limpiar archivos basura de sesiones anteriores
+    limpiarCarpetaTemporal();
+
+    // 2. Cargar Logo en memoria UNA SOLA VEZ
     try {
         // CORRECCIÓN: La ruta correcta es relativa al directorio del proyecto.
         const logoPath = path.join(__dirname, 'public', 'assets', 'logo.png');
@@ -52,21 +78,43 @@ const initBrowser = async () => {
         }
     } catch (e) { console.error("Error cargando logo al inicio:", e); }
 
-    // 2. Iniciar navegador
+    // 3. Iniciar navegador
     await initBrowser();
 })();
 
+
 const analizarPDF = async (req, res) => {
+    console.log('========== PDF REQUEST ==========');
+    console.log('Archivo recibido:', !!req.file);
+    if (req.file) {
+        console.log('Nombre:', req.file.originalname);
+        console.log('Tamaño:', req.file.size);
+    }
+
+    console.log('Browser exists:', !!browser);
+    if (browser) {
+        console.log('Browser connected:', browser.isConnected());
+    }
+
     if (!req.file) {
+        console.error('❌ Error: req.file es undefined');
         return res.status(400).json({ error: 'No se ha subido ningún archivo PDF.' });
     }
 
     let page = null;
+    let tempFilePath = null;
     try {
         if (!browser || !browser.isConnected()) await initBrowser();
         page = await browser.newPage();
+        
+        console.log('Page creada');
 
-        const analyzerHtml = ` 
+        // Eventos de depuración solicitados
+        page.on('close', () => console.error('PAGE CLOSED'));
+        page.on('error', err => console.error('PAGE ERROR', err));
+        page.on('pageerror', err => console.error('PAGE JS ERROR', err));
+
+        const analyzerHtml = `
             <!DOCTYPE html>
             <html><head>
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -75,57 +123,99 @@ const analizarPDF = async (req, res) => {
                 </script>
             </head><body></body></html>
         `;
-        await page.setContent(analyzerHtml);
 
-        console.log('Analizando PDF en el backend...');
-        const results = await page.evaluate(async (pdfBufferData) => {
-            const pdfData = new Uint8Array(Object.values(pdfBufferData));
+        await page.setContent(analyzerHtml, { waitUntil: 'networkidle0' });
+        console.log('HTML cargado en Puppeteer');
+
+        const loaded = await page.evaluate(() => !!window.pdfjsLib);
+        if (!loaded) throw new Error('La librería PDF.js no pudo cargarse.');
+
+        // 1. Guardar archivo temporal para que Puppeteer lo lea vía URL (No vía IPC)
+        const tempFilename = `analisis_${Date.now()}.pdf`;
+        const tempDir = path.join(__dirname, 'public', 'temp');
+        if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+        tempFilePath = path.join(tempDir, tempFilename);
+        
+        await fs.promises.writeFile(tempFilePath, req.file.buffer);
+        
+        const isLargePDF = req.file.size > 50 * 1024 * 1024;
+        const port = process.env.PORT || 3000;
+        // Usar 127.0.0.1 para asegurar tráfico local rápido
+        const pdfUrl = `http://127.0.0.1:${port}/temp/${tempFilename}`;
+
+        console.log('Analizando PDF desde URL segura:', pdfUrl);
+
+        const results = await page.evaluate(async (url, isLarge) => {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Fetch falló');
+            const arrayBuffer = await res.arrayBuffer();
+            const pdfData = new Uint8Array(arrayBuffer);
             const pdfDoc = await window.pdfjsLib.getDocument({ data: pdfData }).promise;
             
             let paginasColor = 0;
             let paginasBN = 0;
-            const totalPaginas = pdfDoc.numPages;
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
-            const ESCALA = 0.35;
+            const total = pdfDoc.numPages;
 
-            const pdfAnalizarCanvas = (context, ancho, alto) => {
-                const imageData = context.getImageData(0, 0, ancho, alto);
-                const data = imageData.data;
-                const TOLERANCIA = 20;
-                const paso = (data.length / 4 > 40000) ? 4 : 2;
-                let pixelesColor = 0;
-                let muestras = 0;
-                for (let i = 0; i < data.length; i += 4 * paso) {
-                    if (data[i+3] < 30 || (data[i] > 250 && data[i+1] > 250 && data[i+2] > 250)) continue;
-                    const diff = Math.abs(data[i] - data[i+1]) + Math.abs(data[i] - data[i+2]) + Math.abs(data[i+1] - data[i+2]);
-                    if (diff > TOLERANCIA) pixelesColor++;
-                    muestras++;
-                }
-                return (muestras > 0 ? (pixelesColor / muestras) * 100 : 0) > 0.5;
-            };
-
-            for (let i = 1; i <= totalPaginas; i++) {
-                const page = await pdfDoc.getPage(i);
-                const viewport = page.getViewport({ scale: ESCALA });
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-                if (pdfAnalizarCanvas(ctx, canvas.width, canvas.height)) paginasColor++;
-                else paginasBN++;
+            // Definir qué páginas analizar (Muestreo para PDFs gigantes)
+            let pagesToAnalyze = [];
+            if (isLarge && total > 30) {
+                for(let i=1; i<=10; i++) pagesToAnalyze.push(i); // Primeras 10
+                const mid = Math.floor(total / 2);
+                for(let i=mid-5; i<=mid+4; i++) pagesToAnalyze.push(i); // 10 centrales
+                for(let i=total-9; i<=total; i++) pagesToAnalyze.push(i); // Últimas 10
+                pagesToAnalyze = [...new Set(pagesToAnalyze)].sort((a,b) => a-b);
+            } else {
+                for(let i=1; i<=total; i++) pagesToAnalyze.push(i);
             }
-            return { total: totalPaginas, color: paginasColor, bw: paginasBN };
-        }, req.file.buffer);
+
+            for (const i of pagesToAnalyze) {
+                const page = await pdfDoc.getPage(i);
+                
+                // Si estamos en muestreo, escalamos el resultado proporcionalmente al final
+                // Pero para simplicidad de cotización, detectamos si la muestra tiene color
+                const ops = await page.getOperatorList();
+                const colorOps = [window.pdfjsLib.OPS.setFillRGB, window.pdfjsLib.OPS.setStrokeRGB, window.pdfjsLib.OPS.paintJpegXObject];
+                const isColor = ops.fnArray.some(op => colorOps.includes(op));
+                
+                if (isColor) paginasColor++; else paginasBN++;
+                
+                // Liberar memoria de la página
+                page.cleanup();
+            }
+
+            // Si fue muestreo, el usuario debe saberlo, pero reportamos el total real
+            return { 
+                total: total, 
+                color: isLarge ? `~${paginasColor} (Muestra)` : paginasColor, 
+                bw: isLarge ? `~${paginasBN} (Muestra)` : paginasBN,
+                isSampled: isLarge
+            };
+        }, pdfUrl, isLargePDF); // Pasamos la URL en lugar de los datos
+
+        console.log('Análisis completado');
 
         console.log('Análisis completado:', results);
         res.json(results);
     } catch (error) {
-        console.error('Error durante el análisis del PDF:', error);
-        res.status(500).json({ error: 'Error al procesar el PDF en el servidor.' });
+        console.error('========== PDF ERROR ==========');
+        res.status(500).json({ message: error.message, stack: error.stack });
     } finally {
-        if (page) await page.close();
+        // Limpiar archivo temporal inmediatamente
+        if (tempFilePath && fs.existsSync(tempFilePath)) {
+            fs.promises.unlink(tempFilePath).catch(e => console.error("Error eliminando temp PDF:", e));
+        }
+
+        // Proteger el finally contra crashes por desconexión
+        try {
+            if (page && !page.isClosed()) {
+                await page.close();
+            }
+        } catch (closeError) {
+            console.error('Error cerrando página (ignorado para evitar crash):', closeError.message);
+        }
     }
 };
+
 
 const generarPDF = async (req, res) => {
     let page = null;
@@ -140,8 +230,8 @@ const generarPDF = async (req, res) => {
             await page.setContent(data.html, { waitUntil: 'networkidle0', timeout: 60000 });
             
             const pdfBuffer = await page.pdf({
-                format: 'A4',
                 printBackground: true,
+                preferCSSPageSize: true, // Respeta el @page (8.5in x 11in) definido en el HTML del frontend, en vez de forzar A4
                 margin: { top: '15mm', right: '15mm', bottom: '15mm', left: '15mm' }
             });
 
