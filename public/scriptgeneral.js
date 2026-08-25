@@ -126,13 +126,12 @@ const preciosEspeciales = {
 
 // Encuadernado Espiral (precio por encuadernado según páginas)
 const preciosEncuadernado = [
-  { min: 1, max: 100, precio: 60 },
-  { min: 101, max: 160, precio: 70 },
-  { min: 161, max: 200, precio: 80 },
-  { min: 201, max: 300, precio: 100 },
-  { min: 301, max: 400, precio: 120 },
-  { min: 401, max: 500, precio: 150 },
-  { min: 501, max: Infinity, precio: 250 }
+  { min: 1, max: 50, precio: 60 },
+  { min: 51, max: 80, precio: 70 },
+  { min: 81, max: 100, precio: 100 },
+  { min: 101, max: 150, precio: 120 },
+  { min: 151, max: 200, precio: 150 },
+  { min: 201, max: Infinity, precio: 250 }
 ];
 
 // Empastado (precio por unidad)
@@ -1580,18 +1579,21 @@ async function imprimirCotizacion() {
         .footer-text { color: #94a3b8; font-size: 11px; line-height: 1.6; border-top: 1px solid #374151; padding-top: 12px; margin-top: 12px; }
         @page { size: 8.5in 11in; margin: 0.3in; }
         @media print {
-          html, body { width: 8.5in; height: 11in; margin: 0; padding: 0; overflow: hidden; }
+          html, body { width: 8.5in; margin: 0; padding: 0; }
           body { background: white; }
-          .container { box-shadow: none; border-radius: 0; max-height: 100%; overflow: hidden; }
+          .container { box-shadow: none; border-radius: 0; }
           * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           .header { padding: 25px 20px; }
           .header h1 { font-size: 24px; }
           .header p { font-size: 10px; }
           .content { padding: 15px; }
           table { font-size: 11px; }
+          thead { display: table-header-group; } /* repite el encabezado de la tabla en cada hoja si hay varias */
           thead th { padding: 10px 12px; font-size: 10px; }
           tbody td { padding: 8px 12px; font-size: 10px; }
-          .footer { padding: 15px 20px; font-size: 9px; }
+          tbody tr { page-break-inside: avoid; } /* una fila no se corta a la mitad entre dos hojas */
+          tfoot { page-break-inside: avoid; } /* Subtotal/Impuesto/TOTAL se mantienen juntos, nunca se cortan ni se pierden */
+          .footer { padding: 15px 20px; font-size: 9px; page-break-inside: avoid; }
           .footer-brand { font-size: 13px; }
           .footer-subtitle { font-size: 9px; }
           .footer-text { font-size: 9px; }
@@ -1795,6 +1797,21 @@ async function guardarCotizacionActual() { // ESTA FUNCIÓN AHORA SOLO CREA NUEV
     guardarEnLocalStorage(); // Guardamos el nuevo ID inmediatamente
     actualizarCotizacion(); // Actualiza la UI (esto ocultará "Guardar" y mostrará "Guardar Cambios")
     mostrarNotificacion(`✅ Cotización guardada`, "success");
+
+    // ── Sincronización con Notion (segundo plano) ──────────────────────────────
+    if (window.NotionSync) {
+      const datosNotion = {
+        nombre:       paqueteDeDatos.nombre,
+        idCotizacion: newRef.key,
+        total:        paqueteDeDatos.total,
+        descripcion:  paqueteDeDatos.descripcion,
+        fecha:        paqueteDeDatos.fecha,
+        firebaseId:   newRef.key
+      };
+      window.NotionSync.syncGeneral(datosNotion, newRef.key);
+    }
+    // ── Fin Notion ─────────────────────────────────────────────────────────────
+
   } catch (error) {
     console.error("❌ Error:", error);
     mostrarNotificacion("Error al guardar: " + error.message, "error");
@@ -2355,7 +2372,7 @@ async function generarFacturaFinal() {
     };
 
     // 3. Guardar en nodo 'facturas'
-    await db.ref('facturas').push(factura);
+    const facturaRef = await db.ref('facturas').push(factura);
 
     // 4. Actualizar la cotización original para marcarla como facturada
     await db.ref(`cotizaciones/${cotizacionAFacturar.id}`).update({
@@ -2368,6 +2385,24 @@ async function generarFacturaFinal() {
     
     // Opcional: Recargar lista
     abrirModalCotizaciones();
+
+    // ── Sincronización con Notion (segundo plano) ──────────────────────────────
+    if (window.NotionSync) {
+      const datosNotionFactura = {
+        razon_social:      factura.razon_social || nombre,
+        rnc_cliente:       factura.rnc_cliente || rnc,
+        ncf:               ncfCompleto,
+        total:             factura.total,
+        itbis:             factura.impuesto || 0,
+        subtotal:          factura.subtotal || 0,
+        tipo_ncf:          tipoNCF,
+        estado:            'activa',
+        fecha_facturacion: factura.fecha_facturacion,
+        firebaseId:        facturaRef.key
+      };
+      window.NotionSync.syncFactura(datosNotionFactura, facturaRef.key);
+    }
+    // ── Fin Notion ─────────────────────────────────────────────────────────────
 
   } catch (error) {
     console.error('Error facturando:', error);
@@ -3690,3 +3725,75 @@ function mostrarBienvenida(nombre) {
     setTimeout(() => overlay.remove(), 500);
   }, 4000);
 }
+
+// ============================================
+// 📄 MÓDULO: CÁLCULO DE HOJAS
+// ============================================
+
+/**
+ * Abre el modal de cálculo de hojas y ejecuta un primer cálculo
+ */
+function abrirModalCalculoHojas() {
+  const modal = document.getElementById('modalCalculoHojas');
+  if(modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    calcularHojas(); // Calcular valores por defecto al abrir
+  }
+}
+
+/**
+ * Cierra el modal de cálculo de hojas
+ */
+function cerrarModalCalculoHojas() {
+  const modal = document.getElementById('modalCalculoHojas');
+  if(modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+/**
+ * Lógica principal para calcular el consumo de papel
+ * Se actualiza automáticamente al cambiar datos
+ */
+function calcularHojas() {
+  const tipo = document.getElementById('calcHojasTipo')?.value || 'una_cara';
+  const paginas = parseInt(document.getElementById('calcHojasPaginas')?.value) || 0;
+  const copias = parseInt(document.getElementById('calcHojasCopias')?.value) || 1;
+
+  let hojasPorCopia = 0;
+  let hojasTotales = 0;
+
+  // Lógica principal según el tipo de impresión
+  if (tipo === 'una_cara') {
+    hojasPorCopia = paginas;
+    hojasTotales = hojasPorCopia * copias;
+  } else if (tipo === 'doble_cara') {
+    hojasPorCopia = Math.ceil(paginas / 2);
+    hojasTotales = hojasPorCopia * copias;
+  } else if (tipo === 'folleto') {
+    const paginasFinales = Math.ceil(paginas / 4) * 4;
+    hojasPorCopia = paginasFinales / 4;
+    hojasTotales = hojasPorCopia * copias;
+  }
+
+  // Cálculos de remas y cajas
+  // Una resma = 500 hojas
+  const remasExactas = hojasTotales / 500;
+  const remasNecesarias = Math.ceil(hojasTotales / 500);
+
+  // Una caja = 10 remas = 5000 hojas
+  const cajasExactas = hojasTotales / 5000;
+  const cajasNecesarias = Math.ceil(hojasTotales / 5000);
+
+  // Mostrar resultados
+  if (document.getElementById('resHojasCopia')) {
+    document.getElementById('resHojasCopia').textContent = hojasPorCopia.toLocaleString();
+    document.getElementById('resHojasTotales').textContent = hojasTotales.toLocaleString();
+    document.getElementById('resRemasExactas').textContent = remasExactas.toFixed(2);
+    document.getElementById('resRemasNecesarias').textContent = remasNecesarias.toLocaleString();
+    document.getElementById('resCajasExactas').textContent = cajasExactas.toFixed(2);
+    document.getElementById('resCajasNecesarias').textContent = cajasNecesarias.toLocaleString();
+  }
+}
