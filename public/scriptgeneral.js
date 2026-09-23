@@ -1,4 +1,4 @@
-// ============================================
+﻿// ============================================
 // 📝 COTIZACIÓN - GLOBAL
 // ============================================
 let cotizacion = [];
@@ -2573,9 +2573,33 @@ function renderizarFacturas() {
   totalLabel.textContent = `Total Facturado: RD$${sumaTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
 }
 
-function imprimirFactura(idFactura) {
+async function imprimirFactura(idFactura) {
   const factura = todasLasFacturas.find(f => f.id === idFactura);
   if (!factura) return;
+
+  // ── Pre-cargar sello y firma como Base64 ──────────────────────────────────
+  // Las ventanas abiertas con document.write tienen baseURL = about:blank,
+  // por lo que rutas relativas no resuelven. Base64 garantiza que las imágenes
+  // estén embebidas y listas antes de que se abra el diálogo de impresión.
+  async function toDataUrl(relPath) {
+    try {
+      const base = window.location.href.replace(/[^\/]*$/, '');
+      const resp  = await fetch(base + relPath);
+      if (!resp.ok) return null;
+      const blob  = await resp.blob();
+      return await new Promise(resolve => {
+        const r = new FileReader();
+        r.onload  = () => resolve(r.result);
+        r.onerror = () => resolve(null);
+        r.readAsDataURL(blob);
+      });
+    } catch { return null; }
+  }
+
+  const [selloDataUrl, firmaDataUrl] = await Promise.all([
+    toDataUrl('sello.png'),
+    toDataUrl('firma.png')
+  ]);
 
   const fecha = new Date(factura.fecha_facturacion).toLocaleDateString('es-DO');
   // Asegurar que items sea un array (Firebase a veces devuelve objetos si las claves son numéricas)
@@ -2646,6 +2670,11 @@ function imprimirFactura(idFactura) {
         .totals-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #cbd5e1; }
         .totals-row.final { border-bottom: none; border-top: 2px solid #1e3a8a; margin-top: 10px; padding-top: 10px; font-size: 18px; color: #1e3a8a; }
         .footer { clear: both; margin-top: 60px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        .firma-sello { clear: both; display: flex; justify-content: space-between; align-items: flex-end; margin-top: 60px; padding-top: 30px; border-top: 1px solid #e2e8f0; gap: 40px; }
+        .firma-sello .bloque { text-align: center; flex: 1; }
+        .firma-sello img { max-height: 90px; max-width: 180px; object-fit: contain; display: block; margin: 0 auto 6px auto; }
+        .firma-sello .linea { border-top: 1px solid #64748b; margin-top: 4px; padding-top: 4px; font-size: 11px; color: #64748b; }
+        @media print { .firma-sello { page-break-inside: avoid; } }
       </style>
     </head>
     <body>
@@ -2676,6 +2705,16 @@ function imprimirFactura(idFactura) {
         <div class="totals-row"><span>Subtotal:</span><span>RD$${subtotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</span></div>
         <div class="totals-row"><span>${nombreImpuesto}:</span><span>RD$${impuesto.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</span></div>
         <div class="totals-row final"><strong>TOTAL:</strong><strong>RD$${total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</strong></div>
+      </div>
+      <div class="firma-sello">
+        <div class="bloque">
+          ${firmaDataUrl ? `<img src="${firmaDataUrl}" alt="Firma autorizada">` : ''}
+          <div class="linea">Firma Autorizada</div>
+        </div>
+        <div class="bloque">
+          ${selloDataUrl ? `<img src="${selloDataUrl}" alt="Sello de la empresa">` : ''}
+          <div class="linea">Sello de la Empresa</div>
+        </div>
       </div>
       <div class="footer"><p>Gracias por preferirnos. Factura generada electrónicamente.</p></div>
     </body>
