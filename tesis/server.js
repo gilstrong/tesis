@@ -3,19 +3,11 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const { GoogleGenAI } = require('@google/genai');
-const cookieParser = require('cookie-parser');
-const cors = require('cors');
-
-// Inicialización consolidada y robusta de Firebase Admin SDK
-const { admin, db } = require('./config/firebase');
 
 const pdfController = require('./pdfController');
 const notionService = require('./notionService');
 
 const app = express();
-// Confiar en el proxy (1 nivel para Render/proxies inversos para obtener la IP real)
-app.set('trust proxy', 1);
-
 const port = process.env.PORT || 3000;
 
 const ai = new GoogleGenAI({
@@ -103,21 +95,19 @@ app.use(express.urlencoded({
     extended: true
 }));
 
-app.use(cookieParser());
-
 // ------------------------
-// CORS & PREFLIGHT (Soporta cookies, credentials y evita Error 405)
+// CORS & PREFLIGHT (Evita Error 405)
 // ------------------------
-app.use(cors({
-    origin: (origin, callback) => {
-        // Permite solicitudes sin encabezado Origin (móviles, curl, server-to-server)
-        // o cualquier origen web reflejando el host exacto para permitir credentials: true
-        callback(null, origin || true);
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['X-Requested-With', 'Content-Type', 'Authorization']
-}));
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Authorization');
+    // Responder inmediatamente a peticiones de pre-vuelo OPTIONS
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+    next();
+});
 
 // ------------------------
 // FAVICON
@@ -344,12 +334,6 @@ app.post('/notion/archivar', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
-
-// ------------------------
-// MONITOREO Y ANALÍTICA DE VISITANTES
-// ------------------------
-app.use('/api/visitors', require('./routes/visitorRoutes'));
-app.use('/api', require('./routes/analyticsRoutes'));
 
 // ------------------------
 // ARCHIVOS ESTÁTICOS (Mover al final)

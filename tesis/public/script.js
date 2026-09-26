@@ -1397,31 +1397,8 @@ async function confirmarGuardarTesis() {
   };
 
   try {
-    const firebaseRef = await db.ref("cotizaciones").push(paqueteDeDatos);
+    await db.ref("cotizaciones").push(paqueteDeDatos);
     mostrarNotificacion(`✅ Tesis guardada correctamente`, "success");
-
-    // ── Sincronización con Notion (segundo plano) ──────────────────────────────
-    // Si NotionSync no está configurado o falla, la app sigue funcionando normal.
-    if (window.NotionSync) {
-      const datosNotion = {
-        nombre:        nombre,
-        idCotizacion:  datosUltimaCotizacion?.idCotizacion || paqueteDeDatos.nombre,
-        total:         paqueteDeDatos.total,
-        tomos:         inputs.tomos,
-        tipoEmpastado: inputs.tipoEmpastado,
-        colorTapa:     inputs.colorTapa,
-        tamano:        inputs.tamano,
-        papel:         inputs.papel,
-        lomo:          inputs.lomo,
-        cantidadCd:    inputs.cantidadCd,
-        itlaAplicado:  elementos.itlaCheckbox?.checked || false,
-        fecha:         paqueteDeDatos.fecha,
-        firebaseId:    firebaseRef.key
-      };
-      window.NotionSync.syncTesis(datosNotion, firebaseRef.key);
-    }
-    // ── Fin Notion ─────────────────────────────────────────────────────────────
-
   } catch (error) {
     console.error("❌ Error:", error);
     mostrarNotificacion("Error al guardar: " + error.message, "error");
