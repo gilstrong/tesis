@@ -139,13 +139,39 @@ async function getPublicGatewayGeo() {
   }
 }
 
+function isCloudOrProduction() {
+  return Boolean(
+    process.env.RENDER ||
+    process.env.NODE_ENV === 'production' ||
+    process.env.RENDER_SERVICE_ID ||
+    process.env.RENDER_INSTANCE_ID
+  );
+}
+
 /**
  * Devuelve la ubicación aproximada de una IP.
  * Nunca lanza excepciones: si falla, devuelve un objeto seguro.
  */
 async function getApproximateLocation(ip) {
-  // Si es IP privada o local (celular en la misma Wi-Fi o localhost en la PC)
+  // Si es IP privada o local (10.x, 192.168.x, 127.0.0.1, etc.)
   if (isPrivateOrLocalIp(ip)) {
+    // Si estamos en la nube (Render) o producción, NUNCA consultar la salida de internet sin IP
+    // porque geolocalizaría el centro de datos de Render en Estados Unidos.
+    if (isCloudOrProduction()) {
+      return {
+        country: 'Red Interna',
+        region: 'Servidor',
+        city: 'Proxy Nube',
+        isp: 'Render / Internal',
+        lat: null,
+        lon: null,
+        approximate: true,
+        isLocalNetwork: true,
+        note: 'IP interna de contenedor',
+      };
+    }
+
+    // Solo en desarrollo local (PC del programador en red Wi-Fi hogareña)
     const gatewayGeo = await getPublicGatewayGeo();
     return {
       ...gatewayGeo,

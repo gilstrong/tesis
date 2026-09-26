@@ -23,6 +23,8 @@ function parseDevice(userAgent) {
   else if (result.device.type === 'tablet') deviceType = 'Tablet';
   else if (result.device.type === 'smarttv') deviceType = 'Smart TV';
   else if (result.device.type) deviceType = result.device.type;
+  else if (/ipad|tablet/i.test(userAgent)) deviceType = 'Tablet';
+  else if (/mobi|android|iphone|ipod|blackberry|opera mini|iemobile|wpdesktop/i.test(userAgent)) deviceType = 'Celular';
 
   return { browser, os, deviceType };
 }

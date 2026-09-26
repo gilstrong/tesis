@@ -78,10 +78,16 @@ if (typeof window !== 'undefined') {
   window.addEventListener('pagehide', sendDisconnect);
   window.addEventListener('beforeunload', sendDisconnect);
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-      sendDisconnect();
-    } else if (document.visibilityState === 'visible' && currentPage) {
-      sendTrack(currentPage);
+    if (document.visibilityState === 'visible') {
+      sendHeartbeat();
+      if (!heartbeatTimer && typeof setInterval !== 'undefined') {
+        heartbeatTimer = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL_MS);
+      }
+    } else {
+      if (heartbeatTimer) {
+        clearInterval(heartbeatTimer);
+        heartbeatTimer = null;
+      }
     }
   });
 }

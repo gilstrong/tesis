@@ -15,18 +15,19 @@ const VISITOR_COOKIE = 'sg_vid';
 const COOKIE_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 365; // 1 año
 const ACTIVE_WINDOW_MS = 1000 * 60 * 5; // 5 minutos
 
-// ─── RATE LIMITING (30 solicitudes por minuto por IP) ─────────────────────────
+// ─── RATE LIMITING (180 solicitudes por minuto por IP real) ───────────────────
 const visitorLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minuto
-  max: 30, // 30 req/min
+  max: 180, // Generoso para que latidos y navegación múltiple no bloqueen al visitante
+  keyGenerator: (req) => getClientIp(req) || 'unknown_ip',
   standardHeaders: true,
   legacyHeaders: false,
   message: { ok: false, error: 'Límite de solicitudes de analítica alcanzado' },
   skip: (req) => req.method === 'OPTIONS',
 });
 
-// ─── FILTRO DE BOTS Y CRAWLERS ────────────────────────────────────────────────
-const BOT_REGEX = /bot|crawler|spider|crawling|googlebot|bingbot|yandex|duckduckbot|slurp|baiduspider|curl|wget|postman|uptimerobot|headlesschrome|python-requests|node-fetch|axios|httpclient/i;
+// ─── FILTRO DE BOTS, CRAWLERS Y PROBES DE NUBE ────────────────────────────────
+const BOT_REGEX = /bot|crawler|spider|crawling|googlebot|bingbot|yandex|duckduckbot|slurp|baiduspider|curl|wget|postman|uptimerobot|headlesschrome|python-requests|node-fetch|axios|httpclient|go-http-client|render|healthcheck|kube-probe|datadog|pingdom/i;
 
 function isBot(userAgent) {
   if (!userAgent) return false;

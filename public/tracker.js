@@ -125,13 +125,20 @@
   window.addEventListener('pagehide', sendDisconnect);
   window.addEventListener('beforeunload', sendDisconnect);
 
-  // Escuchar cuando minimiza o cambia de pestaña
+  // Escuchar cuando minimiza o cambia de pestaña sin desconectar bruscamente (crucial para móviles)
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-      sendDisconnect();
-    } else if (document.visibilityState === 'visible') {
-      // Reconectar inmediatamente al volver a la pestaña
-      sendTrack(document.title);
+    if (document.visibilityState === 'visible') {
+      // Al volver a la pestaña, envía latido y reactiva el temporizador
+      sendHeartbeat();
+      if (!heartbeatTimer) {
+        heartbeatTimer = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL_MS);
+      }
+    } else {
+      // Si la pestaña está oculta o en segundo plano en celular, pausar latidos para ahorrar batería
+      if (heartbeatTimer) {
+        clearInterval(heartbeatTimer);
+        heartbeatTimer = null;
+      }
     }
   });
 
