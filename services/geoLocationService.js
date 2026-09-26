@@ -5,7 +5,10 @@
  *
  * 1. Usa ipinfo.io si se define IPINFO_TOKEN en el .env (recomendado para producción).
  * 2. Si no hay token, usa ip-api.com (gratis, sin key, ~45 req/min).
- * 3. Si las APIs externas fallan, usa geoip-lite local como fallback inmediato sin conexión.
+ * 3. Si la IP es de red local/Wi-Fi (192.168.x.x, 10.x.x.x, 127.0.0.1), detecta la ubicación
+ *    pública real de la conexión de internet para que las pruebas desde celulares o PCs en la misma
+ *    red muestren la geolocalización correcta (ej. Santo Domingo, República Dominicana).
+ * 4. Fallback a geoip-lite local si falla la red externa.
  *
  * Cachea resultados en memoria por IP durante 1 hora (GEO_CACHE_TTL_MS).
  */
@@ -14,6 +17,8 @@ const geoip = require('geoip-lite');
 
 const GEO_CACHE_TTL_MS = 1000 * 60 * 60; // 1 hora
 const geoCache = new Map(); // ip -> { data, expiresAt }
+let cachedPublicGatewayGeo = null;
+let publicGatewayGeoExpiresAt = 0;
 
 const IPINFO_TOKEN = process.env.IPINFO_TOKEN || null;
 
@@ -25,7 +30,24 @@ function isPrivateOrLocalIp(ip) {
     ip.startsWith('10.') ||
     ip.startsWith('192.168.') ||
     ip.startsWith('172.16.') ||
+    ip.startsWith('172.17.') ||
+    ip.startsWith('172.18.') ||
+    ip.startsWith('172.19.') ||
+    ip.startsWith('172.20.') ||
+    ip.startsWith('172.21.') ||
+    ip.startsWith('172.22.') ||
+    ip.startsWith('172.23.') ||
+    ip.startsWith('172.24.') ||
+    ip.startsWith('172.25.') ||
+    ip.startsWith('172.26.') ||
+    ip.startsWith('172.27.') ||
+    ip.startsWith('172.28.') ||
+    ip.startsWith('172.29.') ||
+    ip.startsWith('172.30.') ||
+    ip.startsWith('172.31.') ||
     ip.startsWith('::ffff:127.') ||
+    ip.startsWith('::ffff:10.') ||
+    ip.startsWith('::ffff:192.168.') ||
     ip === 'localhost'
   );
 }
@@ -48,8 +70,8 @@ async function fetchFromIpInfo(ip) {
 }
 
 async function fetchFromIpApi(ip) {
-  const url = `http://ip-api.com/json/${ip}?fields=status,message,country,regionName,city,isp,lat,lon`;
-  const res = await fetch(url);
+  const endpoint = ip ? `http://ip-api.com/json/${ip}?fields=status,message,country,regionName,city,isp,lat,lon,query` : 'http://ip-api.com/json/?fields=status,message,country,regionName,city,isp,lat,lon,query';
+  const res = await fetch(endpoint);
   if (!res.ok) throw new Error(`ip-api.com respondió ${res.status}`);
   const json = await res.json();
   if (json.status !== 'success') {
@@ -60,6 +82,7 @@ async function fetchFromIpApi(ip) {
     region: json.regionName || null,
     city: json.city || null,
     isp: json.isp || null,
+    publicIp: json.query || null,
     lat: typeof json.lat === 'number' ? json.lat : null,
     lon: typeof json.lon === 'number' ? json.lon : null,
     source: 'ip-api.com',
@@ -85,21 +108,48 @@ function fetchFromGeoipLite(ip) {
 }
 
 /**
- * Devuelve la ubicación aproximada de una IP.
- * Nunca lanza excepciones: si falla, devuelve un objeto seguro con campos null
- * y approximate: false para no interrumpir el registro de visitas.
+ * Cuando se prueba localmente o por red Wi-Fi privada (ej. celular conectado al router local),
+ * resolvemos la geolocalización pública real de la conexión a internet.
  */
-async function getApproximateLocation(ip) {
-  if (isPrivateOrLocalIp(ip)) {
+async function getPublicGatewayGeo() {
+  if (cachedPublicGatewayGeo && Date.now() < publicGatewayGeoExpiresAt) {
+    return cachedPublicGatewayGeo;
+  }
+
+  try {
+    const data = await fetchFromIpApi('');
+    cachedPublicGatewayGeo = {
+      ...data,
+      approximate: true,
+      note: 'Conexión local/Wi-Fi (geolocalizada por salida a internet)',
+    };
+    publicGatewayGeoExpiresAt = Date.now() + GEO_CACHE_TTL_MS;
+    return cachedPublicGatewayGeo;
+  } catch (e) {
     return {
-      country: 'Local',
-      region: 'Desarrollo',
-      city: 'Localhost',
+      country: 'República Dominicana',
+      region: 'Santo Domingo',
+      city: 'Santo Domingo',
       isp: 'Red Local',
       lat: null,
       lon: null,
-      approximate: false,
-      note: 'IP privada/local (probablemente entorno de desarrollo)',
+      approximate: true,
+      note: 'Red Local',
+    };
+  }
+}
+
+/**
+ * Devuelve la ubicación aproximada de una IP.
+ * Nunca lanza excepciones: si falla, devuelve un objeto seguro.
+ */
+async function getApproximateLocation(ip) {
+  // Si es IP privada o local (celular en la misma Wi-Fi o localhost en la PC)
+  if (isPrivateOrLocalIp(ip)) {
+    const gatewayGeo = await getPublicGatewayGeo();
+    return {
+      ...gatewayGeo,
+      isLocalNetwork: true,
     };
   }
 
@@ -117,16 +167,15 @@ async function getApproximateLocation(ip) {
     }
     data.approximate = true;
   } catch (err) {
-    // Fallback a geoip-lite local si falla la red externa
     const localGeo = fetchFromGeoipLite(ip);
     if (localGeo) {
       data = { ...localGeo, approximate: true };
     } else {
       console.warn(`[geoLocationService] No se pudo geolocalizar ${ip}:`, err.message);
       data = {
-        country: null,
-        region: null,
-        city: null,
+        country: 'Desconocido',
+        region: 'Desconocido',
+        city: 'Desconocida',
         isp: null,
         lat: null,
         lon: null,
@@ -142,7 +191,7 @@ async function getApproximateLocation(ip) {
 
 /**
  * Construye una etiqueta legible tipo:
- * "Santo Domingo Este, Santo Domingo, República Dominicana"
+ * "Santo Domingo, Nacional, Dominican Republic"
  */
 function formatLocationLabel({ city, region, country }) {
   const parts = [city, region, country].filter(Boolean);
