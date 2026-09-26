@@ -1,11 +1,10 @@
 /**
  * ServiGaco - Sistema de Monitoreo de Visitantes
- * Registra visitas de páginas y pulsos de presencia (heartbeat)
+ * Con desconexión inmediata, latidos automáticos y reconexión en visibilidad.
  */
 (function() {
   'use strict';
 
-  // ID anónimo persistente en cliente como respaldo a la cookie HTTP
   let visitorId = localStorage.getItem('servigaco_visitor_id');
   if (!visitorId) {
     visitorId = 'vis_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
@@ -15,9 +14,20 @@
   const HEARTBEAT_INTERVAL_MS = 45 * 1000; // 45 segundos
   let heartbeatTimer = null;
   let currentPage = document.title || window.location.pathname;
+  let lastTrackTime = 0;
+  let lastTrackPage = '';
 
   async function sendTrack(pageName) {
     currentPage = pageName || document.title || window.location.pathname;
+
+    // Evitar disparar dos veces para la misma página en menos de 2 segundos
+    const now = Date.now();
+    if (currentPage === lastTrackPage && now - lastTrackTime < 2000) {
+      return;
+    }
+    lastTrackTime = now;
+    lastTrackPage = currentPage;
+
     try {
       await fetch('/api/visitors/track', {
         method: 'POST',
@@ -26,11 +36,10 @@
         body: JSON.stringify({
           visitorId,
           page: currentPage,
-          url: window.location.pathname
-        })
+          url: window.location.pathname,
+        }),
       });
     } catch (err) {
-      // Fallback a /api/track si fuese necesario
       try {
         await fetch('/api/track', {
           method: 'POST',
@@ -39,16 +48,17 @@
           body: JSON.stringify({
             visitorId,
             page: currentPage,
-            url: window.location.pathname
-          })
+            url: window.location.pathname,
+          }),
         });
-      } catch (e) {
-        // La analítica nunca debe romper la experiencia de usuario
-      }
+      } catch (e) {}
     }
   }
 
   async function sendHeartbeat() {
+    // Si la pestaña está oculta, no enviar latidos
+    if (document.visibilityState === 'hidden') return;
+
     try {
       await fetch('/api/visitors/heartbeat', {
         method: 'POST',
@@ -56,8 +66,8 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           visitorId,
-          page: currentPage
-        })
+          page: currentPage,
+        }),
       });
     } catch (err) {
       try {
@@ -67,10 +77,32 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             visitorId,
-            page: currentPage
-          })
+            page: currentPage,
+          }),
         });
       } catch (e) {}
+    }
+  }
+
+  /**
+   * Desconexión inmediata al salir o cambiar de pestaña.
+   * navigator.sendBeacon garantiza que la solicitud salga incluso al cerrar el navegador.
+   */
+  function sendDisconnect() {
+    const payload = JSON.stringify({ visitorId, page: currentPage });
+    const url = '/api/visitors/disconnect';
+
+    if (navigator.sendBeacon) {
+      const blob = new Blob([payload], { type: 'application/json' });
+      navigator.sendBeacon(url, blob);
+    } else {
+      fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        keepalive: true,
+      }).catch(() => {});
     }
   }
 
@@ -89,11 +121,25 @@
     }
   }
 
-  // Exponer a ventana global
+  // Escuchar cuando el usuario sale del sitio o cierra la ventana
+  window.addEventListener('pagehide', sendDisconnect);
+  window.addEventListener('beforeunload', sendDisconnect);
+
+  // Escuchar cuando minimiza o cambia de pestaña
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      sendDisconnect();
+    } else if (document.visibilityState === 'visible') {
+      // Reconectar inmediatamente al volver a la pestaña
+      sendTrack(document.title);
+    }
+  });
+
+  // Exponer API global
   window.trackPageView = startTracking;
   window.stopVisitorTracking = stopTracking;
 
-  // Auto-iniciar en carga de documento
+  // Iniciar automáticamente al cargar
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => startTracking());
   } else {

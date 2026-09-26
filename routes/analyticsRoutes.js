@@ -23,9 +23,10 @@ router.get('/analytics', async (req, res) => {
 
     const activeVisitors = activeDocs.map((v) => {
       const lastSeen = v.lastSeen?.toDate ? v.lastSeen.toDate() : v.lastSeen;
+      const displayIp = v.publicIp ? `${maskIp(v.publicIp)} (${maskIp(v.ip)})` : maskIp(v.ip);
       return {
         visitorId: v.visitorId,
-        ip: maskIp(v.ip),
+        ip: displayIp,
         locationString: formatLocationLabel({ city: v.city, region: v.region, country: v.country }),
         country: v.country || 'Desconocido',
         city: v.city || 'Desconocida',
@@ -41,10 +42,11 @@ router.get('/analytics', async (req, res) => {
 
     const recentLogs = logDocs.map((l) => {
       const firstVisit = l.createdAt?.toDate ? l.createdAt.toDate() : l.createdAt;
+      const displayIp = l.publicIp ? `${maskIp(l.publicIp)} (${maskIp(l.ip)})` : maskIp(l.ip);
       return {
         firstVisit: firstVisit,
         locationString: formatLocationLabel({ city: l.city, region: l.region, country: l.country }),
-        ip: maskIp(l.ip),
+        ip: displayIp,
         browser: l.browser || 'Desconocido',
         os: l.os || 'Desconocido',
         device: l.deviceType || 'Desktop',

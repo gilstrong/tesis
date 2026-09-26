@@ -22,6 +22,10 @@ async function logVisit({ visitorId, ip, page, browser, os, deviceType, userAgen
 
   const nowJsDate = new Date();
 
+  // Política TTL: fecha de expiración automática de Firestore
+  const retentionDays = Number(process.env.LOG_RETENTION_DAYS) || 90;
+  const expireAt = new Date(Date.now() + retentionDays * 24 * 60 * 60 * 1000);
+
   const logEntry = {
     visitorId,
     ip,
@@ -34,12 +38,14 @@ async function logVisit({ visitorId, ip, page, browser, os, deviceType, userAgen
     region: location ? location.region : null,
     city: location ? location.city : null,
     isp: location ? location.isp : null,
+    publicIp: location ? location.publicIp : null,
     approximateLocation: location ? location.approximate : false,
     createdAt: now,
+    expireAt: expireAt, // Campo TTL para auto-borrado en Firestore
   };
 
   // Guardar en respaldo en memoria
-  const memoryEntry = { ...logEntry, createdAt: nowJsDate };
+  const memoryEntry = { ...logEntry, createdAt: nowJsDate, expireAt: expireAt };
   memoryLogs.unshift(memoryEntry);
   if (memoryLogs.length > MAX_MEMORY_LOGS) memoryLogs.pop();
 
@@ -71,7 +77,9 @@ async function logVisit({ visitorId, ip, page, browser, os, deviceType, userAgen
             region: location ? location.region : null,
             city: location ? location.city : null,
             isp: location ? location.isp : null,
+            publicIp: location ? location.publicIp : null,
             approximateLocation: location ? location.approximate : false,
+            active: true,
             ...(existingSession.exists ? {} : { firstSeen: now }),
             lastSeen: now,
           },
@@ -97,6 +105,7 @@ async function heartbeat({ visitorId, page }) {
   if (memorySessions.has(visitorId)) {
     const s = memorySessions.get(visitorId);
     s.lastSeen = nowJsDate;
+    s.active = true;
     if (page) s.page = page;
     memorySessions.set(visitorId, s);
   }
@@ -106,6 +115,7 @@ async function heartbeat({ visitorId, page }) {
       const sessionRef = db.collection(SESSIONS_COLLECTION).doc(visitorId);
       const update = {
         lastSeen: admin.firestore.FieldValue.serverTimestamp(),
+        active: true,
       };
       if (page) update.page = page;
 
@@ -117,7 +127,41 @@ async function heartbeat({ visitorId, page }) {
 }
 
 /**
- * Visitantes activos = sesiones cuyo lastSeen fue dentro de la ventana activa.
+ * Desconexión inmediata: marca la sesión como inactiva al instante
+ * cuando el usuario cierra o cambia de pestaña.
+ */
+async function disconnect({ visitorId }) {
+  if (!visitorId) return;
+  const now = admin && admin.firestore && admin.firestore.FieldValue
+    ? admin.firestore.FieldValue.serverTimestamp()
+    : new Date();
+  const nowJsDate = new Date();
+
+  if (memorySessions.has(visitorId)) {
+    const s = memorySessions.get(visitorId);
+    s.active = false;
+    s.disconnectedAt = nowJsDate;
+    memorySessions.set(visitorId, s);
+  }
+
+  if (db) {
+    try {
+      const sessionRef = db.collection(SESSIONS_COLLECTION).doc(visitorId);
+      await sessionRef.set(
+        {
+          active: false,
+          disconnectedAt: now,
+        },
+        { merge: true }
+      );
+    } catch (err) {
+      console.warn('[visitorService] Error disconnect en Firestore:', err.message);
+    }
+  }
+}
+
+/**
+ * Visitantes activos = sesiones cuyo lastSeen fue dentro de la ventana activa Y active !== false.
  */
 async function getActiveVisitors() {
   const cutoffTime = Date.now() - ACTIVE_WINDOW_MS;
@@ -131,7 +175,9 @@ async function getActiveVisitors() {
         .orderBy('lastSeen', 'desc')
         .get();
 
-      return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      return snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((s) => s.active !== false);
     } catch (err) {
       console.warn('[visitorService] Error getActiveVisitors en Firestore:', err.message);
     }
@@ -139,7 +185,7 @@ async function getActiveVisitors() {
 
   // Fallback memoria
   return Array.from(memorySessions.values()).filter(
-    (s) => new Date(s.lastSeen).getTime() >= cutoffTime
+    (s) => new Date(s.lastSeen).getTime() >= cutoffTime && s.active !== false
   );
 }
 
@@ -267,6 +313,7 @@ async function getStats() {
 module.exports = {
   logVisit,
   heartbeat,
+  disconnect,
   getActiveVisitors,
   getRecentVisits,
   getRecentLogEntries,
