@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Calculadora profesional para cotización de tesis con empastado y opciones personalizadas" />
+  <meta name="keywords" content="calculadora tesis, empastado, cotización, impresión" />
+  <meta name="author" content="ServiGaco" />
+  
+  <title>Calculadora de Tesis - Cotización Profesional</title>
+
+  <!-- FUENTES: Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- ESTILOS -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- ICONOS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+
+  <!-- TAILWIND CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+
+</head>
+
+<body>
+  <main class="container">
+    
+    <!-- ========================================
+         🧭 NAVEGACIÓN PRINCIPAL
+         ======================================== -->
+    <servigaco-nav></servigaco-nav>
+
+    <!-- ========================================
+         📝 SECCIÓN: CALCULADORA DE TESIS
+         ======================================== -->
+    <section class="form-card" aria-label="Formulario de cotización">
+      <!-- Logo -->
+      <figure class="logo-container">
+        <img src="logo.png" alt="Logo de la empresa" class="logo-form" width="150" height="80" />
+      </figure>
+
+      <!-- Título principal -->
+      <header class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+        <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Calculadora de Tesis</h1>
+        <div class="flex items-center gap-2">
+          <button type="button" id="btnDashboard" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-500 to-indigo-700 hover:from-indigo-400 hover:to-indigo-600 shadow-md shadow-indigo-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 text-sm">
+            <span class="text-lg">📊</span> Dashboard
+          </button>
+          <button type="button" id="btnVerGuardadas" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-400 hover:to-teal-600 shadow-md shadow-teal-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 text-sm">
+            <span class="text-lg">📂</span>
+            Ver Guardadas
+          </button>
+          <button type="button" onclick="abrirModalAnalizadorPDF()" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-500 to-indigo-700 hover:from-indigo-400 hover:to-indigo-600 shadow-md shadow-indigo-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 text-sm">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            Analizar PDF
+          </button>
+        </div>
+      </header>
+
+      <!-- Formulario de cotización -->
+      <form id="formCotizacion" aria-label="Formulario de cálculo">
+        
+        <!-- Precio Especial ITLA -->
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label for="itlaCheckbox" class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-900/20 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 transition-colors">
+            <input type="checkbox" id="itlaCheckbox" name="itlaCheckbox" class="w-5 h-5 text-indigo-600 rounded border-indigo-300 focus:ring-indigo-500 cursor-pointer">
+            <span class="label-icon m-0" style="margin-bottom: 0;">🏫</span>
+            <span class="font-bold text-indigo-900 dark:text-indigo-200">UNIVERIDAD ITLA</span>
+          </label>
+        </div>
+
+        <!-- Tamaño de papel -->
+        <div class="form-group">
+          <label for="tamano">
+            <span class="label-icon">📐</span>
+            Tamaño de papel
+          </label>
+          <select id="tamano" name="tamano" required aria-describedby="alertaTabloide">
+            <option value="carta">Carta (8.5 x 11)</option>
+            <option value="legal">Legal (8.5 x 14)</option>
+            <option value="tabloide">11 x 17</option>
+          </select>
+        </div>
+
+        <!-- Alerta tamaño tabloide -->
+        <div id="alertaTabloide" class="alerta" role="alert" aria-live="polite">
+          <span class="alert-icon">⚠️</span>
+          11×17 solo disponible en papel satinado con empastado vinil.
+        </div>
+
+        <!-- Tipo de papel -->
+        <div class="form-group">
+          <label for="papel">
+            <span class="label-icon">📄</span>
+            Tipo de papel
+          </label>
+          <select id="papel" name="papel" required>
+            <option value="bond">Bond</option>
+            <option value="hilo">Hilo</option>
+            <option value="satinado">Satinado</option>
+          </select>
+        </div>
+
+        <!-- Páginas B/N y Color -->
+        <div id="bnColorSection" class="form-section">
+          <div class="form-group">
+            <label for="bn">
+              <span class="label-icon">⚫</span>
+              Páginas Blanco y Negro
+            </label>
+            <input 
+              type="number" 
+              id="bn" 
+              name="bn"
+              min="0" 
+              value="0"
+              placeholder="Ej: 50"
+              aria-label="Cantidad de páginas en blanco y negro"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="color">
+              <span class="label-icon">🎨</span>
+              Páginas a Color
+            </label>
+            <input 
+              type="number" 
+              id="color" 
+              name="color"
+              min="0" 
+              value="0"
+              placeholder="Ej: 10"
+              aria-label="Cantidad de páginas a color"
+            />
+          </div>
+        </div>
+
+        <!-- Total de páginas (satinado) -->
+        <div id="soloPaginas" class="form-section">
+          <div class="form-group">
+            <label for="paginas">
+              <span class="label-icon">📊</span>
+              Total de páginas
+            </label>
+            <input 
+              type="number" 
+              id="paginas" 
+              name="paginas"
+              min="1" 
+              value="1"
+              placeholder="Ej: 100"
+              aria-label="Total de páginas"
+            />
+          </div>
+        </div>
+
+        <!-- Cantidad de tomos -->
+        <div class="form-group">
+          <label for="tomos">
+            <span class="label-icon">📚</span>
+            Cantidad de tomos
+          </label>
+          <input 
+            type="number" 
+            id="tomos" 
+            name="tomos"
+            value="1" 
+            min="1" 
+            max="10"
+            required
+            aria-label="Número de tomos a empastar"
+          />
+        </div>
+
+        <!-- Tipo de empastado -->
+        <div class="form-group">
+          <label for="tipoEmpastado">
+            <span class="label-icon">📕</span>
+            Tipo de empastado
+          </label>
+          <select id="tipoEmpastado" name="tipoEmpastado" required>
+            <option value="tapa_dura">Tapa dura</option>
+            <option value="vinil">Vinil</option>
+            <option value="espiral">Espiral</option>
+          </select>
+        </div>
+
+        <!-- Color de tapa (solo tapa dura) -->
+        <div id="colorTapaSection" class="form-section">
+          <div class="form-group">
+            <label for="colorTapa">
+              <span class="label-icon">🎨</span>
+              Color de tapa
+            </label>
+            <select id="colorTapa" name="colorTapa">
+              <option value="beige">Beige</option>
+              <option value="morado">Morado</option>
+              <option value="azul_marino">Azul marino</option>
+              <option value="azul_cielo">Azul cielo</option>
+              <option value="rojo">Rojo</option>
+              <option value="verde_botella">Verde botella</option>
+              <option value="amarillo_medicina">Amarillo medicina</option>
+              <option value="blanco">Blanco</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ¿Lleva lomo? -->
+        <div class="form-group">
+          <label for="lomo">
+            <span class="label-icon">📏</span>
+            ¿Lleva lomo?
+          </label>
+          <select id="lomo" name="lomo">
+            <option value="no">No</option>
+            <option value="si">Sí</option>
+          </select>
+        </div>
+
+        <!-- ¿Lleva CD? -->
+        <div class="form-group">
+          <label for="llevaCd">
+            <span class="label-icon">💿</span>
+            ¿Lleva CD?
+          </label>
+          <select id="llevaCd" name="llevaCd">
+            <option value="no">No</option>
+            <option value="si">Sí</option>
+          </select>
+        </div>
+
+        <!-- Cantidad de CD -->
+        <div id="cdSection" class="form-section">
+          <div class="form-group">
+            <label for="cantidadCd">
+              <span class="label-icon">💿</span>
+              Cantidad de CD
+            </label>
+            <input 
+              type="number" 
+              id="cantidadCd" 
+              name="cantidadCd"
+              min="1" 
+              max="10"
+              value="1"
+              aria-label="Número de CDs a incluir"
+            />
+          </div>
+        </div>
+
+        <!-- Grupo de botones -->
+        <div class="button-group">
+          <button type="button" id="btnCalcular" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-500 via-indigo-600 to-indigo-700 hover:from-indigo-400 hover:to-indigo-500 shadow-lg shadow-indigo-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2">
+            <span class="text-xl">🧮</span>
+            Calcular Total
+          </button>
+
+          <button type="button" id="btnGuardarTesis" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-violet-500 via-violet-600 to-violet-700 hover:from-violet-400 hover:to-violet-550 shadow-lg shadow-violet-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2">
+            <span class="text-xl">💾</span>
+            Guardar en Nube
+          </button>
+
+          <button type="button" id="btnGenerar" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 hover:from-emerald-400 hover:to-emerald-550 shadow-lg shadow-emerald-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2">
+            <span class="text-xl">🖨️</span>
+            Imprimir
+          </button>
+
+          <button type="button" id="btnDescargarPdf" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700 hover:from-rose-400 hover:to-rose-550 shadow-lg shadow-rose-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2">
+            <span class="text-xl">📄</span>
+            Descargar PDF
+          </button>
+
+          <button type="button" id="btnReiniciar" class="w-full py-3 px-6 rounded-xl font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 shadow-sm transform transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2">
+            <span class="text-xl">🔄</span>
+            Reiniciar
+          </button>
+        </div>
+
+
+      </form>
+
+      <!-- ========================================
+           💳 SECCIÓN: COTIZACIÓN GENERADA
+           ======================================== -->
+      <section id="cotizacionGenerada" class="cotizacion" style="display: none;"></section>
+
+      <!-- ========================================
+           📋 SECCIÓN: TABLA DE PRECIOS
+           ======================================== -->
+      <div class="tabla-container">
+        <button 
+          type="button" 
+          id="btnMostrarTabla" 
+          class="w-full py-3 px-6 rounded-xl font-bold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:border-blue-300 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2"
+          aria-expanded="false"
+          aria-controls="tablaPrecios"
+        >
+          <span class="text-xl">📋</span>
+          Ver precios y detalles
+        </button>
+
+        <section 
+          class="tabla-precios" 
+          id="tablaPrecios" 
+          aria-label="Tabla de precios y servicios"
+        >
+          <header class="tabla-header">
+            <h3>
+              <span class="tabla-icon">📋</span>
+              Precios y Detalles
+            </h3>
+            <p class="tabla-subtitle">Todos los precios están en pesos dominicanos (RD$)</p>
+          </header>
+
+          <div class="tabla-responsive">
+            <table>
+              <caption class="sr-only">Lista completa de precios por servicio</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Concepto</th>
+                  <th scope="col">Detalle</th>
+                  <th scope="col">Precio (RD$)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Papel Bond -->
+                <tr>
+                  <td data-label="Concepto">Bond</td>
+                  <td data-label="Detalle">B/N</td>
+                  <td data-label="Precio">$6 / pág.</td>
+                </tr>
+                <tr>
+                  <td data-label="Concepto">Bond</td>
+                  <td data-label="Detalle">Color</td>
+                  <td data-label="Precio">$12 / pág.</td>
+                </tr>
+
+                <!-- Papel Hilo -->
+                <tr>
+                  <td data-label="Concepto">Hilo</td>
+                  <td data-label="Detalle">B/N</td>
+                  <td data-label="Precio">$8 / pág.</td>
+                </tr>
+                <tr>
+                  <td data-label="Concepto">Hilo</td>
+                  <td data-label="Detalle">Color</td>
+                  <td data-label="Precio">$15 / pág.</td>
+                </tr>
+
+                <!-- Papel Satinado -->
+                <tr>
+                  <td data-label="Concepto">Satinado (Carta)</td>
+                  <td data-label="Detalle">B/N o Color</td>
+                  <td data-label="Precio">$25 / pág.</td>
+                </tr>
+                <tr>
+                  <td data-label="Concepto">Satinado (11×17)</td>
+                  <td data-label="Detalle">B/N o Color</td>
+                  <td data-label="Precio">$45 / pág.</td>
+                </tr>
+
+                <!-- Empastado Tapa Dura -->
+                <tr>
+                  <td data-label="Concepto">Empastado Tapa Dura</td>
+                  <td data-label="Detalle">Carta</td>
+                  <td data-label="Precio">$500–600</td>
+                </tr>
+
+                <!-- Empastado Vinil -->
+                <tr>
+                  <td data-label="Concepto">Empastado Vinil</td>
+                  <td data-label="Detalle">Carta</td>
+                  <td data-label="Precio">$1,200</td>
+                </tr>
+                <tr>
+                  <td data-label="Concepto">Empastado Vinil</td>
+                  <td data-label="Detalle">11×17</td>
+                  <td data-label="Precio">$1,500</td>
+                </tr>
+
+                <!-- Extras -->
+                <tr>
+                  <td data-label="Concepto">Lomo</td>
+                  <td data-label="Detalle">Por tomo</td>
+                  <td data-label="Precio">$50</td>
+                </tr>
+                <tr>
+                  <td data-label="Concepto">CD rotulado</td>
+                  <td data-label="Detalle">Por unidad</td>
+                  <td data-label="Precio">$200</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <footer class="tabla-footer">
+            <p>
+              <span class="info-icon">ℹ️</span>
+              Los precios pueden variar según especificaciones especiales. 
+              Contáctanos para más información.
+            </p>
+          </footer>
+        </section>
+      </div>
+    </section>
+
+    <servigaco-footer></servigaco-footer>
+
+  </main>
+
+  <!-- ========================================
+       📊 MODAL DASHBOARD
+       ======================================== -->
+  <div id="modalDashboard" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[90] hidden animate-fade-in">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col animate-slide-in-up m-4 overflow-hidden">
+      <!-- Header -->
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-600 to-blue-600 flex justify-between items-center flex-shrink-0">
+        <div>
+          <h3 class="text-2xl font-bold text-white flex items-center gap-3"><span class="text-3xl">📊</span> Dashboard de Operaciones</h3>
+          <p class="text-indigo-100 text-sm mt-1">Resumen de Tesis y Trabajos realizados</p>
+        </div>
+        <div class="flex items-center gap-4">
+          <!-- Filtros de Fecha -->
+          <div class="flex items-center gap-2 bg-white/10 rounded-lg p-2">
+            <label for="dashFechaInicio" class="text-white text-sm font-medium">Desde:</label>
+            <input type="date" id="dashFechaInicio" class="px-2 py-1 rounded border border-white/20 bg-white/20 text-white text-sm focus:ring-2 focus:ring-white/50 outline-none">
+            <label for="dashFechaFin" class="text-white text-sm font-medium ml-2">Hasta:</label>
+            <input type="date" id="dashFechaFin" class="px-2 py-1 rounded border border-white/20 bg-white/20 text-white text-sm focus:ring-2 focus:ring-white/50 outline-none">
+            <button id="btnFiltrarDashboard" class="ml-2 px-3 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg font-medium text-sm transition-all">Filtrar</button>
+          </div>
+          <button id="btnCerrarDashboard" class="p-2 rounded-full text-white hover:bg-white/20 transition-all">✕</button>
+        </div>
+      </div>
+      <!-- Contenido -->
+      <div class="p-6 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex-1">
+        <!-- Tarjetas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+            <span class="text-4xl mb-2">💰</span><p class="text-gray-500 text-sm font-bold uppercase">Ventas Hoy</p>
+            <p class="text-3xl font-black text-gray-800 dark:text-white mt-1" id="dashVentasHoy">RD$0.00</p>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+            <span class="text-4xl mb-2">📅</span><p class="text-gray-500 text-sm font-bold uppercase">Ventas del Mes</p>
+            <p class="text-3xl font-black text-indigo-600 dark:text-indigo-400 mt-1" id="dashVentasMes">RD$0.00</p>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+            <span class="text-4xl mb-2">📊</span><p class="text-gray-500 text-sm font-bold uppercase">Ventas del Período</p>
+            <p class="text-3xl font-black text-green-600 dark:text-green-400 mt-1" id="dashVentasPeriodo">RD$0.00</p>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+            <span class="text-4xl mb-2">🎓</span><p class="text-gray-500 text-sm font-bold uppercase">Tesis Registradas</p>
+            <p class="text-3xl font-black text-blue-600 dark:text-blue-400 mt-1" id="dashTotalTesis">0</p>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+            <span class="text-4xl mb-2">🧾</span><p class="text-gray-500 text-sm font-bold uppercase">Facturas Emitidas</p>
+            <p class="text-3xl font-black text-purple-600 dark:text-purple-400 mt-1" id="dashTotalFacturas">0</p>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+            <span class="text-4xl mb-2">📚</span><p class="text-gray-500 text-sm font-bold uppercase">Total Tesis Cotizadas</p>
+            <p class="text-3xl font-black text-teal-600 dark:text-teal-400 mt-1" id="dashTotalMontoTesis">RD$0.00</p>
+          </div>
+        </div>
+        <!-- Listas -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20"><h4 class="font-bold text-blue-800 dark:text-blue-300">🎓 Últimas Tesis</h4></div>
+            <div id="dashListaTesis" class="divide-y divide-gray-100 dark:divide-gray-700 max-h-[400px] overflow-y-auto"></div>
+          </div>
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-purple-50 dark:bg-purple-900/20"><h4 class="font-bold text-purple-800 dark:text-purple-300">🧾 Últimos Trabajos</h4></div>
+            <div id="dashListaFacturas" class="divide-y divide-gray-100 dark:divide-gray-700 max-h-[400px] overflow-y-auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       📂 MODAL PARA COTIZACIONES GUARDADAS
+       ======================================== -->
+  <div id="modalCotizacionesGuardadas" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 hidden animate-fade-in">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-slide-in-up m-4">
+      <!-- Header del Modal -->
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
+        <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-3">
+          <span class="text-3xl">📂</span>
+          Tesis Guardadas
+        </h3>
+        <button id="btnCerrarModal" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 transition-all" aria-label="Cerrar modal">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <!-- Contenido del Modal (lista) -->
+      <div class="p-2 md:p-6 overflow-y-auto" id="listaCotizacionesGuardadas">
+        <!-- La lista de cotizaciones se generará aquí con JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       💾 MODAL GUARDAR TESIS (NOMBRE) - Reemplazo de Prompt
+       ======================================== -->
+  <div id="modalGuardarTesis" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[70] hidden animate-fade-in">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md m-4 p-6 animate-slide-in-up border border-indigo-200 dark:border-indigo-900">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">💾</div>
+        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Guardar Cotización</h3>
+        <p class="text-gray-600 dark:text-gray-300 text-sm">Ingresa un nombre para identificar esta tesis en el futuro.</p>
+      </div>
+      
+      <input type="text" id="inputNombreTesis" placeholder="Ej: Tesis María Pérez" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none text-center font-bold text-lg mb-6 dark:bg-gray-700 dark:border-gray-600 dark:text-white" autocomplete="off">
+      
+      <div class="flex gap-3">
+        <button id="btnCancelarGuardar" class="flex-1 px-4 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancelar</button>
+        <button id="btnConfirmarGuardar" class="flex-1 px-4 py-2.5 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all transform hover:-translate-y-1">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       🗑️ MODAL CONFIRMACIÓN ELIMINAR - Reemplazo de Confirm
+       ======================================== -->
+  <div id="modalConfirmarEliminar" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[80] hidden animate-fade-in">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-6 animate-slide-in-up border border-gray-200 dark:border-gray-700 text-center">
+      <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🗑️</div>
+      <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">¿Eliminar Cotización?</h3>
+      <p class="text-gray-600 dark:text-gray-300 text-sm mb-6">¿Estás seguro de eliminar <span id="nombreCotizacionEliminar" class="font-bold text-gray-800 dark:text-white">esta cotización</span>?<br>Esta acción no se puede deshacer.</p>
+      
+      <div class="flex gap-3 justify-center">
+        <button id="btnCancelarEliminar" class="flex-1 px-5 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancelar</button>
+        <button id="btnConfirmarEliminar" class="flex-1 px-5 py-2.5 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all transform hover:-translate-y-1">Sí, Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       🔐 MODAL LOGIN (EMPLEADOS)
+       ======================================== -->
+  <div id="modalLogin" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[2000] hidden animate-fade-in">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-8 animate-slide-in-up border border-blue-200 dark:border-blue-900">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🔐</div>
+        <h3 class="text-xl font-bold text-gray-800 dark:text-white">Acceso Autorizado</h3>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">Ingresa tus credenciales.</p>
+      </div>
+
+      <form id="formLogin" class="space-y-4">
+        <input type="text" id="usuarioLogin" placeholder="Usuario (ej: admin)" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+        <input type="password" id="passwordLogin" placeholder="Contraseña" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg transition-all transform hover:-translate-y-1">Iniciar Sesión</button>
+      </form>
+      <button id="btnCerrarLogin" class="w-full mt-4 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400">Cancelar</button>
+    </div>
+  </div>
+
+  <style>
+    @keyframes animate-fade-in { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes animate-slide-in-up { from { transform: translateY(20px); opacity: 0.8; } to { transform: translateY(0); opacity: 1; } }
+    .animate-fade-in { animation: animate-fade-in 0.3s ease-out forwards; }
+    .animate-slide-in-up { animation: animate-slide-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  </style>
+
+  <!-- SCRIPTS -->
+  <!-- 🔥 FIREBASE SDK (Base de Datos) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+  <script src="components.js"></script>
+  <script src="script.js"></script>
+
+  <!-- PDF.js para análisis local -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
+
+  <!-- ============================================ -->
+  <!-- 3. MODAL ANALIZADOR PDF (ESTILO NATIVO)      -->
+  <!-- ============================================ -->
+  <div id="modalAnalizadorPDF" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 hidden animate-fade-in" onclick="pdfClickOutside(event)">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col animate-slide-in-up m-4">
+      <!-- Header -->
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-start">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 flex-shrink-0 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-xl flex items-center justify-center">
+            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">Analizador de PDF</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Detecta páginas a color vs. blanco y negro</p>
+          </div>
+        </div>
+        <button onclick="cerrarModalAnalizadorPDF()" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Cerrar">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <!-- Body -->
+      <div class="p-6 space-y-5">
+        <!-- Dropzone -->
+        <div id="pdfDropzone" class="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+          <input type="file" accept=".pdf,application/pdf" id="pdfFileInput" onchange="pdfArchivoSeleccionado(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+          <div class="flex flex-col items-center justify-center gap-3 text-gray-500 dark:text-gray-400">
+            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-full flex items-center justify-center">
+              <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"></path></svg>
+            </div>
+            <p class="font-semibold text-gray-700 dark:text-gray-200">Arrastra tu PDF aquí</p>
+            <p class="text-xs">o haz clic para seleccionar un archivo</p>
+          </div>
+        </div>
+        <!-- File selected -->
+        <div id="pdfFileSelected" class="hidden items-center gap-3 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+          <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path></svg>
+          <span id="pdfFileName" class="flex-1 font-mono text-sm text-gray-700 dark:text-gray-200 truncate">archivo.pdf</span>
+          <button onclick="pdfLimpiarArchivo()" class="p-1 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-800/50 dark:hover:text-red-400 transition-colors" title="Quitar archivo">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+          </button>
+        </div>
+        <!-- Error -->
+        <div id="pdfError" class="hidden items-center gap-3 p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg border border-red-200 dark:border-red-700">
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path></svg>
+          <span id="pdfErrorMsg" class="text-sm font-medium">Error al procesar.</span>
+        </div>
+        <!-- Progress -->
+        <div id="pdfProgressWrap" class="hidden space-y-2">
+          <div class="flex justify-between text-xs font-mono text-gray-500 dark:text-gray-400">
+            <span id="pdfProgressLabel">Analizando...</span>
+            <span id="pdfProgressPct">0%</span>
+          </div>
+          <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+            <div id="pdfProgressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+        <!-- Process Button -->
+        <button id="pdfBtnProcesar" onclick="pdfProcesar()" disabled class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-lg shadow-blue-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:shadow-none disabled:transform-none dark:disabled:bg-gray-600 disabled:cursor-not-allowed">
+          <span id="pdfBtnIcon">▶</span>
+          <span id="pdfBtnText" class="ml-2">PROCESAR ARCHIVO</span>
+        </button>
+        <!-- Results -->
+        <div id="pdfResults" class="hidden pt-4 mt-4 border-t border-gray-200 dark:border-gray-700 space-y-5">
+          <!-- Metrics -->
+          <div class="grid grid-cols-3 gap-4">
+            <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-center border-b-4 border-blue-500">
+              <div class="text-3xl font-black text-blue-600 dark:text-blue-400" id="pdfMetricTotal">0</div>
+              <div class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Págs.</div>
+            </div>
+            <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-center border-b-4 border-green-500">
+              <div class="text-3xl font-black text-green-600 dark:text-green-400" id="pdfMetricColor">0</div>
+              <div class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">A Color</div>
+            </div>
+            <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-center border-b-4 border-gray-500">
+              <div class="text-3xl font-black text-gray-600 dark:text-gray-300" id="pdfMetricBW">0</div>
+              <div class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">B/N</div>
+            </div>
+          </div>
+          <!-- Distribution Bar -->
+          <div>
+            <div class="flex h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+              <div id="pdfDistColor" class="bg-green-500 transition-all duration-500" style="width:0%"></div>
+              <div id="pdfDistBW" class="bg-gray-500 transition-all duration-500" style="width:0%"></div>
+            </div>
+            <div class="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
+              <div class="flex items-center gap-1.5">
+                <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                <span id="pdfLegendColor">Color (0%)</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <div class="w-2.5 h-2.5 rounded-full bg-gray-500"></div>
+                <span id="pdfLegendBW">B/N (0%)</span>
+              </div>
+            </div>
+          </div>
+          <!-- Use Data Button -->
+          <button id="pdfBtnUsarDatos" onclick="pdfUsarDatos()" style="display: none;" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 shadow-lg shadow-green-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
+            👇 USAR DATOS EN CALCULADORA
+          </button>
+        </div>
+      </div>
+      <!-- Footer -->
+      <div class="p-4 text-center border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl">
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          El análisis se realiza 100% en tu navegador. Ningún archivo se sube a servidores.
+        </p>
+      </div>
+    </div>
+  </div>
+  <!-- ============================================ -->
+  <!-- 4. SCRIPT — pegar al final del <body>       -->
+  <!-- ============================================ -->
+  <script>
+  // ── Estado global del analizador ─────────────────────────────────────────────
+  const _PDF = {
+    archivo: null,
+    procesando: false
+  };
+
+  // db ya está inicializada en script.js, no necesitamos redeclararla aquí
+  
+  // abrirModalAnalizadorPDF y cerrarModalAnalizadorPDF están definidas en script.js para disponibilidad global
+  
+  function pdfClickOutside(e) {
+    if (e.target.id === 'modalAnalizadorPDF') {
+      cerrarModalAnalizadorPDF();
+    }
+  }
+  
+  // ── Drag & Drop ───────────────────────────────────────────────────────────────
+  (function() {
+    document.addEventListener('DOMContentLoaded', function() {
+      var dz = document.getElementById('pdfDropzone');
+      if (!dz) return;
+  
+      dz.addEventListener('dragover',  function(e) { e.preventDefault(); dz.classList.add('dragging'); });
+      dz.addEventListener('dragleave', function()  { dz.classList.remove('dragging'); });
+      dz.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dz.classList.remove('dragging');
+        var files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type === 'application/pdf') {
+          _PDF.archivo = files[0];
+          pdfMostrarArchivoSeleccionado(files[0].name);
+        } else {
+          pdfMostrarError('Solo se aceptan archivos PDF.');
+        }
+      });
+    });
+  })();
+  
+  // ── Archivo seleccionado por input ────────────────────────────────────────────
+  function pdfArchivoSeleccionado(input) {
+    pdfOcultarError();
+    if (!input.files || input.files.length === 0) return;
+  
+    var archivo = input.files[0];
+    if (archivo.type !== 'application/pdf') {
+      pdfMostrarError('El archivo seleccionado no es un PDF válido.');
+      return;
+    }
+  
+    _PDF.archivo = archivo;
+    pdfMostrarArchivoSeleccionado(archivo.name);
+  }
+  
+  function pdfMostrarArchivoSeleccionado(nombre) {
+    document.getElementById('pdfFileName').textContent = nombre;
+    document.getElementById('pdfFileSelected').classList.remove('hidden');
+    document.getElementById('pdfFileSelected').classList.add('flex');
+    document.getElementById('pdfDropzone').style.display = 'none';
+    document.getElementById('pdfBtnProcesar').disabled = false;
+    document.getElementById('pdfResults').classList.add('hidden');
+    pdfOcultarProgreso();
+  }
+  
+  function pdfLimpiarArchivo() {
+    _PDF.archivo = null;
+    document.getElementById('pdfFileInput').value = '';
+    document.getElementById('pdfFileSelected').classList.add('hidden');
+    document.getElementById('pdfFileSelected').classList.remove('flex');
+    document.getElementById('pdfDropzone').style.display = '';
+    document.getElementById('pdfBtnProcesar').disabled = true;
+    document.getElementById('pdfBtnText').textContent = 'PROCESAR ARCHIVO';
+    document.getElementById('pdfBtnIcon').textContent = '▶';
+    document.getElementById('pdfResults').classList.add('hidden');
+    pdfOcultarProgreso();
+    pdfOcultarError();
+    // Ocultar botón de usar datos
+    const btnUsar = document.getElementById('pdfBtnUsarDatos');
+    if (btnUsar) btnUsar.style.display = 'none';
+  }
+  
+  function pdfLimpiarTodo() {
+    pdfLimpiarArchivo();
+  }
+  
+  // ── Progreso ──────────────────────────────────────────────────────────────────
+  function pdfMostrarProgreso() {
+    document.getElementById('pdfProgressWrap').classList.remove('hidden');
+  }
+  
+  function pdfOcultarProgreso() {
+    document.getElementById('pdfProgressWrap').classList.add('hidden');
+  }
+  
+  function pdfActualizarProgreso(actual, total) {
+    var pct = total > 0 ? Math.round((actual / total) * 100) : 0;
+    document.getElementById('pdfProgressBar').style.width = pct + '%';
+    document.getElementById('pdfProgressPct').textContent = pct + '%';
+    document.getElementById('pdfProgressLabel').textContent =
+      'Analizando página ' + actual + ' de ' + total + '...';
+  }
+  
+  // ── Error ─────────────────────────────────────────────────────────────────────
+  function pdfMostrarError(msg) {
+    document.getElementById('pdfErrorMsg').textContent = msg;
+    document.getElementById('pdfError').classList.remove('hidden');
+  }
+  
+  function pdfOcultarError() {
+    document.getElementById('pdfError').classList.add('hidden');
+  }
+  
+  // ── Procesamiento principal ───────────────────────────────────────────────────
+  async function pdfProcesar() {
+    if (!_PDF.archivo || _PDF.procesando) return;
+  
+    pdfOcultarError();
+    document.getElementById('pdfResults').classList.add('hidden');
+  
+    // Verificar que pdf.js esté cargado
+    if (!window.pdfjsLib) {
+      pdfMostrarError('pdf.js aún no ha terminado de cargarse. Intenta de nuevo en unos segundos.');
+      return;
+    }
+  
+    _PDF.procesando = true;
+    var btn = document.getElementById('pdfBtnProcesar');
+    var btnText = document.getElementById('pdfBtnText');
+    var btnIcon = document.getElementById('pdfBtnIcon');
+    btn.disabled = true;
+    btnText.textContent = 'ANALIZANDO...';
+    btnIcon.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+    pdfMostrarProgreso();
+  
+    try {
+      // Leer el archivo como ArrayBuffer
+      var buffer = await _PDF.archivo.arrayBuffer();
+      var pdfDoc = await window.pdfjsLib.getDocument({ data: buffer }).promise;
+      var totalPaginas = pdfDoc.numPages;
+  
+      var paginasColor = 0;
+      var paginasBN    = 0;
+  
+      // Canvas reutilizable (fuera del loop para no crear/destruir en cada iteración)
+      var canvas  = document.createElement('canvas');
+      var ctx     = canvas.getContext('2d', { willReadFrequently: true });
+  
+      // Escala reducida para velocidad sin perder precisión de color
+      var ESCALA = 0.35;
+  
+      for (var i = 1; i <= totalPaginas; i++) {
+        // Ceder control al navegador cada 3 páginas para no congelarlo
+        if (i % 3 === 0) {
+          await new Promise(function(r) { setTimeout(r, 0); });
+        }
+  
+        pdfActualizarProgreso(i, totalPaginas);
+  
+        var page = await pdfDoc.getPage(i);
+        var viewport = page.getViewport({ scale: ESCALA });
+  
+        canvas.width  = viewport.width;
+        canvas.height = viewport.height;
+  
+        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+  
+        var esColor = pdfAnalizarCanvas(ctx, canvas.width, canvas.height);
+  
+        if (esColor) {
+          paginasColor++;
+        } else {
+          paginasBN++;
+        }
+  
+        // Actualizar contador en tiempo real mientras avanza
+        pdfActualizarContadores(totalPaginas, paginasColor, paginasBN, false);
+      }
+  
+      // Mostrar resultado final
+      pdfActualizarContadores(totalPaginas, paginasColor, paginasBN, true);
+      document.getElementById('pdfResults').classList.remove('hidden');
+  
+    } catch (err) {
+      console.error('[AnalizadorPDF]', err);
+      pdfMostrarError('No se pudo procesar el PDF. ¿Está protegido con contraseña?');
+    } finally {
+      _PDF.procesando = false;
+      btn.disabled = true; // Deshabilitado hasta que se limpie
+      btnText.textContent = 'ANÁLISIS COMPLETADO';
+      btnIcon.textContent = '✓';
+      pdfOcultarProgreso();
+    }
+  }
+  
+  // ── Detección de color en canvas ─────────────────────────────────────────────
+  function pdfAnalizarCanvas(ctx, ancho, alto) {
+    var imageData = ctx.getImageData(0, 0, ancho, alto);
+    var data = imageData.data;
+    var totalPixeles = data.length / 4;
+  
+    // Umbral de tolerancia:
+    //   Si |R-G| + |R-B| + |G-B| > TOLERANCIA → pixel a color
+    // Esto maneja páginas con tinta levemente amarillenta o papel crema
+    var TOLERANCIA = 20;
+  
+    // Para optimizar: muestrear 1 de cada 4 píxeles en páginas grandes
+    var paso = (totalPixeles > 40000) ? 4 : 2;
+  
+    var pixelesColor = 0;
+    var muestras     = 0;
+  
+    for (var i = 0; i < data.length; i += 4 * paso) {
+      var r = data[i];
+      var g = data[i + 1];
+      var b = data[i + 2];
+      var a = data[i + 3];
+  
+      // Ignorar píxeles transparentes o blancos puros (fondo de página)
+      if (a < 30) { muestras++; continue; }
+      if (r > 250 && g > 250 && b > 250) { muestras++; continue; }
+  
+      var diff = Math.abs(r - g) + Math.abs(r - b) + Math.abs(g - b);
+      if (diff > TOLERANCIA) pixelesColor++;
+      muestras++;
+    }
+  
+    // Si más del 0.5% de las muestras tienen color → página a color
+    var porcentajeColor = muestras > 0 ? (pixelesColor / muestras) * 100 : 0;
+    return porcentajeColor > 0.5;
+  }
+  
+  // ── Actualizar contadores en pantalla ────────────────────────────────────────
+  function pdfActualizarContadores(total, color, bw, final) {
+    document.getElementById('pdfMetricTotal').textContent = total;
+    document.getElementById('pdfMetricColor').textContent = color;
+    document.getElementById('pdfMetricBW').textContent    = bw;
+  
+    if (final && total > 0) {
+      var pctColor = Math.round((color / total) * 100);
+      var pctBW    = 100 - pctColor;
+  
+      document.getElementById('pdfDistColor').style.width = pctColor + '%';
+      document.getElementById('pdfDistBW').style.width    = pctBW    + '%';
+  
+      document.getElementById('pdfLegendColor').textContent = 'Color ('    + pctColor + '%)';
+      document.getElementById('pdfLegendBW').textContent    = 'B/N ('      + pctBW    + '%)';
+  
+      // Mostrar botón de usar datos
+      const btnUsar = document.getElementById('pdfBtnUsarDatos');
+      if (btnUsar) btnUsar.style.display = 'flex';
+    }
+  }
+
+  // ── Usar datos en la calculadora ─────────────────────────────────────────────
+  async function pdfUsarDatos() {
+    const paginasColor = document.getElementById('pdfMetricColor').textContent;
+    const paginasBN = document.getElementById('pdfMetricBW').textContent;
+
+    // Detectar en qué página estamos para rellenar el formulario correcto
+    const esTesisPage = !!document.getElementById('formCotizacion'); // ID del form en index.html
+    const esGeneralPage = !!document.getElementById('formImpresion'); // ID de un form en calculadora_general.html
+
+    if (esTesisPage) {
+      const bnInput = document.getElementById('bn');
+      const colorInput = document.getElementById('color');
+      if (bnInput && colorInput) {
+        bnInput.value = paginasBN;
+        colorInput.value = paginasColor;
+
+        // Forzar la actualización de la vista si el papel es satinado
+        document.getElementById('papel').value = 'bond';
+        actualizarVista();
+
+        // Disparar evento para que otras lógicas (como guardar en localStorage) se activen
+        bnInput.dispatchEvent(new Event('input', { bubbles: true }));
+        colorInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    } else if (esGeneralPage) {
+      // Lógica para calculadora_general.html
+      const tipoServicioSelect = document.getElementById('tipoServicio');
+      const libroBNInput = document.getElementById('libroPaginasBN');
+      const libroColorInput = document.getElementById('libroPaginasColor');
+
+      if (tipoServicioSelect && libroBNInput && libroColorInput) {
+        // Cambiar a "Libro Completo"
+        tipoServicioSelect.value = 'libro';
+        tipoServicioSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        
+        libroBNInput.value = paginasBN;
+        libroColorInput.value = paginasColor;
+        document.getElementById('libroPaginasFullColor').value = 0;
+
+        // Disparar evento para actualizar resumen en tiempo real
+        libroBNInput.dispatchEvent(new Event('input', { bubbles: true }));
+        libroColorInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
+
+    mostrarNotificacion('✅ Datos aplicados en la calculadora.', 'success');
+    cerrarModalAnalizadorPDF();
+
+    // Guardar datos del análisis en Firebase
+    const datosAnalisis = {
+      fecha: new Date().toISOString(),
+      timestamp: firebase.database.ServerValue.TIMESTAMP,
+      tipo: "AnalisisPDF",
+      nombre: _PDF.archivo.name,
+      totalPaginas: document.getElementById('pdfMetricTotal').textContent,
+      paginasColor: document.getElementById('pdfMetricColor').textContent,
+      paginasBN: document.getElementById('pdfMetricBW').textContent,
+      precioUnitarioBN: 0, // Se puede calcular si es necesario
+      precioUnitarioColor: 0
+    };
+
+    try {
+      await db.ref("analisis_pdf").push(datosAnalisis);
+      console.log("Datos del análisis guardados en Firebase");
+    } catch (error) {
+      console.error("Error al guardar análisis:", error);
+    }
+  }
+  </script>
+</body>
+</html>

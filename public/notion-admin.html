@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Notion — ServiGaco</title>
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
+
+  <!-- Estilos del proyecto -->
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    body { font-family: 'Montserrat', sans-serif; }
+    .status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
+    .dot-green  { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.25); }
+    .dot-red    { background: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,.25);  }
+    .dot-yellow { background: #eab308; box-shadow: 0 0 0 3px rgba(234,179,8,.25);  }
+    .dot-gray   { background: #6b7280; }
+    .card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 2px 16px rgba(0,0,0,.07);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .dark .card { background: #1e293b; }
+    pre {
+      background: #0f172a;
+      color: #86efac;
+      border-radius: .5rem;
+      padding: 1rem;
+      font-size: 0.78rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .55rem 1.25rem;
+      border-radius: .65rem;
+      font-weight: 700;
+      font-size: .875rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-primary { background: #4f46e5; color: white; }
+    .btn-primary:hover { background: #4338ca; transform: translateY(-1px); }
+    .btn-success { background: #16a34a; color: white; }
+    .btn-success:hover { background: #15803d; transform: translateY(-1px); }
+    .btn-danger  { background: #dc2626; color: white; }
+    .btn-danger:hover  { background: #b91c1c; }
+    .btn-ghost   { background: #f1f5f9; color: #334155; }
+    .btn-ghost:hover   { background: #e2e8f0; }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 min-h-screen text-slate-800 dark:text-slate-100">
+
+  <!-- NAV -->
+  <nav class="bg-white dark:bg-slate-800 shadow-sm px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <img src="logo.png" alt="Logo" class="h-8 w-auto">
+      <span class="font-bold text-lg text-indigo-700 dark:text-indigo-400">Panel Notion</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="index.html" class="btn btn-ghost text-sm">🎓 Tesis</a>
+      <a href="calculadora_general.html" class="btn btn-ghost text-sm">📋 General</a>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto px-4 py-8">
+
+    <!-- ENCABEZADO -->
+    <div class="mb-8">
+      <h1 class="text-2xl font-extrabold text-slate-800 dark:text-white flex items-center gap-2">
+        <span>⚡</span> Administración de Notion
+      </h1>
+      <p class="text-slate-500 dark:text-slate-400 mt-1 text-sm">
+        Panel para verificar la conexión y sincronización con Notion.
+      </p>
+    </div>
+
+    <!-- TARJETA: ESTADO DE CONEXIÓN -->
+    <div class="card dark:card">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 class="font-bold text-lg flex items-center gap-2">
+            🔌 Estado de Conexión
+          </h2>
+          <p class="text-sm text-slate-500 mt-1">
+            Verifica que el <code>NOTION_TOKEN</code> en <code>.env</code> es válido.
+          </p>
+        </div>
+        <button id="btnTestConexion" class="btn btn-primary" onclick="testConexion()">
+          🔍 Probar conexión
+        </button>
+      </div>
+
+      <div id="statusResult" class="mt-4 p-4 rounded-xl bg-slate-100 dark:bg-slate-700 hidden">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="status-dot dot-gray" id="statusDot"></span>
+          <span id="statusText" class="font-bold text-sm">—</span>
+        </div>
+        <pre id="statusPre" class="mt-2 text-xs"></pre>
+      </div>
+    </div>
+
+    <!-- TARJETA: PRUEBA DE SYNC MANUAL -->
+    <div class="card">
+      <h2 class="font-bold text-lg mb-1">🧪 Prueba de Sincronización</h2>
+      <p class="text-sm text-slate-500 mb-4">
+        Envía un registro de prueba a cada base de datos de Notion para verificar que funcionan.
+      </p>
+
+      <div class="flex flex-wrap gap-3">
+        <button class="btn btn-success" onclick="syncPrueba('tesis')">
+          📚 Probar Tesis
+        </button>
+        <button class="btn btn-success" onclick="syncPrueba('general')">
+          📋 Probar General
+        </button>
+        <button class="btn btn-success" onclick="syncPrueba('factura')">
+          🧾 Probar Factura
+        </button>
+      </div>
+
+      <div id="syncResult" class="mt-4 p-4 rounded-xl bg-slate-100 dark:bg-slate-700 hidden">
+        <pre id="syncPre" class="text-xs"></pre>
+      </div>
+    </div>
+
+    <!-- TARJETA: VARIABLES DE ENTORNO -->
+    <div class="card">
+      <h2 class="font-bold text-lg mb-2">⚙️ Variables de Entorno Requeridas</h2>
+      <p class="text-sm text-slate-500 mb-4">
+        Configura estas variables en el archivo <code>.env</code> en la raíz del proyecto.
+      </p>
+      <pre>
+# En el archivo .env del proyecto:
+
+NOTION_TOKEN=secret_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+NOTION_DB_TESIS_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+NOTION_DB_GENERAL_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+NOTION_DB_FACTURAS_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      </pre>
+      <div id="envStatus" class="mt-4"></div>
+      <button class="btn btn-ghost mt-3 text-sm" onclick="checkEnv()">
+        🔎 Verificar configuración
+      </button>
+    </div>
+
+    <!-- TARJETA: GUÍA RÁPIDA -->
+    <div class="card">
+      <h2 class="font-bold text-lg mb-4">📖 Guía Rápida de Configuración</h2>
+
+      <div class="space-y-4 text-sm text-slate-700 dark:text-slate-300">
+
+        <div class="flex gap-3">
+          <div class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-bold flex items-center justify-center text-xs">1</div>
+          <div>
+            <p class="font-bold">Crear la integración en Notion</p>
+            <p class="text-slate-500">Ve a <a href="https://www.notion.so/my-integrations" target="_blank" class="text-indigo-600 underline">notion.so/my-integrations</a> → "Nueva integración" → copia el <strong>Token de integración</strong>.</p>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <div class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-bold flex items-center justify-center text-xs">2</div>
+          <div>
+            <p class="font-bold">Crear las 3 bases de datos en Notion</p>
+            <p class="text-slate-500">Crea una página vacía en Notion → agrega una base de datos tipo "Full page database" para cada una: <strong>Cotizaciones Tesis</strong>, <strong>Cotizaciones Generales</strong>, <strong>Facturas</strong>.</p>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <div class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-bold flex items-center justify-center text-xs">3</div>
+          <div>
+            <p class="font-bold">Agregar columnas a cada base de datos</p>
+            <p class="text-slate-500">
+              <strong>Tesis:</strong> Nombre (Title), ID Cotización (Text), Total (Number), Tomos (Number), Tipo Empastado (Select), Color Tapa (Select), Tamaño Papel (Select), Tipo Papel (Select), Lomo (Checkbox), CD (Number), ITLA (Checkbox), Fecha (Date), Estado Sync (Status), Firebase ID (Text).<br><br>
+              <strong>General:</strong> Nombre Cliente (Title), ID Cotización (Text), Total (Number), Servicios (Text), Fecha (Date), Estado Sync (Status), Firebase ID (Text).<br><br>
+              <strong>Facturas:</strong> Razón Social (Title), RNC (Text), NCF (Text), Total (Number), ITBIS (Number), Subtotal (Number), Tipo NCF (Select), Estado (Select), Fecha Facturación (Date), Estado Sync (Status), Firebase ID (Text).
+            </p>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <div class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-bold flex items-center justify-center text-xs">4</div>
+          <div>
+            <p class="font-bold">Compartir cada base de datos con tu integración</p>
+            <p class="text-slate-500">En cada base de datos → "..." (menú) → "Connections" → busca tu integración y dale acceso.</p>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <div class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-bold flex items-center justify-center text-xs">5</div>
+          <div>
+            <p class="font-bold">Obtener el Database ID</p>
+            <p class="text-slate-500">
+              Abre la base de datos en el navegador. La URL tiene este formato:<br>
+              <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">https://www.notion.so/<strong>workspace/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</strong>?v=...</code><br>
+              El ID son los 32 caracteres hexadecimales. Cópialo para cada base de datos.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <div class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-bold flex items-center justify-center text-xs">6</div>
+          <div>
+            <p class="font-bold">Configurar el .env y reiniciar el servidor</p>
+            <pre class="mt-1 text-xs">NOTION_TOKEN=secret_xxxx
+NOTION_DB_TESIS_ID=xxxx
+NOTION_DB_GENERAL_ID=xxxx
+NOTION_DB_FACTURAS_ID=xxxx</pre>
+            <p class="text-slate-500 mt-2">Luego ejecuta: <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">node server.js</code></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // ── URL base del backend ──────────────────────────────────────────────────
+    const API = window.location.port === '5500' ? 'http://localhost:3000' : '';
+
+    // ── Test de conexión ──────────────────────────────────────────────────────
+    async function testConexion() {
+      const btn = document.getElementById('btnTestConexion');
+      const result = document.getElementById('statusResult');
+      const dot    = document.getElementById('statusDot');
+      const text   = document.getElementById('statusText');
+      const pre    = document.getElementById('statusPre');
+
+      btn.textContent = '⏳ Probando...';
+      btn.disabled    = true;
+      result.classList.remove('hidden');
+      dot.className   = 'status-dot dot-yellow';
+      text.textContent = 'Conectando con Notion...';
+      pre.textContent  = '';
+
+      try {
+        const res  = await fetch(`${API}/notion/status`);
+        const json = await res.json();
+        pre.textContent = JSON.stringify(json, null, 2);
+
+        if (json.connected) {
+          dot.className    = 'status-dot dot-green';
+          text.textContent = `✅ Conectado — Usuario: ${json.user || 'N/A'}`;
+        } else {
+          dot.className    = 'status-dot dot-red';
+          text.textContent = `❌ Error: ${json.error || 'No se pudo conectar'}`;
+        }
+      } catch (err) {
+        dot.className    = 'status-dot dot-red';
+        text.textContent = `❌ Error de red: ${err.message}`;
+        pre.textContent  = err.toString();
+      } finally {
+        btn.textContent = '🔍 Probar conexión';
+        btn.disabled    = false;
+      }
+    }
+
+    // ── Prueba de sincronización ──────────────────────────────────────────────
+    async function syncPrueba(tipo) {
+      const result = document.getElementById('syncResult');
+      const pre    = document.getElementById('syncPre');
+      result.classList.remove('hidden');
+      pre.textContent = `⏳ Sincronizando prueba de "${tipo}"...`;
+
+      const payloads = {
+        tesis: {
+          datos: {
+            nombre:        'PRUEBA - Cliente Test',
+            idCotizacion:  'CTZ-PRUEBA-001',
+            total:         '1500.00',
+            tomos:         2,
+            tipoEmpastado: 'tapa_dura',
+            colorTapa:     'beige',
+            tamano:        'carta',
+            papel:         'bond',
+            lomo:          'si',
+            cantidadCd:    1,
+            itlaAplicado:  false,
+            fecha:         new Date().toISOString(),
+            firebaseId:    'test-firebase-id'
+          }
+        },
+        general: {
+          datos: {
+            nombre:       'PRUEBA - Cliente General',
+            idCotizacion: 'GEN-PRUEBA-001',
+            total:        '2500.00',
+            descripcion:  '10x Impresión B/N, 2x Encuadernado',
+            fecha:        new Date().toISOString(),
+            firebaseId:   'test-firebase-id-gen'
+          }
+        },
+        factura: {
+          datos: {
+            razon_social:      'PRUEBA - Empresa Test SRL',
+            rnc_cliente:       '130000000',
+            ncf:               'B0100000001',
+            total:             '3000.00',
+            itbis:             '459.32',
+            subtotal:          '2540.68',
+            tipo_ncf:          'B01',
+            estado:            'activa',
+            fecha_facturacion: new Date().toISOString(),
+            firebaseId:        'test-firebase-id-fact'
+          }
+        }
+      };
+
+      try {
+        const res  = await fetch(`${API}/notion/sync/${tipo}`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(payloads[tipo])
+        });
+        const json = await res.json();
+        pre.textContent = JSON.stringify(json, null, 2);
+
+        if (json.success) {
+          pre.textContent = `✅ Sincronizado con éxito.\n\nNotion Page ID: ${json.notionPageId}\n\n` + JSON.stringify(json, null, 2);
+        } else {
+          pre.textContent = `❌ Error: ${json.error}\n\n` + JSON.stringify(json, null, 2);
+        }
+      } catch (err) {
+        pre.textContent = `❌ Error de red: ${err.message}\n\n` + err.toString();
+      }
+    }
+
+    // ── Verificar variables de entorno ────────────────────────────────────────
+    async function checkEnv() {
+      const div = document.getElementById('envStatus');
+      div.innerHTML = '<p class="text-sm text-slate-500">⏳ Verificando...</p>';
+
+      try {
+        const res  = await fetch(`${API}/notion/status`);
+        const json = await res.json();
+
+        if (json.connected) {
+          div.innerHTML = `
+            <div class="flex items-center gap-2 text-green-700 dark:text-green-400 text-sm font-bold mt-2">
+              <span class="status-dot dot-green"></span>
+              NOTION_TOKEN: configurado y válido ✅
+            </div>
+            <p class="text-xs text-slate-500 mt-1">
+              Si las pruebas de sync fallan, verifica que los NOTION_DB_*_ID también estén correctos.
+            </p>
+          `;
+        } else {
+          div.innerHTML = `
+            <div class="flex items-center gap-2 text-red-600 text-sm font-bold mt-2">
+              <span class="status-dot dot-red"></span>
+              Error: ${json.error || 'NOTION_TOKEN inválido o no configurado'} ❌
+            </div>
+            <p class="text-xs text-slate-500 mt-1">
+              Asegúrate de reiniciar el servidor después de editar .env
+            </p>
+          `;
+        }
+      } catch (err) {
+        div.innerHTML = `<p class="text-sm text-red-500 mt-2">❌ No se pudo conectar al backend: ${err.message}</p>`;
+      }
+    }
+  </script>
+  <script src="tracker.js"></script>
+</body>
+</html>

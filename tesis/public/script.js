@@ -1,0 +1,1753 @@
+// ============================================
+// 📋 CONFIGURACIÓN Y CONSTANTES
+// ============================================
+
+
+
+// 🔗 URL DE TU API DE GOOGLE SHEETS (Pégala aquí abajo)
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxRUMlkInT_O_C6G_q15jb8mVqVcX9SOLwu9Tl9_ucgwsu1C-ZfoIJIqrCcROo5WwSJbQ/exec';
+
+// 🔥 CONFIGURACIÓN DE FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyBgVrMPSwZg3O5zbuIozstpG0bM8XFEeZE",
+  authDomain: "servigaco.firebaseapp.com",
+  databaseURL: "https://servigaco-default-rtdb.firebaseio.com",
+  projectId: "servigaco",
+  storageBucket: "servigaco.firebasestorage.app",
+  messagingSenderId: "516579834487",
+  appId: "1:516579834487:web:e7fb1c46d93bb62a98a472"
+};
+
+const PRECIOS = {
+  carta: {
+    bond: { bn: 6, color: 12 },
+    hilo: { bn: 8, color: 15 },
+    satinado: { precio: 25 }
+  },
+  tabloide: {
+    satinado: { precio: 45 }
+  }
+};
+
+// Rangos de precios para tamaño Legal tomados de la calculadora general
+const PRECIOS_LEGAL_BN = [
+  { min: 1, max: 50, precio: 10 },
+  { min: 51, max: 200, precio: 8 },
+  { min: 201, max: Infinity, precio: 6 }
+];
+
+const PRECIOS_LEGAL_COLOR = [
+  { min: 1, max: 50, precio: 30 },
+  { min: 51, max: 200, precio: 25 },
+  { min: 201, max: Infinity, precio: 20 }
+];
+
+const PRECIOS_LEGAL_SATINADO = [
+  { min: 1, max: 50, precio: 45 },
+  { min: 51, max: 200, precio: 40 },
+  { min: 201, max: Infinity, precio: 35 }
+];
+
+const TAPA_DURA = {
+  beige: 600,
+  morado: 500,
+  azul_marino: 500,
+  azul_cielo: 500,
+  rojo: 500,
+  verde_botella: 500,
+  amarillo_medicina: 500,
+  blanco: 600,
+};
+
+const VINIL = {
+  carta: 1200,
+  legal: 1200,
+  tabloide: 1500
+};
+
+const PRECIOS_ENCUADERNADO = [
+  { min: 1, max: 50, precio: 60 },
+  { min: 51, max: 80, precio: 70 },
+  { min: 81, max: 100, precio: 100 },
+  { min: 101, max: 150, precio: 120 },
+  { min: 151, max: 200, precio: 150 },
+  { min: 201, max: Infinity, precio: 250 }
+];
+
+// Constantes de servicios adicionales
+const PRECIOS_SERVICIOS = {
+  LOMO: 50,
+  CD: 200,
+  REDONDEO_MULTIPLO: 5
+};
+
+const BLOQUE_MENSAJE_PAGINA_SIGUIENTE = `
+  <div class="mensaje-pagina-siguiente">
+    <span class="flecha">⬇</span>
+    <span class="texto">
+      Debajo encontrarás las cuentas bancarias y el ejemplar del empastado
+    </span>
+  </div>
+`;
+
+
+const TIEMPO_ENTREGA = {
+  TAPA_DURA: '6 horas',
+  VINIL: '24 horas'
+};
+
+// ============================================
+// 🖼️ IMÁGENES DE EJEMPLARES POR COLOR
+// ============================================
+
+const IMAGEN_EJEMPLAR_TAPA = {
+  beige: 'beige.png',
+  morado: 'morado.png',
+  azul_marino: 'mclcielo.png',
+  rojo: 'rojo.png',
+  verde_botella: 'verde.png',
+  amarillo_medicina: 'amarillo.png',
+  blanco: 'blanco.png',
+  azul_cielo: 'azulcielo.png'
+};
+
+const BLOQUE_CUENTAS = `
+  <div class="cuentas-pago">
+    <img src="/bhd.jpg" alt="Cuenta BHD" class="img-cuenta">
+    <img src="/popular.jpg" alt="Cuenta Popular" class="img-cuenta">
+    <img src="/banreservas.jpg" alt="Cuenta Banreservas" class="img-cuenta">
+  </div>
+
+
+    <!-- AQUÍ va el tiempo de entrega -->
+    {{TIEMPO_ENTREGA}}
+`;
+
+// ============================================
+// 🔧 UTILIDADES
+// ============================================
+
+/**
+ * Convierte nombre de color con guiones bajos a formato legible
+ * @param {string} color - Nombre del color con guiones bajos
+ * @returns {string} Nombre formateado
+ */
+function nombreColor(color) {
+  return color.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+/**
+ * Redondea un número al múltiplo de 5 más cercano
+ * @param {number} num - Número a redondear
+ * @returns {number} Número redondeado
+ */
+function redondearA5(num) {
+  return Math.round(num / PRECIOS_SERVICIOS.REDONDEO_MULTIPLO) * PRECIOS_SERVICIOS.REDONDEO_MULTIPLO;
+}
+
+/**
+ * Obtiene el precio unitario correspondiente a una cantidad según una tabla de rangos
+ * @param {Array} tabla - Tabla de rangos de precios
+ * @param {number} cantidad - Cantidad a buscar
+ * @returns {number} Precio unitario
+ */
+function obtenerPrecioRango(tabla, cantidad) {
+  const rango = tabla.find(r => cantidad >= r.min && cantidad <= r.max);
+  return rango ? rango.precio : 0;
+}
+
+/**
+ * Calcula el precio de encuadernación según el número de páginas
+ * @param {number} paginas - Número de páginas
+ * @returns {number} Precio unitario del encuadernado
+ */
+function calcularPrecioEncuadernado(paginas) {
+  return obtenerPrecioRango(PRECIOS_ENCUADERNADO, paginas);
+}
+
+/**
+ * Formatea un número como moneda dominicana
+ * @param {number} valor - Valor a formatear
+ * @returns {string} Valor formateado
+ */
+function formatearMoneda(valor) {
+  return `RD$${valor.toLocaleString('es-DO')}`;
+}
+
+// ============================================
+// 🆔 ID Y FECHA DE COTIZACIÓN
+// ============================================
+
+function generarIdCotizacion() {
+  const fecha = new Date();
+  const y = fecha.getFullYear();
+  const m = String(fecha.getMonth() + 1).padStart(2, '0');
+  const d = String(fecha.getDate()).padStart(2, '0');
+  const h = String(fecha.getHours()).padStart(2, '0');
+  const min = String(fecha.getMinutes()).padStart(2, '0');
+  const rand = Math.floor(Math.random() * 900 + 100);
+
+  return `CTZ-${y}${m}${d}-${h}${min}-${rand}`;
+}
+
+function fechaFormateada() {
+  return new Date().toLocaleString('es-DO', {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  });
+}
+
+function nombreArchivoPDF(id, colorTapa, tipoEmp) {
+  let sub = 'vinil';
+  if (tipoEmp === 'espiral') {
+    sub = 'espiral';
+  } else if (colorTapa) {
+    sub = colorTapa.replace(/_/g, '-');
+  }
+  return `${id}-${sub}.pdf`;
+}
+
+
+/**
+ * Obtiene valor numérico de un input con valor por defecto
+ * @param {string} id - ID del elemento
+ * @param {number} valorDefecto - Valor por defecto
+ * @returns {number} Valor parseado
+ */
+function obtenerValorNumerico(id, valorDefecto = 0) {
+  return parseInt(document.getElementById(id)?.value) || valorDefecto;
+}
+
+// ============================================
+// 📱 ELEMENTOS DEL DOM
+// ============================================
+
+const elementos = {
+  // Selectores principales
+  itlaCheckbox: document.getElementById('itlaCheckbox'),
+  tamano: document.getElementById('tamano'),
+  papel: document.getElementById('papel'),
+  tipoEmpastado: document.getElementById('tipoEmpastado'),
+  
+  // Alertas y secciones
+  alertaTabloide: document.getElementById('alertaTabloide'),
+  bnColorSection: document.getElementById('bnColorSection'),
+  soloPaginas: document.getElementById('soloPaginas'),
+  colorTapaSection: document.getElementById('colorTapaSection'),
+  
+  // CD
+  llevaCd: document.getElementById('llevaCd'),
+  cdSection: document.getElementById('cdSection'),
+  
+  // Resultado
+  resultado: document.getElementById('cotizacionGenerada'),
+  
+  // Botones
+  btnCalcular: document.getElementById('btnCalcular'),
+  btnDescargarPdf: document.getElementById('btnDescargarPdf'),
+  btnGenerar: document.getElementById('btnGenerar'),
+  btnReiniciar: document.getElementById('btnReiniciar'),
+  btnMostrarTabla: document.getElementById('btnMostrarTabla'),
+  btnGuardarTesis: document.getElementById('btnGuardarTesis'),
+  btnVerGuardadas: document.getElementById('btnVerGuardadas'),
+  
+  // Otros
+  tablaPrecios: document.getElementById('tablaPrecios')
+};
+
+let ultimaCotizacion = '';
+let datosGlobales = {};
+let datosUltimaCotizacion = null; // Variable para almacenar los datos completos de la última cotización
+let datosParaGuardar = null; // Variable temporal para guardar en Sheets
+let todasLasCotizaciones = []; // Para el modal de Firebase
+let isProcessingAction = false; // Flag para evitar doble click en acciones
+let idCotizacionAEliminar = null; // Variable temporal para eliminación
+
+// Inicializar Firebase
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+const auth = firebase.auth();
+const ACTIVAR_SEGURIDAD = true; // Control de seguridad
+
+
+// ============================================
+// 🎨 FUNCIONES DE VISTA
+// ============================================
+
+/**
+ * Actualiza la visibilidad de secciones según selecciones
+ */
+function actualizarVista() {
+  const tamano = elementos.tamano.value;
+
+  // Primero forzamos el modo según tamaño
+  if (tamano === 'tabloide') {
+    configurarModoTabloide();
+  } else {
+    configurarModoCarta();
+  }
+
+  // 🔥 AHORA sí leemos los valores reales
+  const esSatinado = elementos.papel.value === 'satinado';
+  const esTapaDura = elementos.tipoEmpastado.value === 'tapa_dura';
+  const esEspiral = elementos.tipoEmpastado.value === 'espiral';
+
+  // Mostrar/ocultar secciones según papel
+  elementos.bnColorSection.style.display = esSatinado ? 'none' : 'block';
+  elementos.soloPaginas.style.display = esSatinado ? 'block' : 'none';
+
+  // Color de tapa SOLO carta/legal + tapa dura
+  elementos.colorTapaSection.style.display =
+    (esTapaDura && (tamano === 'carta' || tamano === 'legal')) ? 'block' : 'none';
+
+  // Ocultar Lomo si es Espiral y resetear a 'no'
+  const lomoSelect = document.getElementById('lomo');
+  if (lomoSelect) {
+    const lomoGroup = lomoSelect.closest('.form-group');
+    if (lomoGroup) {
+      if (esEspiral) {
+        lomoGroup.style.display = 'none';
+        lomoSelect.value = 'no';
+      } else {
+        lomoGroup.style.display = 'block';
+      }
+    }
+  }
+}
+
+
+/**
+ * Configura vista para modo tabloide
+ */
+function configurarModoTabloide() {
+  elementos.alertaTabloide.style.display = 'block';
+  elementos.papel.value = 'satinado';
+  elementos.papel.disabled = true;
+  elementos.tipoEmpastado.value = 'vinil';
+  elementos.tipoEmpastado.disabled = true;
+}
+
+/**
+ * Configura vista para modo carta
+ */
+function configurarModoCarta() {
+  elementos.alertaTabloide.style.display = 'none';
+  elementos.papel.disabled = false;
+  elementos.tipoEmpastado.disabled = false;
+}
+
+/**
+ * Alterna visibilidad de sección CD
+ */
+function toggleSeccionCD() {
+  const mostrar = elementos.llevaCd.value === 'si';
+  elementos.cdSection.style.display = mostrar ? 'block' : 'none';
+}
+
+/**
+ * Alterna visibilidad de tabla de precios
+ */
+function toggleTablaPrecios() {
+  elementos.tablaPrecios?.classList.toggle('mostrar');
+}
+
+// ============================================
+// 🧮 LÓGICA DE CÁLCULO
+// ============================================
+
+/**
+ * Calcula el costo de impresión según el tipo de papel
+ * @returns {Object} {impresion, detalleImpresion}
+ */
+function calcularImpresion() {
+  const esSatinado = elementos.papel.value === 'satinado';
+  
+  if (esSatinado) {
+    return calcularImpresionSatinado();
+  } else {
+    return calcularImpresionBondHilo();
+  }
+}
+
+function eliminarCotizacionGuardada(id) {
+  const cotizacion = todasLasCotizaciones.find(c => c.id === id);
+  if (cotizacion) {
+    idCotizacionAEliminar = id;
+    const nombreSpan = document.getElementById('nombreCotizacionEliminar');
+    if (nombreSpan) nombreSpan.textContent = `"${cotizacion.nombre}"`;
+    document.getElementById('modalConfirmarEliminar').classList.remove('hidden');
+  }
+}
+
+async function ejecutarEliminacionCotizacion() {
+  if (!idCotizacionAEliminar) return;
+  const id = idCotizacionAEliminar;
+
+  // Cerrar modal
+  document.getElementById('modalConfirmarEliminar').classList.add('hidden');
+  idCotizacionAEliminar = null;
+
+  try {
+    await db.ref("cotizaciones").child(id).remove();
+    todasLasCotizaciones = todasLasCotizaciones.filter(c => c.id !== id);
+    renderizarCotizacionesGuardadas();
+    mostrarNotificacion('Cotización eliminada', 'success');
+  } catch (e) {
+    console.error(e);
+    mostrarNotificacion('Error al eliminar', 'error');
+  }
+}
+/**
+ * Calcula impresión para papel satinado
+ * @returns {Object}
+ */
+function calcularImpresionSatinado() {
+  const paginas = obtenerValorNumerico('paginas');
+  
+  if (!paginas) {
+    throw new Error('Debe ingresar la cantidad de páginas');
+  }
+
+  let precio;
+  if (elementos.itlaCheckbox?.checked) {
+    precio = 30;
+  } else if (elementos.tamano.value === 'legal') {
+    precio = obtenerPrecioRango(PRECIOS_LEGAL_SATINADO, paginas);
+  } else {
+    precio = PRECIOS[elementos.tamano.value].satinado.precio;
+  }
+  
+  return {
+    impresion: paginas * precio,
+    detalleImpresion: `${paginas} páginas x RD$${precio}`
+  };
+}
+
+/**
+ * Calcula impresión para papel bond/hilo
+ * @returns {Object}
+ */
+function calcularImpresionBondHilo() {
+  const bn = obtenerValorNumerico('bn');
+  const color = obtenerValorNumerico('color');
+  
+  if (bn + color === 0) {
+    throw new Error('Debe ingresar páginas en blanco y negro o color');
+  }
+
+  let precioBN, precioColor;
+  const tamano = elementos.tamano.value;
+  
+  if (tamano === 'legal') {
+    const baseBN = obtenerPrecioRango(PRECIOS_LEGAL_BN, bn);
+    const baseColor = obtenerPrecioRango(PRECIOS_LEGAL_COLOR, color);
+    
+    if (elementos.papel.value === 'hilo') {
+      precioBN = baseBN + 2;
+      precioColor = baseColor + 3;
+    } else {
+      precioBN = baseBN;
+      precioColor = baseColor;
+    }
+  } else {
+    const precios = PRECIOS[tamano][elementos.papel.value];
+    precioBN = precios.bn;
+    precioColor = precios.color;
+  }
+  
+  return {
+    impresion: bn * precioBN + color * precioColor,
+    detalleImpresion: `${bn} B/N + ${color} Color`
+  };
+}
+
+/**
+ * Calcula el costo del empastado
+ * @param {number} tomos - Cantidad de tomos
+ * @returns {Object} {empastado, tipoEmp, colorTapa}
+ */
+function calcularEmpastado(tomos, totalPaginas) {
+  const tipoEmp = elementos.tipoEmpastado.value;
+  const colorTapa = tipoEmp === 'tapa_dura' 
+    ? document.getElementById('colorTapa').value 
+    : '';
+
+  let costoUnitario = 0;
+  if (tipoEmp === 'vinil') {
+    costoUnitario = VINIL[elementos.tamano.value];
+  } else if (tipoEmp === 'espiral') {
+    costoUnitario = calcularPrecioEncuadernado(totalPaginas);
+  } else {
+    costoUnitario = elementos.tamano.value === 'legal' ? 800 : TAPA_DURA[colorTapa];
+    if (elementos.itlaCheckbox?.checked) {
+      costoUnitario = 700;
+    }
+  }
+
+  return {
+    empastado: costoUnitario * tomos,
+    tipoEmp,
+    colorTapa,
+    costoUnitario
+  };
+}
+
+/**
+ * Genera bloque visual del ejemplar según color de tapa
+ * @param {string} tipoEmp
+ * @param {string} colorTapa
+ * @returns {string}
+ */
+function generarBloqueEjemplar(tipoEmp, colorTapa) {
+  if (tipoEmp !== 'tapa_dura') return '';
+
+  const src = IMAGEN_EJEMPLAR_TAPA[colorTapa];
+  if (!src) return '';
+
+  return `
+    <div class="bloque-ejemplar">
+      <div class="bloque-ejemplar-header">
+        📘 Ejemplar – Tapa ${nombreColor(colorTapa)}
+      </div>
+      <div class="bloque-ejemplar-img">
+        <img src="${src}" alt="Ejemplar color ${colorTapa}">
+      </div>
+    </div>
+  `;
+}
+
+
+/**
+ * Calcula servicios adicionales
+ * @param {number} tomos - Cantidad de tomos
+ * @returns {Object} {lomoVal, cdVal, lomo, cd, cantidadCd}
+ */
+function calcularServiciosAdicionales(tomos) {
+  const lomo = document.getElementById('lomo').value === 'si';
+  const lomoVal = lomo ? PRECIOS_SERVICIOS.LOMO * tomos : 0;
+
+  const cd = elementos.llevaCd.value === 'si';
+  const cantidadCd = cd ? obtenerValorNumerico('cantidadCd') : 0;
+  const cdVal = cantidadCd * PRECIOS_SERVICIOS.CD;
+
+  return { lomoVal, cdVal, lomo, cd, cantidadCd };
+}
+
+/**
+ * Función principal de cálculo de cotización
+ */
+async function calcular() {
+  try {
+
+    const idCotizacion = generarIdCotizacion();
+    const fecha = fechaFormateada();
+
+    const tomos = Math.max(1, obtenerValorNumerico('tomos', 1));
+    
+    // Cálculo de impresión
+    const { impresion, detalleImpresion } = calcularImpresion();
+    
+    // Cálculo de empastado/encuadernación
+    const esSatinado = elementos.papel.value === 'satinado';
+    const totalPaginas = esSatinado ? obtenerValorNumerico('paginas') : (obtenerValorNumerico('bn') + obtenerValorNumerico('color'));
+    const { empastado, tipoEmp, colorTapa, costoUnitario } = calcularEmpastado(tomos, totalPaginas);
+    
+    // Servicios adicionales
+    const { lomoVal, cdVal, lomo, cd, cantidadCd } = calcularServiciosAdicionales(tomos);
+    
+    // Total
+    const total = impresion * tomos + empastado + lomoVal + cdVal;
+    const totalRedondeado = redondearA5(total);
+    
+    // Guardar datos completos para la generación de PDF
+    datosUltimaCotizacion = {
+      itlaAplicado: elementos.itlaCheckbox?.checked,
+      esSatinado,
+      tomos,
+      impresion,
+      detalleImpresion,
+      empastado,
+      tipoEmp,
+      colorTapa,
+      costoUnitario,
+      lomoVal,
+      lomo,
+      cdVal,
+      cd,
+      cantidadCd,
+      totalRedondeado,
+      idCotizacion,
+      fecha
+    };
+    // Generar HTML de cotización
+datosGlobales = {
+  idCotizacion,
+  colorTapa
+};
+
+// Preparar datos para Google Sheets
+datosParaGuardar = {
+  descripcion: 'Tesis', // 🏷️ Cambiado de 'tipo' a 'descripcion'
+  total: totalRedondeado.toFixed(2),
+  detalle: `📚 ${tomos} tomos - RD$${totalRedondeado.toFixed(2)}\n📄 ${nombreColor(elementos.tamano.value)} / ${nombreColor(elementos.papel.value)}\n📕 ${nombreColor(elementos.tipoEmpastado.value)}`
+};
+ultimaCotizacion = generarHTMLCotizacion(datosUltimaCotizacion);
+
+
+    
+    elementos.resultado.innerHTML = ultimaCotizacion;
+    elementos.resultado.style.display = 'block';
+    mostrarNotificacion('Cotización calculada exitosamente', 'success');
+
+    // Guardar en Firebase para el dashboard
+    const datosDashboard = {
+      fecha: new Date().toISOString(),
+      timestamp: firebase.database.ServerValue.TIMESTAMP,
+      tipo: "Tesis",
+      nombre: idCotizacion, // Usar el ID como nombre
+      total: totalRedondeado.toFixed(2),
+      descripcion: `Cotización automática - ${tomos} tomos`
+    };
+
+    try {
+      await db.ref("cotizaciones").push(datosDashboard);
+      console.log("Tesis guardada en dashboard");
+    } catch (error) {
+      console.error("Error al guardar tesis:", error);
+    }
+    
+  } catch (error) {
+    mostrarNotificacion(error.message, 'error');
+  }
+}
+
+// ============================================
+// 🎨 GENERACIÓN DE HTML
+// ============================================
+
+/**
+ * Genera el HTML completo de la cotización
+ * @param {Object} datos - Datos de la cotización
+ * @returns {string} HTML generado
+ */
+function generarHTMLCotizacion(datos) {
+return `
+  <div class="page-break"></div>
+
+  <div class="cotizacion">
+    ${generarEncabezado(datos.idCotizacion, datos.fecha)}
+    ${generarTablaDetalle(datos)}
+    
+      ${generarTablaTotal(datos.totalRedondeado)}
+      ${BLOQUE_MENSAJE_PAGINA_SIGUIENTE}
+  
+    
+    ${generarBloqueEjemplar(datos.tipoEmp, datos.colorTapa)}
+    ${BLOQUE_CUENTAS.replace(
+      '{{TIEMPO_ENTREGA}}',
+      generarTiempoEntrega(datos.tipoEmp)
+    )}
+  </div>
+`;
+
+}
+
+function formatearMonto(valor) {
+  return Number(valor).toLocaleString('en-US');
+}
+
+
+
+/**
+ * Genera el encabezado de la cotización
+ * @returns {string}
+ */
+function generarEncabezado(idCotizacion, fecha) {
+  return `
+    <div class="cotizacion-header">
+      <img src="logo.png" class="logo" alt="Logo ServiGaco">
+      <div class="empresa-info">
+        <h1>Cotización de Tesis</h1>
+        <p>
+          <strong>ID:</strong> ${idCotizacion}<br>
+          <strong>Fecha:</strong> ${fecha}<br>
+          ServiGaco<br>
+          Tel: 809-682-1075
+        </p>
+      </div>
+    </div>
+  `;
+}
+
+
+/**
+ * Genera la tabla de detalle de servicios
+ * @param {Object} datos
+ * @returns {string}
+ */
+function generarTablaDetalle(datos) {
+  const filaLomo = datos.lomo ? generarFilaLomo(datos.tomos, datos.lomoVal) : '';
+  const filaCD = (datos.cd && datos.cantidadCd) ? generarFilaCD(datos.cantidadCd, datos.cdVal) : '';
+
+  return `
+    <div style="overflow-x: auto; width: 100%; margin-bottom: 1rem; border-radius: 0.5rem; border: 1px solid var(--border-light);">
+      <table class="tabla-cotizacion" style="min-width: 650px; margin-top: 0;">
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th>Detalle</th>
+            <th>Cantidad</th>
+            <th>Precio Unit.</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${generarFilaImpresion(datos)}
+          ${generarFilaEmpastado(datos)}
+          ${filaLomo}
+          ${filaCD}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+/**
+ * Genera fila de impresión
+ * @param {Object} datos
+ * @returns {string}
+ */
+function generarFilaImpresion(datos) {
+  const badgeItla = (datos.itlaAplicado && datos.esSatinado) ? ' <span style="background:#4f46e5;color:white;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:bold;vertical-align:middle;margin-left:4px;">ITLA</span>' : '';
+  return `
+    <tr>
+      <td><strong>Impresión${badgeItla}</strong></td>
+      <td>${datos.detalleImpresion}</td>
+      <td class="center">${datos.tomos}</td>
+      <td class="right">RD$${formatearMonto(datos.impresion)}</td>
+      <td class="right">RD$${formatearMonto(datos.impresion * datos.tomos)}</td>
+
+    </tr>
+  `;
+}
+
+/**
+ * Genera fila de empastado
+ * @param {Object} datos
+ * @returns {string}
+ */
+function generarFilaEmpastado(datos) {
+  let detalle = 'Vinil';
+  let concepto = 'Empastado';
+  const badgeItla = (datos.itlaAplicado && datos.tipoEmp === 'tapa_dura') ? ' <span style="background:#4f46e5;color:white;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:bold;vertical-align:middle;margin-left:4px;">ITLA</span>' : '';
+  if (datos.tipoEmp === 'tapa_dura') {
+    detalle = `Tapa dura (${nombreColor(datos.colorTapa)})${badgeItla}`;
+  } else if (datos.tipoEmp === 'espiral') {
+    detalle = 'Encuadernado Espiral';
+    concepto = 'Encuadernado';
+  }
+
+  return `
+    <tr>
+      <td><strong>${concepto}</strong></td>
+      <td>${detalle}</td>
+      <td class="center">${datos.tomos}</td>
+      <td class="right">RD$${formatearMonto(datos.costoUnitario)}</td>
+      <td class="right">RD$${formatearMonto(datos.empastado)}</td>
+    </tr>
+  `;
+}
+
+/**
+ * Genera fila de lomo
+ * @param {number} tomos
+ * @param {number} lomoVal
+ * @returns {string}
+ */
+function generarFilaLomo(tomos, lomoVal) {
+  return `
+    <tr>
+      <td>Lomo</td>
+      <td>Incluido</td>
+      <td class="center">${tomos}</td>
+      <td>RD$${formatearMonto(PRECIOS_SERVICIOS.LOMO)}</td>
+      <td>RD$${formatearMonto(lomoVal)}</td>
+
+    </tr>
+  `;
+}
+
+
+/**
+ * Genera fila de CD
+ * @param {number} cantidadCd
+ * @param {number} cdVal
+ * @returns {string}
+ */
+function generarFilaCD(cantidadCd, cdVal) {
+  return `
+    <tr>
+      <td>CD</td>
+      <td>${cantidadCd} unidad(es)</td>
+      <td class="center">${cantidadCd}</td>
+      <td>RD$${formatearMonto(PRECIOS_SERVICIOS.CD)}</td>
+      <td>RD$${formatearMonto(cdVal)}</td>
+
+    </tr>
+  `;
+}
+
+/**
+ * Genera tabla de total
+ * @param {number} total
+ * @returns {string}
+ */
+function generarTablaTotal(total) {
+  return `
+    <table class="tabla-total">
+      <tr>
+        <td><strong>Total General</strong></td>
+        <td class="right"><strong>RD$${formatearMonto(total)}</strong></td>
+      </tr>
+    </table>
+  `;
+}
+
+/**
+ * Genera mensaje de tiempo de entrega
+ * @param {string} tipoEmp
+ * @returns {string}
+ */
+function generarTiempoEntrega(tipoEmp) {
+  if (tipoEmp === 'espiral') {
+    return `
+      <div class="tiempo-entrega">
+        ⏰ Tiempo de entrega: encuadernado espiral se entrega de inmediato.
+      </div>
+    `;
+  }
+
+  const tiempo = tipoEmp === 'tapa_dura' 
+    ? TIEMPO_ENTREGA.TAPA_DURA 
+    : TIEMPO_ENTREGA.VINIL;
+    
+  return `
+    <div class="tiempo-entrega">
+      ⏰ Tiempo de entrega: en tapa dura ${tiempo}, si es apartir de las 12:00 PM se entrega al otro dia / ${TIEMPO_ENTREGA.VINIL} vinil.
+    </div>
+  `;
+}
+
+// ============================================
+// 🖨️ FUNCIONES DE IMPRESIÓN Y COMPARTIR
+// ============================================
+
+/**
+ * Genera el HTML completo y autocontenido para la cotización, ideal para PDF o impresión.
+ * @param {Object} datos - Los datos completos de la cotización.
+ * @returns {string} - El string HTML completo.
+ */
+function generarHTMLParaImprimir(datos) {
+  // Generar filas de la tabla
+  const filaImpresion = generarFilaImpresion(datos);
+  const filaEmpastado = generarFilaEmpastado(datos);
+  const filaLomo = datos.lomo ? generarFilaLomo(datos.tomos, datos.lomoVal) : '';
+  const filaCD = (datos.cd && datos.cantidadCd) ? generarFilaCD(datos.cantidadCd, datos.cdVal) : '';
+  const tableBody = `${filaImpresion}${filaEmpastado}${filaLomo}${filaCD}`;
+
+  // Generar pie de tabla con total
+  const resumenHTML = `
+    <tr style="background: linear-gradient(to right, #2563eb, #1e40af);">
+      <td colspan="4" style="text-align: right; font-weight: bold; color: white; padding: 16px; font-size: 14px;">TOTAL:</td>
+      <td style="text-align: right; font-weight: 900; color: white; padding: 16px; font-size: 18px; background: linear-gradient(to right, #ea580c, #c2410c);">RD$${formatearMonto(datos.totalRedondeado)}</td>
+    </tr>
+  `;
+
+  // Construir el HTML completo para el PDF
+  return `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="utf-8">
+      <base href="${window.location.origin}/">
+      <title>Cotización Tesis - ${datos.idCotizacion}</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: white; }
+        .container { max-width: 900px; margin: 0 auto; background: white; overflow: hidden; }
+        .header { background: linear-gradient(135deg, #2563eb 0%, #1e40af 50%, #1e3a8a 100%); color: white; padding: 40px 30px; position: relative; overflow: hidden; }
+        .header-content { position: relative; z-index: 1; text-align: center; }
+        .logo { width: 140px; height: auto; margin: 0 auto 15px; display: block; }
+        .header h1 { font-size: 28px; font-weight: 900; margin-bottom: 5px; letter-spacing: -0.5px; }
+        .header-divider { width: 50px; height: 4px; background: linear-gradient(to right, #f97316, #ea580c); margin: 10px auto 15px; border-radius: 10px; }
+        .header p { font-size: 12px; color: #bfdbfe; font-weight: 600; letter-spacing: 1px; margin-bottom: 15px; }
+        .header-badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 12px 20px; font-size: 12px; font-weight: 600; }
+        .content { padding: 30px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+        thead tr { background: linear-gradient(to right, #2563eb, #1e40af); color: white; }
+        thead th { padding: 14px 16px; text-align: left; font-weight: 700; font-size: 12px; letter-spacing: 0.5px; text-transform: uppercase; }
+        tbody tr { border-bottom: 1px solid #e0e7ff; }
+        tbody tr:nth-child(odd) { background: #f0f9ff; }
+        tbody td { padding: 14px 16px; font-size: 13px; }
+        tbody td:first-child { font-weight: 700; color: #1e3a8a; }
+        .center { text-align: center; }
+        .right { text-align: right; }
+        .footer { background: linear-gradient(to right, #1f2937, #111827); border-top: 4px solid #ea580c; padding: 25px 30px; text-align: center; color: white; }
+        .footer-brand { color: #f97316; font-weight: 900; font-size: 16px; letter-spacing: 1px; margin-bottom: 5px; }
+        .footer-subtitle { color: #cbd5e1; font-size: 11px; font-weight: 600; margin-bottom: 12px; }
+        .footer-text { color: #94a3b8; font-size: 11px; line-height: 1.6; border-top: 1px solid #374151; padding-top: 12px; margin-top: 12px; }
+        /* Estilos para los bloques adicionales */
+        .bloque-ejemplar, .cuentas-pago, .tiempo-entrega { page-break-inside: avoid; margin-top: 2rem; }
+        .bloque-ejemplar { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+        .bloque-ejemplar-header { background: #f3f4f6; padding: 10px; font-weight: bold; }
+        .bloque-ejemplar-img { padding: 20px; text-align: center; }
+        .bloque-ejemplar-img img { max-width: 250px; height: auto; }
+        .cuentas-pago { text-align: center; }
+        .img-cuenta { max-width: 100%; height: auto; margin-bottom: 1rem; }
+        .tiempo-entrega { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 15px; border-radius: 8px; text-align: center; font-size: 14px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="header-content">
+            <img src="logo.png" class="logo" alt="Logo ServiGaco" />
+            <h1>Cotización de Tesis</h1>
+            <div class="header-divider"></div>
+            <p>ID: ${datos.idCotizacion}</p>
+            <div class="header-badge">
+              📅 ${datos.fecha} | ✓ Presupuesto Válido
+            </div>
+          </div>
+        </div>
+        <div class="content">
+          <table>
+            <thead>
+              <tr>
+                <th>Concepto</th>
+                <th>Detalle</th>
+                <th class="center">Cantidad</th>
+                <th class="right">Precio Unit.</th>
+                <th class="right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>${tableBody}</tbody>
+            <tfoot>${resumenHTML}</tfoot>
+          </table>
+          ${generarBloqueEjemplar(datos.tipoEmp, datos.colorTapa)}
+          ${BLOQUE_CUENTAS.replace('{{TIEMPO_ENTREGA}}', generarTiempoEntrega(datos.tipoEmp))}
+        </div>
+        <div class="footer">
+          <div class="footer-brand">ServiGaco®</div>
+          <div class="footer-subtitle">CALIDAD Y RAPIDEZ</div>
+          <div class="footer-text">Cotización generada automáticamente. Válida por 30 días.</div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+/**
+ * Obtiene el PDF como un Blob desde el backend.
+ * @param {Object} datos - Los datos completos de la cotización.
+ * @returns {Promise<Blob>}
+ */
+async function getPDFBlob(datos) {
+  const filename = nombreArchivoPDF(datos.idCotizacion, datos.colorTapa, datos.tipoEmp);
+  const html = generarHTMLParaImprimir(datos); // Reutilizamos la función de generación de HTML
+
+  const apiUrl = window.location.port === '5500' ? 'http://localhost:3000/generar-pdf' : '/generar-pdf';
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ html: html, filename: filename })
+  });
+
+  if (!response.ok) {
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'El servidor no pudo generar el PDF.');
+    } else {
+      throw new Error(`Error ${response.status}: El endpoint /generar-pdf no existe.\n\n⚠️ CAUSA PROBABLE: No estás ejecutando 'node server.js' o estás usando otro servidor (como Live Server) en el puerto 3000.`);
+    }
+  }
+
+  return await response.blob();
+}
+
+/**
+ * Abre una nueva ventana con la cotización formateada y activa el diálogo de impresión del navegador.
+ * Este método es rápido, optimizado y no depende del backend.
+ */
+function imprimir() {
+  if (isProcessingAction) {
+    return mostrarNotificacion('Espere a que la acción actual termine.', 'warning');
+  }
+  if (!ultimaCotizacion || !datosUltimaCotizacion) {
+    return mostrarNotificacion('Calcule primero la cotización', 'warning');
+  }
+
+  isProcessingAction = true;
+  const btn = elementos.btnGenerar;
+  const originalBtnHTML = btn.innerHTML;
+  btn.disabled = true;
+  try {
+    // 1. Generamos el HTML optimizado para impresión, que es autocontenido.
+    const htmlCompleto = generarHTMLParaImprimir(datosUltimaCotizacion);
+
+    // 2. Abrimos una nueva ventana para la impresión.
+    const ventanaImpresion = window.open('', 'Imprimir Cotización', 'height=800,width=1200');
+    
+    if (!ventanaImpresion) {
+        throw new Error('El navegador bloqueó la ventana emergente. Por favor, permite los popups para imprimir.');
+    }
+
+    // 3. Escribimos el contenido en la nueva ventana.
+    ventanaImpresion.document.write(htmlCompleto);
+    ventanaImpresion.document.close(); // Esencial para que 'onload' se dispare correctamente.
+    
+    // 4. Esperamos a que todo (incluyendo CSS e imágenes) se cargue antes de imprimir.
+    ventanaImpresion.onload = function() {
+      ventanaImpresion.focus(); // Asegura que la ventana de impresión esté al frente.
+      ventanaImpresion.print(); // Llama al diálogo de impresión del navegador.
+      
+      // 5. Cerramos la ventana auxiliar después de que el usuario interactúe con el diálogo.
+      // Usamos un pequeño timeout para dar tiempo a que el comando de impresión se envíe.
+      setTimeout(() => {
+        ventanaImpresion.close();
+      }, 250);
+    };
+
+  } catch (error) {
+    console.error('Error al preparar la impresión:', error);
+    mostrarNotificacion(error.message || 'Error al generar la vista de impresión', 'error');
+  } finally {
+    isProcessingAction = false;
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHTML;
+  }
+}
+
+
+/**
+ * Genera y descarga el PDF usando el backend con Puppeteer
+ */
+async function generarPDFDesdeBackend() {
+  if (isProcessingAction) {
+    return mostrarNotificacion('Espere a que la acción actual termine.', 'warning');
+  }
+  if (!ultimaCotizacion || !datosUltimaCotizacion) {
+    mostrarNotificacion('Primero genera la cotización', 'warning');
+    return;
+  }
+
+  isProcessingAction = true;
+  const btn = document.getElementById('btnDescargarPdf');
+  const originalBtnHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="text-xl animate-spin">⚙️</span> Generando...`;
+  
+  try {
+    const datos = datosUltimaCotizacion;
+    const filename = nombreArchivoPDF(datos.idCotizacion, datos.colorTapa, datos.tipoEmp);
+
+    const pdfBlob = await getPDFBlob(datos);
+
+    // Download
+    const url = window.URL.createObjectURL(pdfBlob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
+  } catch (error) {
+    console.error('Error al generar PDF desde backend:', error);
+    mostrarNotificacion(error.message || 'Error al generar el PDF', 'error');
+  } finally {
+    isProcessingAction = false;
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHTML;
+  }
+}
+
+// ============================================
+// 🔄 FUNCIÓN DE REINICIO
+// ============================================
+
+/**
+ * Reinicia el formulario a valores por defecto
+ */
+function reiniciar() {
+  // Limpiar campos numéricos
+  const camposLimpiar = ['bn', 'color', 'paginas', 'cantidadCd'];
+  camposLimpiar.forEach(id => {
+    const campo = document.getElementById(id);
+    if (campo) campo.value = '';
+  });
+
+  // Restablecer tomos a 1
+  const tomos = document.getElementById('tomos');
+  if (tomos) tomos.value = 1;
+
+  // Restablecer selectores
+  elementos.tamano.value = 'carta';
+  elementos.papel.value = 'bond';
+  elementos.tipoEmpastado.value = 'tapa_dura';
+  
+  const colorTapa = document.getElementById('colorTapa');
+  if (colorTapa) colorTapa.value = 'beige';
+  
+  const lomo = document.getElementById('lomo');
+  if (lomo) lomo.value = 'no';
+  
+  elementos.llevaCd.value = 'no';
+
+  // Ocultar secciones
+  elementos.cdSection.style.display = 'none';
+  elementos.alertaTabloide.style.display = 'none';
+
+  // Limpiar resultado
+  elementos.resultado.innerHTML = '';
+  elementos.resultado.style.display = 'none';
+  ultimaCotizacion = '';
+
+  // Actualizar vista
+  actualizarVista();
+  
+  guardarTesisLocalStorage();
+  mostrarNotificacion('Formulario reiniciado', 'success');
+}
+
+// ============================================
+// 🎬 INICIALIZACIÓN Y EVENTOS
+// ============================================
+
+/**
+ * Inicializa la aplicación
+ */
+function inicializar() {
+  if (window.location.protocol === 'file:') {
+    alert("⚠️ ATENCIÓN: Estás abriendo el archivo directamente (file://).\n\nPara que la generación de PDF funcione, debes usar el servidor local.\n\nEjecuta 'node server.js' y abre http://localhost:3000");
+  }
+
+  // Establecer valor por defecto
+  elementos.tipoEmpastado.value = 'tapa_dura';
+  
+  // Cargar datos guardados (si existen)
+  cargarTesisLocalStorage();
+  
+  // Configurar eventos principales
+  [elementos.tamano, elementos.papel, elementos.tipoEmpastado].forEach(el => {
+    el.addEventListener('change', actualizarVista);
+  });
+
+  // Evento para CD
+  elementos.llevaCd.addEventListener('change', toggleSeccionCD);
+
+  // Eventos de botones
+  elementos.btnCalcular.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); calcular(); });
+  elementos.btnGenerar.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); imprimir(); });
+  if (elementos.btnDescargarPdf) {
+    elementos.btnDescargarPdf.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      generarPDFDesdeBackend();
+    });
+  }
+  elementos.btnReiniciar.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); reiniciar(); });
+
+  // Eventos Firebase
+  if (elementos.btnGuardarTesis) {
+    elementos.btnGuardarTesis.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); guardarTesisEnFirebase(); });
+  }
+  if (elementos.btnVerGuardadas) {
+    elementos.btnVerGuardadas.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); abrirModalCotizaciones(); });
+  }
+  
+  // --- EVENTOS DASHBOARD Y AUTH (NUEVO) ---
+  const btnDashboard = document.getElementById('btnDashboard');
+  if (btnDashboard) btnDashboard.addEventListener('click', abrirModalDashboard);
+
+  // --- EVENTO FILTRO DASHBOARD ---
+  const btnFiltrarDash = document.getElementById('btnFiltrarDashboard');
+  if (btnFiltrarDash) btnFiltrarDash.addEventListener('click', cargarDatosDashboard);
+
+  const btnAuthNav = document.getElementById('btnAuthNav');
+  if (btnAuthNav) btnAuthNav.addEventListener('click', manejarClickAuth);
+
+  document.getElementById('formLogin')?.addEventListener('submit', procesarLogin);
+  document.getElementById('btnCerrarLogin')?.addEventListener('click', () => document.getElementById('modalLogin').classList.add('hidden'));
+  document.getElementById('btnCerrarDashboard')?.addEventListener('click', () => document.getElementById('modalDashboard').classList.add('hidden'));
+  document.getElementById('btnFiltrarDashboard')?.addEventListener('click', cargarDatosDashboard);
+
+  auth.onAuthStateChanged(actualizarIconoAuth);
+
+  // Evento tabla de precios (opcional)
+  if (elementos.btnMostrarTabla) {
+    elementos.btnMostrarTabla.addEventListener('click', toggleTablaPrecios);
+  }
+
+  // Listeners para persistencia en todos los inputs
+  const inputs = document.querySelectorAll('input, select');
+  inputs.forEach(el => {
+    el.addEventListener('change', guardarTesisLocalStorage);
+    el.addEventListener('input', guardarTesisLocalStorage);
+  });
+
+  // Eventos Modal
+  const btnCerrarModal = document.getElementById('btnCerrarModal');
+  if (btnCerrarModal) btnCerrarModal.addEventListener('click', cerrarModalCotizaciones);
+  
+  // Cerrar modal al hacer click fuera
+  const modal = document.getElementById('modalCotizacionesGuardadas');
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) cerrarModalCotizaciones();
+    });
+  }
+
+  // Eventos Modal Eliminar
+  const btnConfirmarEliminar = document.getElementById('btnConfirmarEliminar');
+  if (btnConfirmarEliminar) btnConfirmarEliminar.addEventListener('click', ejecutarEliminacionCotizacion);
+
+  const btnCancelarEliminar = document.getElementById('btnCancelarEliminar');
+  if (btnCancelarEliminar) btnCancelarEliminar.addEventListener('click', () => {
+    document.getElementById('modalConfirmarEliminar').classList.add('hidden');
+    idCotizacionAEliminar = null;
+  });
+
+  // Eventos Modal Guardar (Nuevo)
+  const btnConfirmarGuardar = document.getElementById('btnConfirmarGuardar');
+  if (btnConfirmarGuardar) btnConfirmarGuardar.addEventListener('click', confirmarGuardarTesis);
+
+  const btnCancelarGuardar = document.getElementById('btnCancelarGuardar');
+  if (btnCancelarGuardar) btnCancelarGuardar.addEventListener('click', () => {
+    isProcessingAction = false; // Liberar si se cancela
+    document.getElementById('modalGuardarTesis').classList.add('hidden');
+  });
+
+  // Actualizar vista inicial
+  actualizarVista();
+}
+
+// Iniciar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', inicializar);
+} else {
+  inicializar();
+}
+
+// ============================================
+// 💾 PERSISTENCIA (LOCALSTORAGE)
+// ============================================
+
+function guardarTesisLocalStorage() {
+  const datos = {
+    tamano: document.getElementById('tamano')?.value,
+    papel: document.getElementById('papel')?.value,
+    bn: document.getElementById('bn')?.value,
+    color: document.getElementById('color')?.value,
+    paginas: document.getElementById('paginas')?.value,
+    tomos: document.getElementById('tomos')?.value,
+    tipoEmpastado: document.getElementById('tipoEmpastado')?.value,
+    colorTapa: document.getElementById('colorTapa')?.value,
+    lomo: document.getElementById('lomo')?.value,
+    llevaCd: document.getElementById('llevaCd')?.value,
+    cantidadCd: document.getElementById('cantidadCd')?.value
+  };
+  localStorage.setItem('cotizacion_tesis_datos', JSON.stringify(datos));
+}
+
+function cargarTesisLocalStorage() {
+  const guardado = localStorage.getItem('cotizacion_tesis_datos');
+  if (guardado) {
+    try {
+      const datos = JSON.parse(guardado);
+      if (datos.tamano) document.getElementById('tamano').value = datos.tamano;
+      if (datos.papel) document.getElementById('papel').value = datos.papel;
+      if (datos.bn) document.getElementById('bn').value = datos.bn;
+      if (datos.color) document.getElementById('color').value = datos.color;
+      if (datos.paginas) document.getElementById('paginas').value = datos.paginas;
+      if (datos.tomos) document.getElementById('tomos').value = datos.tomos;
+      if (datos.tipoEmpastado) document.getElementById('tipoEmpastado').value = datos.tipoEmpastado;
+      if (datos.colorTapa) document.getElementById('colorTapa').value = datos.colorTapa;
+      if (datos.lomo) document.getElementById('lomo').value = datos.lomo;
+      if (datos.llevaCd) document.getElementById('llevaCd').value = datos.llevaCd;
+      if (datos.cantidadCd) document.getElementById('cantidadCd').value = datos.cantidadCd;
+
+      toggleSeccionCD();
+    } catch (e) {
+      console.error('Error cargando datos de tesis', e);
+    }
+  }
+}
+
+// ============================================
+// 🔔 NOTIFICACIONES TOAST
+// ============================================
+
+function mostrarNotificacion(mensaje, tipo = 'success') {
+  let container = document.querySelector('.toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${tipo}`;
+  toast.innerHTML = `
+    <span class="toast-icon">${tipo === 'success' ? '✅' : tipo === 'error' ? '❌' : '⚠️'}</span>
+    <span class="toast-message">${mensaje}</span>
+  `;
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.animation = 'toastFadeOut 0.4s forwards';
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
+
+// ============================================
+// ☁️ GOOGLE SHEETS API
+// ============================================
+
+function enviarAGoogleSheets(datos) {
+  if (GOOGLE_SCRIPT_URL === 'TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI' || !GOOGLE_SCRIPT_URL) {
+    console.warn('⚠️ Falta configurar la URL de Google Sheets en el script.');
+    return;
+  }
+
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'text/plain'
+    },
+    body: JSON.stringify(datos)
+  }).then(() => console.log('✅ Pedido guardado en Sheets'))
+    .catch(err => console.error('❌ Error guardando en Sheets:', err));
+}
+
+// ============================================
+// ☁️ FIREBASE FUNCTIONS (TESIS)
+// ============================================
+
+async function guardarTesisEnFirebase() {
+  if (isProcessingAction) {
+    return mostrarNotificacion('Espere a que la acción actual termine.', 'warning');
+  }
+  if (!ultimaCotizacion) {
+    calcular();
+    if (!ultimaCotizacion) return;
+  }
+
+  isProcessingAction = true; // Bloqueamos otras acciones
+
+  // ABRIR MODAL EN LUGAR DE PROMPT
+  const modal = document.getElementById('modalGuardarTesis');
+  const input = document.getElementById('inputNombreTesis');
+  
+  if (modal && input) {
+    input.value = "Cliente Tesis"; // Valor por defecto
+    modal.classList.remove('hidden');
+    setTimeout(() => input.focus(), 100);
+    // isProcessingAction se libera en confirmarGuardarTesis o al cerrar el modal
+  }
+}
+
+async function confirmarGuardarTesis() {
+  const nombre = document.getElementById('inputNombreTesis').value || "Cliente Tesis";
+  document.getElementById('modalGuardarTesis').classList.add('hidden');
+
+  if (!nombre) return;
+
+  // Recopilar inputs actuales
+  const inputs = {
+    tamano: elementos.tamano.value,
+    papel: elementos.papel.value,
+    bn: document.getElementById('bn').value,
+    color: document.getElementById('color').value,
+    paginas: document.getElementById('paginas').value,
+    tomos: document.getElementById('tomos').value,
+    tipoEmpastado: elementos.tipoEmpastado.value,
+    colorTapa: document.getElementById('colorTapa').value,
+    lomo: document.getElementById('lomo').value,
+    llevaCd: elementos.llevaCd.value,
+    cantidadCd: document.getElementById('cantidadCd').value
+  };
+
+  const paqueteDeDatos = {
+    fecha: new Date().toISOString(),
+    timestamp: firebase.database.ServerValue.TIMESTAMP,
+    tipo: "Tesis",
+    nombre: nombre,
+    total: datosParaGuardar.total,
+    descripcion: `Tesis: ${inputs.tomos} tomos, ${nombreColor(inputs.tamano)}, ${nombreColor(inputs.papel)}, ${nombreColor(inputs.tipoEmpastado)}`,
+    detalle_tecnico: datosParaGuardar.detalle,
+    inputs: inputs
+  };
+
+  try {
+    await db.ref("cotizaciones").push(paqueteDeDatos);
+    mostrarNotificacion(`✅ Tesis guardada correctamente`, "success");
+  } catch (error) {
+    console.error("❌ Error:", error);
+    mostrarNotificacion("Error al guardar: " + error.message, "error");
+  } finally {
+    isProcessingAction = false; // Liberar bloqueo
+  }
+}
+
+async function abrirModalCotizaciones() {
+  const container = document.getElementById('listaCotizacionesGuardadas');
+  if (container) container.innerHTML = '<div class="text-center py-10"><p class="text-xl animate-pulse">🔥 Cargando desde Base de Datos...</p></div>';
+  
+  document.getElementById('modalCotizacionesGuardadas')?.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+
+  try {
+    // OPTIMIZACIÓN: Filtrar por tipo 'Tesis' y traer solo las últimas 20
+    // Requiere regla en Firebase: "cotizaciones": { ".indexOn": ["tipo"] }
+    const snapshot = await db.ref("cotizaciones").orderByChild("tipo").equalTo("Tesis").limitToLast(20).once("value");
+    const data = snapshot.val();
+
+    if (data) {
+      todasLasCotizaciones = Object.keys(data).map(key => ({
+        ...data[key], // 1. Cargar datos primero
+        id: key       // 2. SOBRESCRIBIR con la clave real de Firebase
+      })).sort((a, b) => {
+        return new Date(b.fecha || b.fechaISO) - new Date(a.fecha || a.fechaISO);
+      });
+    } else {
+      todasLasCotizaciones = [];
+    }
+
+    renderizarCotizacionesGuardadas();
+  } catch (error) {
+    console.error("Error cargando cotizaciones:", error);
+    if (container) container.innerHTML = '<p class="text-center text-red-500 py-8">Error al cargar las cotizaciones.</p>';
+  }
+}
+
+function cerrarModalCotizaciones() {
+  document.getElementById('modalCotizacionesGuardadas')?.classList.add('hidden');
+  document.body.style.overflow = 'auto';
+  isProcessingAction = false; // Liberar si se cierra el modal sin guardar
+}
+
+function renderizarCotizacionesGuardadas() {
+  const container = document.getElementById('listaCotizacionesGuardadas');
+  if (!container) return;
+
+  if (todasLasCotizaciones.length === 0) {
+    container.innerHTML = `<p class="text-center text-gray-500 py-8">No hay cotizaciones guardadas.</p>`;
+    return;
+  }
+
+  container.innerHTML = todasLasCotizaciones.map(c => {
+    let fechaObj = new Date();
+    if (c.timestamp && c.timestamp.toDate) fechaObj = c.timestamp.toDate();
+    else if (c.fecha) fechaObj = new Date(c.fecha);
+    
+    const fechaStr = fechaObj.toLocaleDateString('es-DO', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const total = Number(c.total || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    
+    const esTesis = c.tipo === 'Tesis';
+    const icono = esTesis ? '🎓' : '📄';
+    
+    // Solo permitimos cargar si es Tesis, o borrar cualquiera
+    const btnCargar = esTesis 
+      ? `<button onclick="cargarCotizacionGuardada('${c.id}')" class="flex-1 md:flex-none py-2 px-3 rounded-lg font-semibold text-sm text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-sm whitespace-nowrap">📂 Cargar</button>`
+      : `<span class="text-xs text-gray-400 italic px-2 self-center">Ir a General para editar</span>`;
+
+    return `
+      <div class="p-4 mb-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 hover:bg-blue-50 transition-colors">
+        <div class="flex-grow w-full md:w-auto">
+          <p class="font-bold text-lg text-blue-700 dark:text-blue-400 break-words">${icono} ${c.nombre}</p>
+          <p class="text-sm text-gray-500">${fechaStr} - ${c.descripcion || 'Sin descripción'}</p>
+          <p class="text-md font-semibold text-gray-800 mt-1">Total: RD$${total}</p>
+        </div>
+        <div class="flex flex-wrap gap-2 w-full md:w-auto justify-end mt-2 md:mt-0">
+          ${btnCargar}
+          <button onclick="eliminarCotizacionGuardada('${c.id}')" class="flex-1 md:flex-none py-2 px-3 rounded-lg font-semibold text-sm text-white bg-red-600 hover:bg-red-700 transition-all shadow-sm whitespace-nowrap">🗑️ Borrar</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function cargarCotizacionGuardada(id) {
+  const cotizacion = todasLasCotizaciones.find(c => c.id === id);
+  if (cotizacion && cotizacion.inputs) {
+    const d = cotizacion.inputs;
+    
+    if (d.tamano) elementos.tamano.value = d.tamano;
+    if (d.papel) elementos.papel.value = d.papel;
+    if (d.bn) document.getElementById('bn').value = d.bn;
+    if (d.color) document.getElementById('color').value = d.color;
+    if (d.paginas) document.getElementById('paginas').value = d.paginas;
+    if (d.tomos) document.getElementById('tomos').value = d.tomos;
+    if (d.tipoEmpastado) elementos.tipoEmpastado.value = d.tipoEmpastado;
+    if (d.colorTapa) document.getElementById('colorTapa').value = d.colorTapa;
+    if (d.lomo) document.getElementById('lomo').value = d.lomo;
+    if (d.llevaCd) elementos.llevaCd.value = d.llevaCd;
+    if (d.cantidadCd) document.getElementById('cantidadCd').value = d.cantidadCd;
+
+    actualizarVista();
+    toggleSeccionCD();
+    calcular(); // Recalcular automáticamente
+    cerrarModalCotizaciones();
+    mostrarNotificacion(`Tesis de "${cotizacion.nombre}" cargada`, 'success');
+  }
+}
+
+// ============================================
+// 📊 LÓGICA DEL DASHBOARD (TESIS)
+// ============================================
+
+async function abrirModalDashboard() {
+  if (!verificarPermisoAdmin()) return;
+
+  const modal = document.getElementById('modalDashboard');
+  modal.classList.remove('hidden');
+
+  // Establecer fechas por defecto (Mes Actual)
+  const date = new Date();
+  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  
+  const formatDate = (d) => d.toISOString().split('T')[0];
+  
+  const inputInicio = document.getElementById('dashFechaInicio');
+  const inputFin = document.getElementById('dashFechaFin');
+  
+  if (inputInicio && inputFin) {
+      inputInicio.value = formatDate(firstDay);
+      inputFin.value = formatDate(lastDay);
+  }
+
+  await cargarDatosDashboard();
+}
+
+async function cargarDatosDashboard() {
+  // Elementos de UI
+  const elVentasHoy = document.getElementById('dashVentasHoy');
+  const elVentasMes = document.getElementById('dashVentasMes');
+  const elVentasPeriodo = document.getElementById('dashVentasPeriodo');
+  const elTotalTesis = document.getElementById('dashTotalTesis');
+  const elTotalFacturas = document.getElementById('dashTotalFacturas');
+  const elTotalMontoTesis = document.getElementById('dashTotalMontoTesis');
+  const listaTesis = document.getElementById('dashListaTesis');
+  const listaFacturas = document.getElementById('dashListaFacturas');
+  
+  const fechaInicio = document.getElementById('dashFechaInicio').value;
+  const fechaFin = document.getElementById('dashFechaFin').value;
+
+  // Reset UI
+  elVentasHoy.textContent = '...';
+  elVentasMes.textContent = '...';
+  elVentasPeriodo.textContent = '...';
+  elTotalMontoTesis.textContent = '...';
+  listaTesis.innerHTML = '<p class="p-6 text-center text-gray-400 animate-pulse">Cargando datos...</p>';
+  listaFacturas.innerHTML = '<p class="p-6 text-center text-gray-400 animate-pulse">Cargando datos...</p>';
+
+  try {
+    const startAt = fechaInicio;
+    const endAt = fechaFin + "T23:59:59";
+
+    // 1. Cargar Facturas
+    const snapFacturas = await db.ref("facturas")
+      .orderByChild("fecha_facturacion")
+      .startAt(startAt)
+      .endAt(endAt)
+      .once("value");
+      
+    const dataFacturas = snapFacturas.val() || {};
+    const facturasArray = Object.values(dataFacturas).sort((a, b) => new Date(b.fecha_facturacion) - new Date(a.fecha_facturacion));
+
+    // 2. Cargar Tesis
+    const snapCotizaciones = await db.ref("cotizaciones")
+      .orderByChild("fecha")
+      .startAt(startAt)
+      .endAt(endAt)
+      .once("value");
+      
+    const dataCotizaciones = snapCotizaciones.val() || {};
+    const tesisArray = Object.values(dataCotizaciones)
+      .filter(c => c.tipo === 'Tesis')
+      .sort((a, b) => new Date(b.fecha || b.timestamp) - new Date(a.fecha || a.timestamp));
+
+    // Calcular total monto de tesis
+    let totalMontoTesis = 0;
+    tesisArray.forEach(t => totalMontoTesis += parseFloat(t.total || 0));
+
+    // --- CÁLCULOS ---
+    const hoy = new Date().toISOString().slice(0, 10);
+    const mesActual = new Date().toISOString().slice(0, 7);
+
+    let totalHoy = 0;
+    let totalMes = 0;
+    let countFacturasMes = 0;
+    let totalPeriodo = 0;
+    let countFacturasPeriodo = 0;
+
+    facturasArray.forEach(f => {
+      if (f.estado === 'anulada') return;
+      const fechaF = f.fecha_facturacion.slice(0, 10);
+      const mesF = f.fecha_facturacion.slice(0, 7);
+      const monto = parseFloat(f.total || 0);
+
+      if (fechaF === hoy) totalHoy += monto;
+      if (mesF === mesActual) {
+        totalMes += monto;
+        countFacturasMes++;
+      }
+      
+      totalPeriodo += monto;
+      countFacturasPeriodo++;
+    });
+
+    // --- ACTUALIZAR UI ---
+    elVentasHoy.textContent = `RD$${totalHoy.toLocaleString('es-DO', {minimumFractionDigits: 2})}`;
+    elVentasMes.textContent = `RD$${totalMes.toLocaleString('es-DO', {minimumFractionDigits: 2})}`;
+    elVentasPeriodo.textContent = `RD$${totalPeriodo.toLocaleString('es-DO', {minimumFractionDigits: 2})}`;
+    elTotalTesis.textContent = tesisArray.length;
+    elTotalFacturas.textContent = countFacturasPeriodo;
+    elTotalMontoTesis.textContent = `RD$${totalMontoTesis.toLocaleString('es-DO', {minimumFractionDigits: 2})}`;
+
+    // --- LISTA TESIS ---
+    if (tesisArray.length === 0) {
+      listaTesis.innerHTML = '<p class="p-4 text-center text-gray-400">No hay tesis recientes.</p>';
+    } else {
+      listaTesis.innerHTML = tesisArray.slice(0, 10).map(t => {
+        const fecha = new Date(t.fecha || t.timestamp).toLocaleDateString('es-DO');
+        return `
+          <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-100 dark:border-gray-700">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="font-bold text-gray-800 dark:text-gray-200 text-sm">${t.nombre}</p>
+                <p class="text-xs text-gray-500">${t.descripcion || 'Sin detalle'}</p>
+              </div>
+              <span class="text-xs font-mono text-gray-400">${fecha}</span>
+            </div>
+            <p class="text-right font-bold text-blue-600 text-sm mt-1">RD$${parseFloat(t.total).toLocaleString()}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- LISTA FACTURAS ---
+    if (facturasArray.length === 0) {
+      listaFacturas.innerHTML = '<p class="p-4 text-center text-gray-400">No hay facturas recientes.</p>';
+    } else {
+      listaFacturas.innerHTML = facturasArray.slice(0, 10).map(f => {
+        const fecha = new Date(f.fecha_facturacion).toLocaleDateString('es-DO');
+        const esAnulada = f.estado === 'anulada';
+        const colorMonto = esAnulada ? 'text-gray-400 line-through' : 'text-purple-600';
+        const estado = esAnulada ? '<span class="text-[10px] bg-red-100 text-red-600 px-1 rounded">Anulada</span>' : '';
+
+        return `
+          <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-100 dark:border-gray-700">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="font-bold text-gray-800 dark:text-gray-200 text-sm">${f.razon_social}</p>
+                <p class="text-xs text-gray-500 font-mono">${f.ncf}</p>
+              </div>
+              <div class="text-right">
+                <p class="font-bold ${colorMonto} text-sm">RD$${parseFloat(f.total).toLocaleString()}</p>
+                ${estado}
+              </div>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">${fecha}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+  } catch (error) {
+    console.error("Error dashboard:", error);
+    listaTesis.innerHTML = '<p class="text-red-500 p-4">Error al cargar datos.</p>';
+  }
+}
+
+// ============================================
+// 🔐 SEGURIDAD Y AUTH
+// ============================================
+
+function verificarPermisoAdmin() {
+  if (!ACTIVAR_SEGURIDAD) return true;
+  const user = auth.currentUser;
+  if (user) return true;
+  
+  document.getElementById('modalLogin').classList.remove('hidden');
+  mostrarNotificacion('🔒 Acceso restringido', 'warning');
+  return false;
+}
+
+function manejarClickAuth() {
+  const user = auth.currentUser;
+  if (user) {
+    if (!confirm("¿Cerrar sesión?")) return;
+    auth.signOut().then(() => {
+      mostrarNotificacion('Sesión cerrada', 'info');
+      document.getElementById('modalDashboard').classList.add('hidden');
+    });
+  } else {
+    document.getElementById('modalLogin').classList.remove('hidden');
+  }
+}
+
+function actualizarIconoAuth(user) {
+  const btn = document.getElementById('btnAuthNav');
+  if (!btn) return;
+
+  if (user) {
+    const nombre = user.email ? user.email.split('@')[0] : 'Admin';
+    btn.innerHTML = `<span class="mr-1 text-lg">🚪</span><span class="font-bold">Salir (${nombre})</span>`;
+    btn.className = "flex items-center text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm px-3 py-2 mr-2 transition-all shadow-md";
+  } else {
+    btn.innerHTML = `<span id="iconAuth">🔓</span>`;
+    btn.className = "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all";
+  }
+}
+
+async function procesarLogin(e) {
+  e.preventDefault();
+  const usuario = document.getElementById('usuarioLogin').value.trim();
+  const pass = document.getElementById('passwordLogin').value;
+  const email = `${usuario}@servigaco.com`;
+
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+    document.getElementById('modalLogin').classList.add('hidden');
+    mostrarNotificacion('¡Bienvenido de nuevo!', 'success');
+    document.getElementById('formLogin').reset();
+  } catch (error) {
+    console.error(error);
+    mostrarNotificacion('Credenciales incorrectas', 'error');
+  }
+}
+
+// ============================================
+// 📄 ANALIZADOR DE PDF - FUNCIONES GLOBALES
+// ============================================
+
+function abrirModalAnalizadorPDF() {
+  document.getElementById('modalAnalizadorPDF').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function cerrarModalAnalizadorPDF() {
+  const modal = document.getElementById('modalAnalizadorPDF');
+  modal.classList.add('hidden');
+  document.body.style.overflow = '';
+}

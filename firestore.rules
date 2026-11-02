@@ -1,0 +1,18 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Reglas de seguridad para monitoreo y analítica de visitantes:
+    // Se bloquea el acceso directo de lectura y escritura desde clientes/SDK web.
+    // Solo el backend autorizado vía Firebase Admin SDK puede escribir y consultar estas colecciones.
+    match /visitor_logs/{doc} {
+      allow read, write: if false;
+    }
+    
+    match /visitor_sessions/{doc} {
+      allow read, write: if false;
+    }
+
+  }
+}
