@@ -214,6 +214,12 @@ function calcularPrecioPloteo(tipo, tamano, cantidad, anchoCustom = 0, altoCusto
     '24x36': 90
   };
   
+  const preciosBondPorPie = {
+    bond_bn: 15,
+    bond_color: 25,
+    bond_full_color: 60
+  };
+
   // Precios por pie cuadrado
   const preciosPorPie = {
     'cartonite': 80,
@@ -227,7 +233,8 @@ function calcularPrecioPloteo(tipo, tamano, cantidad, anchoCustom = 0, altoCusto
   if (tamano === 'custom') {
     const pulgadasCuadradas = anchoCustom * altoCustom;
     const piesCuadrados = pulgadasCuadradas / 144;
-    const precioPorPie = preciosPorPie[tipo] || 100;
+    const precioPorPie = preciosBondPorPie[tipo] ?? preciosPorPie[tipo];
+    if (precioPorPie === undefined) return 0;
     return piesCuadrados * precioPorPie * cantidad;
   }
   
@@ -271,6 +278,78 @@ function calcularPrecioPlastificado(tamano, llevaCorte, cantidadHojas, piezasPor
   }
 }
 
+function esPrecioManualValido(precio) {
+  return Number.isFinite(precio) && precio >= 0;
+}
+
+function calcularCostosLibro({ paginasBN, paginasColor, paginasFullColor, tamano, tipoTerminacion, juegos }) {
+  const totalPaginas = paginasBN + paginasColor + paginasFullColor;
+  const costoBN = paginasBN > 0
+    ? calcularPrecioImpresion(paginasBN * juegos, 'bn', tamano) / juegos
+    : 0;
+  const costoColor = paginasColor > 0
+    ? calcularPrecioImpresion(paginasColor * juegos, 'color', tamano) / juegos
+    : 0;
+  const costoFullColor = paginasFullColor > 0
+    ? calcularPrecioImpresion(paginasFullColor * juegos, 'full_color', tamano) / juegos
+    : 0;
+  let costoTerminacion = 0;
+
+  if (tipoTerminacion === 'espiral') {
+    costoTerminacion = calcularPrecioEncuadernado(totalPaginas);
+  } else if (tipoTerminacion === 'tapa_dura') {
+    costoTerminacion = calcularPrecioEmpastado('Tapa Dura', tamano);
+  } else if (tipoTerminacion === 'tapa_blanda') {
+    costoTerminacion = calcularPrecioEmpastado('Tapa Blanda', tamano);
+  }
+
+  const costoPorLibro = costoBN + costoColor + costoFullColor + costoTerminacion;
+  return {
+    totalPaginas,
+    costoBN,
+    costoColor,
+    costoFullColor,
+    costoTerminacion,
+    costoPorLibro,
+    costoTotal: costoPorLibro * juegos
+  };
+}
+
+function construirDescripcionLibro(datos, costos) {
+  const tamanos = {
+    carta: '8½ x 11',
+    legal: '8½ x 14',
+    tabloide: '11 x 17'
+  };
+  const terminacionTexto = {
+    espiral: 'Encuadernado espiral',
+    tapa_dura: 'Empastado tapa dura',
+    tapa_blanda: 'Empastado tapa blanda',
+    ninguna: 'Sin terminación'
+  };
+  const descripcion = `${datos.juegos} libro(s) · ${costos.totalPaginas} páginas totales · ${tamanos[datos.tamano]}`;
+  const desglosePaginas = [];
+  if (datos.paginasBN > 0) desglosePaginas.push(`${datos.paginasBN} B/N`);
+  if (datos.paginasColor > 0) desglosePaginas.push(`${datos.paginasColor} Color`);
+  if (datos.paginasFullColor > 0) desglosePaginas.push(`${datos.paginasFullColor} Full Color`);
+
+  let resultado = `${descripcion}\n(${desglosePaginas.join(' + ')})\n${terminacionTexto[datos.tipoTerminacion]}`;
+  const desgloseCostos = [];
+  if (costos.costoBN > 0) desgloseCostos.push(`B/N: RD$${costos.costoBN.toFixed(2)}`);
+  if (costos.costoColor > 0) desgloseCostos.push(`Color: RD$${costos.costoColor.toFixed(2)}`);
+  if (costos.costoFullColor > 0) desgloseCostos.push(`Full Color: RD$${costos.costoFullColor.toFixed(2)}`);
+  if (costos.costoTerminacion > 0) {
+    desgloseCostos.push(`${terminacionTexto[datos.tipoTerminacion]}: RD$${costos.costoTerminacion.toFixed(2)}`);
+  }
+
+  if (desgloseCostos.length > 0 && datos.juegos === 1) {
+    resultado += `\n[${desgloseCostos.join(' + ')}]`;
+  } else if (desgloseCostos.length > 0) {
+    resultado += `\nCosto unitario: RD$${costos.costoPorLibro.toFixed(2)}`;
+  }
+  return resultado;
+}
+
 // ============================================
 // 📝 FUNCIONES DE COTIZACIÓN
 // ============================================
@@ -294,16 +373,41 @@ function cambiarCantidad(index, delta) {
   const nuevaCantidad = (item.cantidad || 1) + delta;
   if (nuevaCantidad < 1) return;
 
-  // Actualizar descripción si empieza con el número anterior (para mantener coherencia visual)
-  const cantidadAnterior = item.cantidad || 1;
-  if (item.descripcion && item.descripcion.startsWith(cantidadAnterior.toString())) {
-     item.descripcion = item.descripcion.replace(new RegExp('^' + cantidadAnterior), nuevaCantidad);
-  }
+  const datosPrecio = item.datosPrecio;
+  if (datosPrecio?.tipo === 'impresion') {
+    const precio = datosPrecio.precioManual > 0
+      ? datosPrecio.precioManual * nuevaCantidad
+      : calcularPrecioImpresion(nuevaCantidad, datosPrecio.tipoImpresion, datosPrecio.tamano);
+    if (precio <= 0) return;
 
-  item.cantidad = nuevaCantidad;
+    const tamanos = {
+      carta: '8½ x 11 (Carta)',
+      legal: '8½ x 14 (Legal)',
+      tabloide: '11 x 17 (Tabloide)'
+    };
+    const hojas = datosPrecio.caras === 'doble' ? Math.ceil(nuevaCantidad / 2) : nuevaCantidad;
+    item.cantidad = nuevaCantidad;
+    item.precio = precio;
+    item.precioUnitario = precio / nuevaCantidad;
+    item.descripcion = `${nuevaCantidad} páginas (${hojas} hojas) · ${tamanos[datosPrecio.tamano]} · ${datosPrecio.caras === 'doble' ? 'Doble Cara' : 'Simple Cara'}`;
+  } else if (datosPrecio?.tipo === 'libro') {
+    const nuevosDatos = { ...datosPrecio, juegos: nuevaCantidad };
+    const costos = calcularCostosLibro(nuevosDatos);
+    item.cantidad = nuevaCantidad;
+    item.precio = costos.costoTotal;
+    item.precioUnitario = costos.costoPorLibro;
+    item.descripcion = construirDescripcionLibro(nuevosDatos, costos);
+    item.datosPrecio = nuevosDatos;
+  } else {
+    const cantidadAnterior = item.cantidad || 1;
+    if (item.descripcion && item.descripcion.startsWith(cantidadAnterior.toString())) {
+      item.descripcion = item.descripcion.replace(new RegExp('^' + cantidadAnterior), nuevaCantidad);
+    }
   
-  if (item.precioUnitario !== undefined) {
-    item.precio = item.precioUnitario * nuevaCantidad;
+    item.cantidad = nuevaCantidad;
+    if (item.precioUnitario !== undefined) {
+      item.precio = item.precioUnitario * nuevaCantidad;
+    }
   }
 
   actualizarCotizacion();
@@ -331,8 +435,12 @@ function limpiarCotizacion() {
 function ejecutarLimpiarCotizacion() {
   cotizacion = [];
   idCotizacionActiva = null;
+  nombreCotizacionActiva = '';
   localStorage.removeItem('cotizacion_servigaco_id');
   localStorage.removeItem('cotizacion_servigaco_nombre');
+  localStorage.removeItem('cotizacion_servigaco_tipo_comprobante');
+  const tipoComprobante = document.getElementById('tipoComprobante');
+  if (tipoComprobante) tipoComprobante.value = 'ninguno';
   actualizarCotizacion();
   document.getElementById('modalConfirmarLimpiar').classList.add('hidden');
   mostrarNotificacion('Cotización limpiada', 'success');
@@ -471,6 +579,7 @@ function agregarImpresion() {
   if (!cant || cant <= 0) { mostrarNotificacion('Cantidad inválida', 'error'); return; }
   if (!tipo) { mostrarNotificacion('Seleccione el tipo de impresión', 'error'); return; }
   if (!tamano) { mostrarNotificacion('Seleccione el tamaño', 'error'); return; }
+  if (!esPrecioManualValido(manual)) { mostrarNotificacion('Precio personalizado inválido', 'error'); return; }
 
   const tipos = { 
     bn: 'B/N', 
@@ -507,7 +616,14 @@ function agregarImpresion() {
     descripcion: `${cant} páginas (${hojas} hojas) · ${tamanos[tamano]} · ${carasTexto}`, 
     cantidad: cant,
     precioUnitario: precio / cant,
-    precio 
+    precio,
+    datosPrecio: {
+      tipo: 'impresion',
+      tipoImpresion: tipo,
+      tamano,
+      caras,
+      precioManual: manual
+    }
   });
   limpiarFormulario('formImpresion');
 }
@@ -521,22 +637,27 @@ function agregarImpresion() {
 
 function agregarLibro() {
   // Obtener valores de los campos
-  const paginasBN = parseInt(document.getElementById('libroPaginasBN')?.value || 0);
-  const paginasColor = parseInt(document.getElementById('libroPaginasColor')?.value || 0);
-  const paginasFullColor = parseInt(document.getElementById('libroPaginasFullColor')?.value || 0);
+  const paginasBN = Number(document.getElementById('libroPaginasBN')?.value || 0);
+  const paginasColor = Number(document.getElementById('libroPaginasColor')?.value || 0);
+  const paginasFullColor = Number(document.getElementById('libroPaginasFullColor')?.value || 0);
   const tamano = document.getElementById('libroTamano')?.value || 'carta';
   const tipoTerminacion = document.getElementById('libroTerminacion')?.value || 'ninguna';
-  const juegos = parseInt(document.getElementById('libroJuegos')?.value || 1);
+  const juegos = Number(document.getElementById('libroJuegos')?.value || 1);
 
   // Validaciones
   const totalPaginas = paginasBN + paginasColor + paginasFullColor;
+  if (![paginasBN, paginasColor, paginasFullColor].every(Number.isSafeInteger) ||
+      paginasBN < 0 || paginasColor < 0 || paginasFullColor < 0) {
+    mostrarNotificacion('Las cantidades de páginas deben ser números enteros no negativos', 'error');
+    return;
+  }
   
-  if (totalPaginas === 0) {
+  if (totalPaginas <= 0) {
     mostrarNotificacion('Debe especificar al menos 1 página', 'error');
     return;
   }
 
-  if (!juegos || juegos <= 0) {
+  if (!Number.isSafeInteger(juegos) || juegos <= 0) {
     mostrarNotificacion('Número de juegos inválido', 'error');
     return;
   }
@@ -547,96 +668,9 @@ function agregarLibro() {
     return;
   }
 
-  // ===============================================
-  // CALCULAR COSTOS POR SEPARADO
-  // ===============================================
-  
-  let costoBN = 0;
-  let costoColor = 0;
-  let costoFullColor = 0;
-  let costoTerminacion = 0;
-
-  // 1. Calcular costo de impresión B/N
-  // NOTA: Calculamos en base al VOLUMEN TOTAL (páginas * juegos) para aplicar el precio correcto de mayoreo
-  if (paginasBN > 0) {
-    const totalPaginasBN = paginasBN * juegos;
-    const precioTotalBN = calcularPrecioImpresion(totalPaginasBN, 'bn', tamano);
-    costoBN = precioTotalBN / juegos; // Precio por libro individual
-  }
-
-  // 2. Calcular costo de impresión Color
-  if (paginasColor > 0) {
-    const totalPaginasColor = paginasColor * juegos;
-    const precioTotalColor = calcularPrecioImpresion(totalPaginasColor, 'color', tamano);
-    costoColor = precioTotalColor / juegos;
-  }
-
-  // 3. Calcular costo de impresión Full Color
-  if (paginasFullColor > 0) {
-    const totalPaginasFull = paginasFullColor * juegos;
-    const precioTotalFull = calcularPrecioImpresion(totalPaginasFull, 'full_color', tamano);
-    costoFullColor = precioTotalFull / juegos;
-  }
-
-  // 4. Calcular costo de terminación (si aplica)
-  if (tipoTerminacion === 'espiral') {
-    costoTerminacion = calcularPrecioEncuadernado(totalPaginas);
-  } else if (tipoTerminacion === 'tapa_dura') {
-    costoTerminacion = calcularPrecioEmpastado('Tapa Dura', tamano);
-  } else if (tipoTerminacion === 'tapa_blanda') {
-    costoTerminacion = calcularPrecioEmpastado('Tapa Blanda', tamano);
-  }
-
-  // 5. Costo total por libro individual
-  const costoPorLibro = costoBN + costoColor + costoFullColor + costoTerminacion;
-
-  // 6. Costo total (multiplicado por cantidad de juegos)
-  const costoTotal = costoPorLibro * juegos;
-
-  // ===============================================
-  // CONSTRUIR DESCRIPCIÓN DETALLADA
-  // ===============================================
-  
-  const tamanos = {
-    carta: '8½ x 11',
-    legal: '8½ x 14',
-    tabloide: '11 x 17'
-  };
-
-  const terminacionTexto = {
-    'espiral': 'Encuadernado espiral',
-    'tapa_dura': 'Empastado tapa dura',
-    'tapa_blanda': 'Empastado tapa blanda',
-    'ninguna': 'Sin terminación'
-  };
-
-  // Construir descripción detallada
-  let descripcion = `${juegos} libro(s) · ${totalPaginas} páginas totales · ${tamanos[tamano]}`;
-  
-  // Desglose de páginas
-  let desglosePaginas = [];
-  if (paginasBN > 0) desglosePaginas.push(`${paginasBN} B/N`);
-  if (paginasColor > 0) desglosePaginas.push(`${paginasColor} Color`);
-  if (paginasFullColor > 0) desglosePaginas.push(`${paginasFullColor} Full Color`);
-  
-  if (desglosePaginas.length > 0) {
-    descripcion += `\n(${desglosePaginas.join(' + ')})`;
-  }
-  
-  descripcion += `\n${terminacionTexto[tipoTerminacion]}`;
-
-  // Desglose de costos (opcional, para transparencia)
-  let desgloseCostos = [];
-  if (costoBN > 0) desgloseCostos.push(`B/N: RD$${costoBN.toFixed(2)}`);
-  if (costoColor > 0) desgloseCostos.push(`Color: RD$${costoColor.toFixed(2)}`);
-  if (costoFullColor > 0) desgloseCostos.push(`Full Color: RD$${costoFullColor.toFixed(2)}`);
-  if (costoTerminacion > 0) desgloseCostos.push(`${terminacionTexto[tipoTerminacion]}: RD$${costoTerminacion.toFixed(2)}`);
-  
-  if (desgloseCostos.length > 0 && juegos === 1) {
-    descripcion += `\n[${desgloseCostos.join(' + ')}]`;
-  } else if (desgloseCostos.length > 0 && juegos > 1) {
-    descripcion += `\nCosto unitario: RD$${costoPorLibro.toFixed(2)}`;
-  }
+  const datosPrecio = { tipo: 'libro', paginasBN, paginasColor, paginasFullColor, tamano, tipoTerminacion, juegos };
+  const costos = calcularCostosLibro(datosPrecio);
+  const descripcion = construirDescripcionLibro(datosPrecio, costos);
 
   // ===============================================
   // AGREGAR A COTIZACIÓN
@@ -646,8 +680,9 @@ function agregarLibro() {
     nombre: '📘 Libro Completo',
     descripcion: descripcion,
     cantidad: juegos,
-    precioUnitario: costoPorLibro,
-    precio: costoTotal
+    precioUnitario: costos.costoPorLibro,
+    precio: costos.costoTotal,
+    datosPrecio
   });
 
   // Limpiar formulario
@@ -665,6 +700,7 @@ function agregarEncuadernado() {
 
   if (!pag || pag <= 0) { mostrarNotificacion('Páginas inválidas', 'error'); return; }
   if (!cant || cant <= 0) { mostrarNotificacion('Cantidad inválida', 'error'); return; }
+  if (!esPrecioManualValido(manual)) { mostrarNotificacion('Precio personalizado inválido', 'error'); return; }
 
   // Validar límite máximo
   if (pag > 1000 && !manual) {
@@ -704,6 +740,7 @@ function agregarEmpastado() {
   const manual = parseFloat(document.getElementById('precioPersonalEmpastado')?.value || 0);
 
   if (!cant || cant <= 0) { mostrarNotificacion('Cantidad inválida', 'error'); return; }
+  if (!esPrecioManualValido(manual)) { mostrarNotificacion('Precio personalizado inválido', 'error'); return; }
 
   const tipoMap = { tapa_dura: 'Tapa Dura', tapa_blanda: 'Tapa Blanda' };
   const tipo = tipoMap[tipoRaw];
@@ -744,13 +781,17 @@ function agregarPloteo() {
   const tipoPloteo = document.getElementById('tipoPloteo')?.value;
   const tipoTam = document.getElementById('opcionTamanoPloteo')?.value;
   const tam = document.getElementById('tamanoPloteo')?.value;
-  const cant = parseInt(document.getElementById('cantidadPloteo')?.value);
+  const cant = Number(document.getElementById('cantidadPloteo')?.value);
   const ancho = parseFloat(document.getElementById('anchoPloteo')?.value || 0);
   const alto = parseFloat(document.getElementById('altoPloteo')?.value || 0);
   const manual = parseFloat(document.getElementById('precioPersonalPloteo')?.value || 0);
 
-  if (!cant || cant <= 0) { mostrarNotificacion('Cantidad inválida', 'error'); return; }
-  if (tipoTam === 'personalizado' && (!ancho || !alto)) { mostrarNotificacion('Ingrese ancho y alto', 'error'); return; }
+  if (!Number.isSafeInteger(cant) || cant <= 0) { mostrarNotificacion('Cantidad inválida', 'error'); return; }
+  if (tipoTam === 'personalizado' && (!Number.isFinite(ancho) || !Number.isFinite(alto) || ancho <= 0 || alto <= 0)) {
+    mostrarNotificacion('Ingrese medidas válidas mayores que cero', 'error');
+    return;
+  }
+  if (manual < 0 || !Number.isFinite(manual)) { mostrarNotificacion('Precio personalizado inválido', 'error'); return; }
 
   let precio;
   let precioUnitario;
@@ -768,6 +809,11 @@ function agregarPloteo() {
     precioUnitario = precio / cant;
   }
   
+  if (!Number.isFinite(precio) || precio <= 0 || !Number.isFinite(precioUnitario) || precioUnitario <= 0) {
+    mostrarNotificacion('No se pudo calcular el precio. Ingrese un precio personalizado válido.', 'error');
+    return;
+  }
+
   const tipoTexto = {
     'bond_bn': 'Bond B/N',
     'bond_color': 'Bond Color',
@@ -802,6 +848,7 @@ function agregarPlastificado() {
 
   if (!cant || cant <= 0) { mostrarNotificacion('Cantidad inválida', 'error'); return; }
   if (corte && (!piezas || piezas <= 0)) { mostrarNotificacion('Cantidad de piezas inválida', 'error'); return; }
+  if (!esPrecioManualValido(manual)) { mostrarNotificacion('Precio personalizado inválido', 'error'); return; }
 
   const tamanoTexto = {
     cedula: 'Cédula',
@@ -827,7 +874,7 @@ function agregarPlastificado() {
     precioTotal = calcularPrecioPlastificado(tam, corte, cant, piezas);
   }
 
-  agregarACotizacion({ nombre: 'Plastificado', descripcion: desc, cantidad: corte ? cant * piezas : cant, precioUnitario: llevaCorte ? precioTotal / (cant * piezas) : precioTotal / cant, precio: precioTotal });
+  agregarACotizacion({ nombre: 'Plastificado', descripcion: desc, cantidad: corte ? cant * piezas : cant, precioUnitario: corte ? precioTotal / (cant * piezas) : precioTotal / cant, precio: precioTotal });
   limpiarFormulario('formPlastificado');
 }
 
@@ -863,6 +910,9 @@ function limpiarFormulario(formId) {
 
   form.querySelectorAll('input[type="number"], input[type="text"]').forEach(i => i.value = '');
   form.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+  form.querySelectorAll('.precio-calculado').forEach(resumen => {
+    resumen.style.display = 'none';
+  });
 
   if (formId === 'formPloteo') {
     const cf = document.getElementById('tamanoPersonalizado');
@@ -999,6 +1049,11 @@ function inicializarEventListeners() {
     tipoSrv.addEventListener('change', e => {
       const val = e.target.value;
       document.querySelectorAll('.form-servicio').forEach(f => f.style.display = 'none');
+      if (val === 'lomo') {
+        window.lomo_abrirModal?.();
+        tipoSrv.value = '';
+        return;
+      }
       if (val) {
         const formId = `form${val.charAt(0).toUpperCase() + val.slice(1)}`;
         const form = document.getElementById(formId);
@@ -1254,17 +1309,20 @@ function calcularPrecioImpresionTiempoReal() {
   const cantidad = parseInt(document.getElementById('cantidadPaginas')?.value || 0);
   const tipo = document.getElementById('tipoImpresion')?.value;
   const tamano = document.getElementById('tamanoImpresion')?.value;
+  const manual = parseFloat(document.getElementById('precioPersonalImpresion')?.value || 0);
   const precioDiv = document.getElementById('precioImpresion');
   const unitarioSpan = document.getElementById('precioUnitarioImpresion');
   const totalSpan = document.getElementById('precioTotalImpresion');
 
-  if (!cantidad || !tipo || !tamano || cantidad <= 0) {
+  if (!cantidad || !tipo || !tamano || cantidad <= 0 || !esPrecioManualValido(manual)) {
     if (precioDiv) precioDiv.style.display = 'none';
     return;
   }
 
-  const precioUnitario = calcularPrecioImpresion(cantidad, tipo, tamano) / cantidad;
-  const precioTotal = precioUnitario * cantidad;
+  const precioTotal = manual > 0
+    ? manual * cantidad
+    : calcularPrecioImpresion(cantidad, tipo, tamano);
+  const precioUnitario = precioTotal / cantidad;
 
   if (precioUnitario > 0) {
     if (unitarioSpan) unitarioSpan.textContent = `RD$${precioUnitario.toFixed(2)}`;
@@ -1278,16 +1336,17 @@ function calcularPrecioImpresionTiempoReal() {
 function calcularPrecioEncuadernadoTiempoReal() {
   const paginas = parseInt(document.getElementById('paginasEncuadernado')?.value || 0);
   const cantidad = parseInt(document.getElementById('cantidadEncuadernado')?.value || 1);
+  const manual = parseFloat(document.getElementById('precioPersonalEncuadernado')?.value || 0);
   const precioDiv = document.getElementById('precioEncuadernado');
   const unitarioSpan = document.getElementById('precioUnitarioEncuadernado');
   const totalSpan = document.getElementById('precioTotalEncuadernado');
 
-  if (!paginas || paginas <= 0) {
+  if (!paginas || paginas <= 0 || !cantidad || cantidad <= 0 || !esPrecioManualValido(manual)) {
     if (precioDiv) precioDiv.style.display = 'none';
     return;
   }
 
-  const precioUnitario = calcularPrecioEncuadernado(paginas);
+  const precioUnitario = manual > 0 ? manual : calcularPrecioEncuadernado(paginas);
   const precioTotal = precioUnitario * cantidad;
 
   if (precioUnitario > 0) {
@@ -1303,18 +1362,19 @@ function calcularPrecioEmpastadoTiempoReal() {
   const tipoRaw = document.getElementById('tipoEmpastadoGeneral')?.value;
   const tamano = document.getElementById('tamanoEmpastado')?.value;
   const cantidad = parseInt(document.getElementById('cantidadEmpastado')?.value || 1);
+  const manual = parseFloat(document.getElementById('precioPersonalEmpastado')?.value || 0);
   const precioDiv = document.getElementById('precioEmpastado');
   const unitarioSpan = document.getElementById('precioUnitarioEmpastado');
   const totalSpan = document.getElementById('precioTotalEmpastado');
 
-  if (!tipoRaw || !tamano) {
+  if (!tipoRaw || !tamano || !cantidad || cantidad <= 0 || !esPrecioManualValido(manual)) {
     if (precioDiv) precioDiv.style.display = 'none';
     return;
   }
 
   const tipoMap = { tapa_dura: 'Tapa Dura', tapa_blanda: 'Tapa Blanda' };
   const tipo = tipoMap[tipoRaw];
-  const precioUnitario = calcularPrecioEmpastado(tipo, tamano);
+  const precioUnitario = manual > 0 ? manual : calcularPrecioEmpastado(tipo, tamano);
   const precioTotal = precioUnitario * cantidad;
 
   if (precioUnitario > 0) {
@@ -1330,20 +1390,24 @@ function calcularPrecioPloteoTiempoReal() {
   const tipo = document.getElementById('tipoPloteo')?.value;
   const opcionTamano = document.getElementById('opcionTamanoPloteo')?.value;
   const tamano = document.getElementById('tamanoPloteo')?.value;
-  const cantidad = parseInt(document.getElementById('cantidadPloteo')?.value || 1);
+  const cantidad = Number(document.getElementById('cantidadPloteo')?.value || 1);
   const ancho = parseFloat(document.getElementById('anchoPloteo')?.value || 0);
   const alto = parseFloat(document.getElementById('altoPloteo')?.value || 0);
+  const precioManual = parseFloat(document.getElementById('precioPersonalPloteo')?.value || 0);
   const precioDiv = document.getElementById('precioPloteo');
   const unitarioSpan = document.getElementById('precioUnitarioPloteo');
   const totalSpan = document.getElementById('precioTotalPloteo');
 
-  if (!tipo || !opcionTamano || cantidad <= 0) {
+  if (!tipo || !opcionTamano || !Number.isSafeInteger(cantidad) || cantidad <= 0 ||
+      !esPrecioManualValido(precioManual)) {
     if (precioDiv) precioDiv.style.display = 'none';
     return;
   }
 
   let precioUnitario = 0;
-  if (opcionTamano === 'personalizado' && ancho > 0 && alto > 0) {
+  if (precioManual > 0) {
+    precioUnitario = precioManual;
+  } else if (opcionTamano === 'personalizado' && ancho > 0 && alto > 0) {
     precioUnitario = calcularPrecioPloteo(tipo, 'custom', 1, ancho, alto);
   } else if (tamano) {
     precioUnitario = calcularPrecioPloteo(tipo, tamano, 1);
@@ -1365,17 +1429,22 @@ function calcularPrecioPlastificadoTiempoReal() {
   const llevaCorte = document.getElementById('llevaCorte')?.value === 'si';
   const cantidadHojas = parseInt(document.getElementById('cantidadPlastificado')?.value || 1);
   const piezasPorHoja = llevaCorte ? parseInt(document.getElementById('cantidadPiezas')?.value || 1) : 1;
+  const manual = parseFloat(document.getElementById('precioPersonalPlastificado')?.value || 0);
   const precioDiv = document.getElementById('precioPlastificado');
   const unitarioSpan = document.getElementById('precioUnitarioPlastificado');
   const totalSpan = document.getElementById('precioTotalPlastificado');
 
-  if (!tamano || cantidadHojas <= 0) {
+  if (!tamano || cantidadHojas <= 0 ||
+      (llevaCorte && piezasPorHoja <= 0) || !esPrecioManualValido(manual)) {
     if (precioDiv) precioDiv.style.display = 'none';
     return;
   }
 
-  const precioTotal = calcularPrecioPlastificado(tamano, llevaCorte, cantidadHojas, piezasPorHoja);
-  const precioUnitario = llevaCorte ? precioTotal / (cantidadHojas * piezasPorHoja) : precioTotal / cantidadHojas;
+  const cantidadUnidades = llevaCorte ? cantidadHojas * piezasPorHoja : cantidadHojas;
+  const precioUnitario = manual > 0
+    ? manual
+    : calcularPrecioPlastificado(tamano, llevaCorte, cantidadHojas, piezasPorHoja) / cantidadUnidades;
+  const precioTotal = precioUnitario * cantidadUnidades;
 
   if (precioUnitario > 0) {
     if (unitarioSpan) unitarioSpan.textContent = `RD$${precioUnitario.toFixed(2)}`;
@@ -1406,7 +1475,7 @@ function calcularPrecioPersonalizadoTiempoReal() {
 
 function inicializarPrecioTiempoReal() {
   // Impresión
-  const camposImpresion = ['cantidadPaginas', 'tipoImpresion', 'tamanoImpresion'];
+  const camposImpresion = ['cantidadPaginas', 'tipoImpresion', 'tamanoImpresion', 'precioPersonalImpresion'];
   camposImpresion.forEach(id => {
     const elemento = document.getElementById(id);
     if (elemento) {
@@ -1416,7 +1485,7 @@ function inicializarPrecioTiempoReal() {
   });
 
   // Encuadernado
-  const camposEncuadernado = ['paginasEncuadernado', 'cantidadEncuadernado'];
+  const camposEncuadernado = ['paginasEncuadernado', 'cantidadEncuadernado', 'precioPersonalEncuadernado'];
   camposEncuadernado.forEach(id => {
     const elemento = document.getElementById(id);
     if (elemento) {
@@ -1426,7 +1495,7 @@ function inicializarPrecioTiempoReal() {
   });
 
   // Empastado
-  const camposEmpastado = ['tipoEmpastadoGeneral', 'tamanoEmpastado', 'cantidadEmpastado'];
+  const camposEmpastado = ['tipoEmpastadoGeneral', 'tamanoEmpastado', 'cantidadEmpastado', 'precioPersonalEmpastado'];
   camposEmpastado.forEach(id => {
     const elemento = document.getElementById(id);
     if (elemento) {
@@ -1436,7 +1505,7 @@ function inicializarPrecioTiempoReal() {
   });
 
   // Ploteo
-  const camposPloteo = ['tipoPloteo', 'opcionTamanoPloteo', 'tamanoPloteo', 'cantidadPloteo', 'anchoPloteo', 'altoPloteo'];
+  const camposPloteo = ['tipoPloteo', 'opcionTamanoPloteo', 'tamanoPloteo', 'cantidadPloteo', 'anchoPloteo', 'altoPloteo', 'precioPersonalPloteo'];
   camposPloteo.forEach(id => {
     const elemento = document.getElementById(id);
     if (elemento) {
@@ -1446,7 +1515,7 @@ function inicializarPrecioTiempoReal() {
   });
 
   // Plastificado
-  const camposPlastificado = ['tamanoPlastificado', 'llevaCorte', 'cantidadPlastificado', 'cantidadPiezas'];
+  const camposPlastificado = ['tamanoPlastificado', 'llevaCorte', 'cantidadPlastificado', 'cantidadPiezas', 'precioPersonalPlastificado'];
   camposPlastificado.forEach(id => {
     const elemento = document.getElementById(id);
     if (elemento) {
@@ -1489,13 +1558,9 @@ async function imprimirCotizacion() {
     btn.innerHTML = `<span class="text-2xl animate-spin">⚙️</span> Generando PDF...`;
   }
 
+  try {
   const originalTable = document.getElementById('cotizacionTabla');
-  if (!originalTable) { mostrarNotificacion('No se encontró la tabla', 'error'); return; }
-
-  if (!originalTable) {
-    mostrarNotificacion('No se encontró la tabla', 'error');
-    return;
-  }
+  if (!originalTable) throw new Error('No se encontró la tabla');
   const tableClone = originalTable.cloneNode(true);
   tableClone.querySelectorAll('tr').forEach(row => {
     row.querySelectorAll('button, input, select').forEach(n => n.remove());
@@ -1664,12 +1729,12 @@ async function imprimirCotizacion() {
   `;
 
   const ventana = window.open('', 'cotizacion', 'width=1200,height=800');
+  if (!ventana) throw new Error('El navegador bloqueó la ventana de impresión. Permite ventanas emergentes e inténtalo de nuevo.');
   ventana.document.write(html);
   ventana.document.close();
   setTimeout(() => {
     ventana.print();
   }, 500);
-  try {
     const filename = `cotizacion-general-${new Date().getTime()}.pdf`;
     const response = await fetch('/generar-pdf', {
       method: 'POST',
@@ -1721,6 +1786,7 @@ async function imprimirCotizacion() {
 
 function guardarEnLocalStorage() {
   localStorage.setItem('cotizacion_servigaco', JSON.stringify(cotizacion));
+  localStorage.setItem('cotizacion_servigaco_tipo_comprobante', document.getElementById('tipoComprobante')?.value || 'ninguno');
   // Guardamos también el ID para no perder la referencia si se recarga la página
   if (idCotizacionActiva) localStorage.setItem('cotizacion_servigaco_id', idCotizacionActiva);
   if (nombreCotizacionActiva) localStorage.setItem('cotizacion_servigaco_nombre', nombreCotizacionActiva);
@@ -1728,14 +1794,18 @@ function guardarEnLocalStorage() {
 
 function cargarDeLocalStorage() {
   const guardado = localStorage.getItem('cotizacion_servigaco');
+  let tieneCotizacionGuardada = false;
   if (guardado) {
     try {
       cotizacion = JSON.parse(guardado);
-      actualizarCotizacion();
+      tieneCotizacionGuardada = true;
     } catch (e) {
       console.error('Error cargando cotización guardada', e);
     }
   }
+  const tipoComprobanteGuardado = localStorage.getItem('cotizacion_servigaco_tipo_comprobante');
+  const tipoComprobante = document.getElementById('tipoComprobante');
+  if (tipoComprobante) tipoComprobante.value = tipoComprobanteGuardado || 'ninguno';
   // Recuperar el ID si existe
   const idGuardado = localStorage.getItem('cotizacion_servigaco_id');
   if (idGuardado) {
@@ -1745,7 +1815,7 @@ function cargarDeLocalStorage() {
   if (nombreGuardado) {
     nombreCotizacionActiva = nombreGuardado;
   }
-  if (idGuardado || nombreGuardado) actualizarCotizacion();
+  if (tieneCotizacionGuardada || idGuardado || nombreGuardado) actualizarCotizacion();
 }
 
 // ============================================
@@ -1781,6 +1851,7 @@ async function guardarCotizacionActual() { // ESTA FUNCIÓN AHORA SOLO CREA NUEV
     timestamp: firebase.database.ServerValue.TIMESTAMP,
     tipo: "General",
     nombre: nombre,
+    tipoComprobante: tipoComp,
     total: total.toFixed(2),
     descripcion: descripcionFinal, // Ahora guarda los detalles reales
     items: cotizacion
@@ -1840,6 +1911,7 @@ async function guardarCambiosCotizacion() { // NUEVA FUNCIÓN SOLO PARA EDITAR
     // No sobrescribimos timestamp original si no queremos, o usamos uno de 'updatedAt'
     tipo: "General",
     nombre: nombre,
+    tipoComprobante: tipoComp,
     total: total.toFixed(2),
     descripcion: descripcionFinal,
     items: cotizacion
@@ -1859,6 +1931,8 @@ function cargarCotizacionGuardada(id) {
   if (cotizacionGuardada) {
     idCotizacionActiva = id;
     nombreCotizacionActiva = cotizacionGuardada.nombre || "Cliente General";
+    const tipoComprobante = document.getElementById('tipoComprobante');
+    if (tipoComprobante) tipoComprobante.value = cotizacionGuardada.tipoComprobante || 'ninguno';
     // Asegurar que items sea un array (Firebase puede devolver objeto si las claves son numéricas pero discontinuas, aunque push usa array)
     cotizacion = cotizacionGuardada.items ? Object.values(cotizacionGuardada.items) : [];
     actualizarCotizacion();
