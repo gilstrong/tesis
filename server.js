@@ -9,8 +9,8 @@ const cors = require('cors');
 // Inicialización consolidada y robusta de Firebase Admin SDK
 const { admin, db } = require('./config/firebase');
 
-const pdfController = require('./pdfController');
-const notionService = require('./notionService');
+const pdfController = require('./tesis/pdfController');
+const notionService = require('./tesis/notionService');
 
 const app = express();
 // Confiar en el proxy (1 nivel para Render/proxies inversos para obtener la IP real)
@@ -354,6 +354,10 @@ app.use('/api', require('./routes/analyticsRoutes'));
 // ------------------------
 // ARCHIVOS ESTÁTICOS (Mover al final)
 // ------------------------
+app.use('/temp', express.static(
+    path.join(__dirname, 'tesis', 'public', 'temp')
+));
+
 app.use(express.static(
     path.join(__dirname, 'public')
 ));
