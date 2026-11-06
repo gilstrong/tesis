@@ -4216,3 +4216,198 @@ function inicializarEventListenersBooklet() {
     });
   }
 }
+
+
+// ============================================
+// 🎨 SELECTOR PERSONALIZADO PREMIUM SERVIGACO
+// ============================================
+function inicializarCustomSelect(config = {}) {
+  const nativeSelectId = config.selectId || 'tipoServicio';
+  const nativeSelect = document.getElementById(nativeSelectId);
+  const wrapper = document.getElementById('sgSelectWrapper');
+  const trigger = document.getElementById('sgTrigger');
+  const triggerTitle = document.getElementById('sgTriggerTitle');
+  const triggerDesc = document.getElementById('sgTriggerDesc');
+  const triggerIconBox = document.getElementById('sgTriggerIconBox');
+  const dropdown = document.getElementById('sgDropdown');
+  const searchInput = document.getElementById('sgSearchInput');
+  const optionsList = document.getElementById('sgDropdownList');
+  if (!nativeSelect || !wrapper || !trigger || !dropdown || !optionsList) return;
+
+  const options = Array.from(optionsList.querySelectorAll('.sg-option'));
+  const noResults = document.getElementById('sgNoResults');
+  let highlightedIndex = -1;
+
+  function abrirDropdown() {
+    wrapper.classList.add('sg-open');
+    trigger.setAttribute('aria-expanded', 'true');
+    dropdown.setAttribute('aria-hidden', 'false');
+    searchInput.value = '';
+    filtrarOpciones('');
+    setTimeout(() => searchInput.focus(), 60);
+    const selectedIndex = getVisibleOptions().findIndex(op => op.getAttribute('aria-selected') === 'true');
+    highlightOption(selectedIndex >= 0 ? selectedIndex : 0);
+  }
+
+  function cerrarDropdown(enfocarTrigger = true) {
+    if (!wrapper.classList.contains('sg-open')) return;
+    wrapper.classList.remove('sg-open');
+    trigger.setAttribute('aria-expanded', 'false');
+    dropdown.setAttribute('aria-hidden', 'true');
+    clearHighlights();
+    if (enfocarTrigger) trigger.focus();
+  }
+
+  function toggleDropdown() {
+    if (wrapper.classList.contains('sg-open')) {
+      cerrarDropdown();
+    } else {
+      abrirDropdown();
+    }
+  }
+
+  function getVisibleOptions() {
+    return options.filter(op => !op.classList.contains('sg-hidden'));
+  }
+
+  function filtrarOpciones(termino) {
+    const term = termino.toLowerCase().trim();
+    let coincidencias = 0;
+    options.forEach(option => {
+      const title = option.querySelector('.sg-option-title').textContent.toLowerCase();
+      const desc = option.querySelector('.sg-option-desc').textContent.toLowerCase();
+      if (title.includes(term) || desc.includes(term)) {
+        option.classList.remove('sg-hidden');
+        coincidencias++;
+      } else {
+        option.classList.add('sg-hidden');
+      }
+    });
+    if (noResults) noResults.style.display = coincidencias === 0 ? 'block' : 'none';
+    clearHighlights();
+    const visibles = getVisibleOptions();
+    if (visibles.length > 0) highlightOption(0);
+  }
+
+  function seleccionarOpcion(optionEl) {
+    if (!optionEl) return;
+    const val = optionEl.getAttribute('data-value');
+    const title = optionEl.querySelector('.sg-option-title').textContent;
+    const desc = optionEl.querySelector('.sg-option-desc').textContent;
+    const iconBox = optionEl.querySelector('.sg-option-icon-box');
+
+    options.forEach(op => op.setAttribute('aria-selected', 'false'));
+    optionEl.setAttribute('aria-selected', 'true');
+
+    triggerTitle.textContent = title;
+    triggerDesc.textContent = desc;
+    if (iconBox) {
+      triggerIconBox.innerHTML = iconBox.innerHTML;
+      triggerIconBox.className = 'sg-trigger-icon-box ' + (iconBox.classList[1] || '');
+    }
+
+    if (nativeSelect.value !== val) {
+      nativeSelect.value = val;
+      const changeEvent = new Event('change', { bubbles: true });
+      nativeSelect.dispatchEvent(changeEvent);
+    }
+
+    cerrarDropdown();
+  }
+
+  function clearHighlights() {
+    options.forEach(op => op.classList.remove('sg-focused'));
+    highlightedIndex = -1;
+  }
+
+  function highlightOption(index) {
+    const visibles = getVisibleOptions();
+    if (visibles.length === 0) return;
+    clearHighlights();
+    highlightedIndex = Math.max(0, Math.min(index, visibles.length - 1));
+    const target = visibles[highlightedIndex];
+    target.classList.add('sg-focused');
+    target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleDropdown();
+  });
+
+  searchInput.addEventListener('input', (e) => {
+    filtrarOpciones(e.target.value);
+  });
+
+  optionsList.addEventListener('click', (e) => {
+    const option = e.target.closest('.sg-option');
+    if (option) seleccionarOpcion(option);
+  });
+
+  wrapper.addEventListener('keydown', (e) => {
+    const isOpen = wrapper.classList.contains('sg-open');
+    if (!isOpen) {
+      if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) {
+        e.preventDefault();
+        abrirDropdown();
+      }
+      return;
+    }
+    const visibles = getVisibleOptions();
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        highlightOption(highlightedIndex + 1);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        highlightOption(highlightedIndex - 1);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (visibles.length > 0 && highlightedIndex >= 0) {
+          seleccionarOpcion(visibles[highlightedIndex]);
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        cerrarDropdown();
+        break;
+      case 'Tab':
+        cerrarDropdown(false);
+        break;
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!wrapper.contains(e.target)) {
+      cerrarDropdown(false);
+    }
+  });
+
+  nativeSelect.addEventListener('change', () => {
+    const matchingOption = options.find(op => op.getAttribute('data-value') === nativeSelect.value);
+    if (matchingOption) {
+      options.forEach(op => op.setAttribute('aria-selected', 'false'));
+      matchingOption.setAttribute('aria-selected', 'true');
+      triggerTitle.textContent = matchingOption.querySelector('.sg-option-title').textContent;
+      triggerDesc.textContent = matchingOption.querySelector('.sg-option-desc').textContent;
+      const iconBox = matchingOption.querySelector('.sg-option-icon-box');
+      if (iconBox) {
+        triggerIconBox.innerHTML = iconBox.innerHTML;
+        triggerIconBox.className = 'sg-trigger-icon-box ' + (iconBox.classList[1] || '');
+      }
+    } else if (!nativeSelect.value) {
+      options.forEach(op => op.setAttribute('aria-selected', 'false'));
+      triggerTitle.textContent = 'Selecciona un servicio';
+      triggerDesc.textContent = 'Elige un tipo de trabajo para cotizar';
+      triggerIconBox.className = 'sg-trigger-icon-box';
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => inicializarCustomSelect());
+} else {
+  inicializarCustomSelect();
+}
