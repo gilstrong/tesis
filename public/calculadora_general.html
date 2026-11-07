@@ -438,12 +438,14 @@
           <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Calculadora de Servicios</h1>
           <p class="subtitle mt-2">Cotiza impresiones, ploteos, encuadernados y más</p>
         </div>
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="abrirModalCalculoHojas()" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-400 hover:to-blue-600 shadow-md shadow-blue-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 text-sm">
-            <span class="text-lg">📄</span> Cálculo de Hojas
+        <div class="sg-tools-bar">
+          <button type="button" onclick="abrirModalCalculoHojas()" class="sg-tool-btn" title="Calculadora de Hojas para Impresión">
+            <span class="sg-tool-icon">📄</span>
+            <span>Calculadora de Hojas</span>
           </button>
-          <button type="button" onclick="lomo_abrirModal()" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-500 to-indigo-700 hover:from-indigo-400 hover:to-indigo-600 shadow-md shadow-indigo-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 text-sm">
-            <span class="text-lg">📏</span> Estimador de Lomo
+          <button type="button" onclick="lomo_abrirModal()" class="sg-tool-btn" title="Estimador de Lomo de Tesis y Libros">
+            <span class="sg-tool-icon">📏</span>
+            <span>Estimador de Lomo</span>
           </button>
         </div>
       </header>
@@ -494,12 +496,14 @@
 
         <!-- Selector de tipo de servicio -->
         <div class="mb-8">
-          <label for="tipoServicio" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-            <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">📦</span>
+          <label for="sgTrigger" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+            <span class="bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 p-1.5 rounded-lg text-xs">📦</span>
             Tipo de servicio
           </label>
-          <div class="relative">
-            <select id="tipoServicio" class="w-full px-5 py-4 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 font-semibold text-lg focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm">
+          <!-- SELECTOR PERSONALIZADO SERVIGACO -->
+          <div class="sg-select-wrapper" id="sgSelectWrapper">
+            <!-- Select nativo original (OCULTO y SINCRONIZADO para la lógica existente) -->
+            <select id="tipoServicio" class="sg-native-select" tabindex="-1" aria-hidden="true">
               <option value="">-- Selecciona un servicio --</option>
               <option value="impresion">📄 Impresiones</option>
               <option value="encuadernado">📚 Encuadernado Espiral</option>
@@ -507,12 +511,231 @@
               <option value="ploteo">🖼️ Ploteo</option>
               <option value="plastificado">💳 Plastificado</option>
               <option value="libro">📘 Libro Completo (con Terminación)</option>
-                            <option value="booklet">📖 Booklet / Folleto</option>
-<option value="personalizado">🛠️ Servicio Personalizado</option>
+              <option value="booklet">📖 Booklet / Folleto</option>
+              <option value="personalizado">🛠️ Servicio Personalizado</option>
               <option value="lomo">📏 Estimador de Lomo</option>
             </select>
-            <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
-              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+
+            <!-- Botón disparador visible (Combobox) -->
+            <button
+              type="button"
+              class="sg-trigger"
+              id="sgTrigger"
+              role="combobox"
+              aria-expanded="false"
+              aria-haspopup="listbox"
+              aria-controls="sgDropdownList"
+              aria-label="Seleccionar tipo de servicio">
+
+              <div class="sg-trigger-left">
+                <span class="sg-trigger-icon-box" id="sgTriggerIconBox">
+                  <svg class="sg-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                </span>
+                <div class="sg-trigger-text">
+                  <span class="sg-trigger-title" id="sgTriggerTitle">Selecciona un servicio</span>
+                  <span class="sg-trigger-desc" id="sgTriggerDesc">Elige un tipo de trabajo para cotizar</span>
+                </div>
+              </div>
+
+              <!-- Flecha giratoria SVG -->
+              <span class="sg-arrow" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </span>
+            </button>
+
+            <!-- Menú desplegable con animación -->
+            <div class="sg-dropdown" id="sgDropdown" aria-hidden="true">
+              <!-- Buscador interno -->
+              <div class="sg-search-box">
+                <svg class="sg-search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="8.5" cy="8.5" r="5.5"></circle>
+                  <path d="M17 17l-4.5-4.5"></path>
+                </svg>
+                <input
+                  type="text"
+                  class="sg-search-input"
+                  id="sgSearchInput"
+                  placeholder="Buscar servicio..."
+                  autocomplete="off"
+                  aria-label="Buscar servicio en la lista">
+              </div>
+
+              <!-- Lista de opciones con scroll (Max-height: 320px) -->
+              <ul class="sg-options-list" id="sgDropdownList" role="listbox" tabindex="-1">
+
+                <!-- Opción 1: Impresiones -->
+                <li class="sg-option" role="option" data-value="impresion" aria-selected="false">
+                  <div class="sg-option-icon-box sg-icon-blue">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                      <rect x="6" y="14" width="12" height="8"></rect>
+                    </svg>
+                  </div>
+                  <div class="sg-option-info">
+                    <span class="sg-option-title">Impresiones</span>
+                    <span class="sg-option-desc">B/N y Color, variedad de papeles y gramajes</span>
+                  </div>
+                  <span class="sg-check-icon" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                  </span>
+                </li>
+
+                <!-- Opción 2: Encuadernado Espiral -->
+                <li class="sg-option" role="option" data-value="encuadernado" aria-selected="false">
+                  <div class="sg-option-icon-box sg-icon-purple">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                      <line x1="9" y1="6" x2="15" y2="6"></line>
+                      <line x1="9" y1="10" x2="15" y2="10"></line>
+                    </svg>
+                  </div>
+                  <div class="sg-option-info">
+                    <span class="sg-option-title">Encuadernado Espiral</span>
+                    <span class="sg-option-desc">Espiral plástico o metálico con micas protectoras</span>
+                  </div>
+                  <span class="sg-check-icon" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                  </span>
+                </li>
+
+                <!-- Opción 3: Empastado -->
+                <li class="sg-option" role="option" data-value="empastado" aria-selected="false">
+                  <div class="sg-option-icon-box sg-icon-amber">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a2.5 2.5 0 0 1-2.5-2.5z"></path>
+                      <path d="M6 6h10"></path>
+                      <path d="M6 10h10"></path>
+                    </svg>
+                  </div>
+                  <div class="sg-option-info">
+                    <span class="sg-option-title">Empastado</span>
+                    <span class="sg-option-desc">Tesis y libros en tapa dura con grabado dorado</span>
+                  </div>
+                  <span class="sg-check-icon" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                  </span>
+                </li>
+
+                <!-- Opción 4: Ploteo -->
+                <li class="sg-option" role="option" data-value="ploteo" aria-selected="false">
+                  <div class="sg-option-icon-box sg-icon-green">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                      <path d="M3 9h18"></path>
+                      <path d="M9 21V9"></path>
+                    </svg>
+                  </div>
+                  <div class="sg-option-info">
+                    <span class="sg-option-title">Ploteo</span>
+                    <span class="sg-option-desc">Planos arquitectónicos, pósters y gran formato</span>
+                  </div>
+                  <span class="sg-check-icon" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                  </span>
+                </li>
+
+                <!-- Opción 5: Plastificado -->
+                <li class="sg-option" role="option" data-value="plastificado" aria-selected="false">
+                  <div class="sg-option-icon-box sg-icon-red">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                      <path d="m9 12 2 2 4-4"></path>
+                    </svg>
+                  </div>
+                  <div class="sg-option-info">
+                    <span class="sg-option-title">Plastificado</span>
+                    <span class="sg-option-desc">Laminado mate y brillante térmico de alta durabilidad</span>
+                  </div>
+                  <span class="sg-check-icon" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                  </span>
+                </li>
+
+                <!-- Opción 6: Libro Completo -->
+                <li class="sg-option" role="option" data-value="libro" aria-selected="false">
+                  <div class="sg-option-icon-box sg-icon-indigo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                  </div>
+                  <div class="sg-option-info">
+                    <span class="sg-option-title">Libro Completo (con Terminación)</span>
+                    <span class="sg-option-desc">Producción integral: pliegos, doblado, cosido y lomo</span>
+                  </div>
+                  <span class="sg-check-icon" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                  </span>
+                </li>
+
+                <!-- Opción 7: Booklet / Folleto -->
+                <li class="sg-option" role="option" data-value="booklet" aria-selected="false">
+                  <div class="sg-option-icon-box sg-icon-pink">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                  </div>
+                  <div class="sg-option-info">
+                    <span class="sg-option-title">Booklet / Folleto</span>
+                    <span class="sg-option-desc">Folleto engrapado a caballo tipo revista o manual</span>
+                  </div>
+                  <span class="sg-check-icon" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                  </span>
+                </li>
+
+                <!-- Opción 8: Servicio Personalizado -->
+                <li class="sg-option" role="option" data-value="personalizado" aria-selected="false">
+                  <div class="sg-option-icon-box sg-icon-cyan">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path>
+                    </svg>
+                  </div>
+                  <div class="sg-option-info">
+                    <span class="sg-option-title">Servicio Personalizado</span>
+                    <span class="sg-option-desc">Cotización libre de trabajos especiales a medida</span>
+                  </div>
+                  <span class="sg-check-icon" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                  </span>
+                </li>
+
+                <!-- Opción 9: Estimador de Lomo -->
+                <li class="sg-option" role="option" data-value="lomo" aria-selected="false">
+                  <div class="sg-option-icon-box sg-icon-slate">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"></path>
+                      <path d="m14.5 12.5 2-2"></path>
+                      <path d="m11.5 9.5 2-2"></path>
+                      <path d="m8.5 6.5 2-2"></path>
+                    </svg>
+                  </div>
+                  <div class="sg-option-info">
+                    <span class="sg-option-title">Estimador de Lomo</span>
+                    <span class="sg-option-desc">Cálculo milimétrico del lomo según páginas y papel</span>
+                  </div>
+                  <span class="sg-check-icon" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                  </span>
+                </li>
+
+              </ul>
+
+              <!-- Mensaje sin resultados de búsqueda -->
+              <div class="sg-no-results" id="sgNoResults" style="display: none;">
+                <p>No se encontraron servicios que coincidan.</p>
+              </div>
             </div>
           </div>
         </div>

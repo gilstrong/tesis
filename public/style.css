@@ -1916,3 +1916,591 @@ body {
 .chat-input-area { padding: 12px; display: flex; gap: 8px; background: var(--bg-secondary); border-top: 1px solid var(--border-light); }
 .chat-input-area input { margin: 0 !important; padding: 10px 15px !important; flex: 1; }
 .chat-input-area button { margin: 0 !important; padding: 10px 15px !important; width: auto !important; }
+
+/* ==========================================================================
+   🎨 SELECTOR PERSONALIZADO PREMIUM SERVIGACO (sg-select)
+   ========================================================================== */
+:root,
+[data-theme="light"] {
+  --sg-navy: #0f2747;
+  --sg-accent: #0b5ed7;
+  --sg-accent-light: #eef4ff;
+  --sg-accent-hover: #0a58ca;
+  --sg-bg: #ffffff;
+  --sg-trigger-bg: #f8fafc;
+  --sg-border: #dbe2ea;
+  --sg-border-focus: #0b5ed7;
+  --sg-text: #0f2747;
+  --sg-text-muted: #64748b;
+  --sg-search-bg: #f1f5f9;
+  --sg-hover-bg: #eef4ff;           /* Hover CLARO garantizado en modo claro */
+  --sg-hover-text: #0f2747;         /* Texto OSCURO en hover */
+  --sg-selected-bg: #e0edff;
+  --sg-selected-text: #0b5ed7;
+  --sg-shadow: 0 14px 30px -6px rgba(15, 39, 71, 0.16), 0 4px 10px -2px rgba(15, 39, 71, 0.06);
+  --sg-radius: 16px;
+}
+
+[data-theme="dark"],
+html.dark,
+.dark {
+  --sg-navy: #f8fafc;
+  --sg-accent: #38bdf8;
+  --sg-accent-light: #162a45;
+  --sg-accent-hover: #60a5fa;
+  --sg-bg: #0c1829;
+  --sg-trigger-bg: #111e33;
+  --sg-border: #203554;
+  --sg-border-focus: #38bdf8;
+  --sg-text: #f8fafc;
+  --sg-text-muted: #94a3b8;
+  --sg-search-bg: #16253d;
+  --sg-hover-bg: #1f3a66;           /* Azul más claro que el fondo en modo oscuro */
+  --sg-hover-text: #ffffff;
+  --sg-selected-bg: #173254;
+  --sg-selected-text: #38bdf8;
+  --sg-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.65), 0 6px 14px -2px rgba(0, 0, 0, 0.45);
+}
+
+.sg-select-wrapper {
+  position: relative;
+  width: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+/* Ocultar select nativo de forma accesible */
+.sg-native-select {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Botón disparador visible (Trigger) con reseteo de reglas globales */
+button.sg-trigger {
+  all: unset;
+  box-sizing: border-box;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background-color: var(--sg-trigger-bg) !important;
+  border: 1.5px solid var(--sg-border) !important;
+  border-radius: var(--sg-radius) !important;
+  padding: 12px 18px !important;
+  cursor: pointer !important;
+  color: var(--sg-text) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
+  text-align: left !important;
+  user-select: none !important;
+}
+
+/* Blindaje Hover del trigger: NO se oscurece nunca */
+button.sg-trigger:hover {
+  background-color: var(--sg-trigger-bg) !important;
+  border-color: var(--sg-border-focus) !important;
+  box-shadow: 0 0 0 3px rgba(11, 94, 215, 0.12) !important;
+  color: var(--sg-text) !important;
+}
+
+button.sg-trigger:focus-visible,
+.sg-select-wrapper.sg-open button.sg-trigger {
+  border-color: var(--sg-border-focus) !important;
+  box-shadow: 0 0 0 4px rgba(11, 94, 215, 0.18) !important;
+  background-color: var(--sg-bg) !important;
+}
+
+.sg-trigger-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  flex: 1;
+}
+
+.sg-trigger-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--sg-accent-light);
+  color: var(--sg-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.sg-icon-svg {
+  width: 20px;
+  height: 20px;
+}
+
+.sg-trigger-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sg-trigger-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--sg-text);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sg-trigger-desc {
+  font-size: 0.775rem;
+  color: var(--sg-text-muted);
+  line-height: 1.25;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sg-arrow {
+  width: 20px;
+  height: 20px;
+  color: var(--sg-text-muted);
+  flex-shrink: 0;
+  margin-left: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
+}
+
+.sg-arrow svg {
+  width: 100%;
+  height: 100%;
+}
+
+.sg-select-wrapper.sg-open .sg-arrow {
+  transform: rotate(180deg);
+  color: var(--sg-accent);
+}
+
+/* Menú desplegable con animación (fade + slide 200ms) */
+.sg-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: var(--sg-bg);
+  border: 1.5px solid var(--sg-border);
+  border-radius: var(--sg-radius);
+  box-shadow: var(--sg-shadow);
+  padding: 8px;
+  box-sizing: border-box;
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sg-select-wrapper.sg-open .sg-dropdown {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+  pointer-events: auto !important;
+}
+
+/* Buscador interno */
+.sg-search-box {
+  position: relative;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.sg-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--sg-text-muted);
+  pointer-events: none;
+}
+
+input.sg-search-input {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  padding: 9px 12px 9px 36px !important;
+  font-size: 0.85rem !important;
+  font-family: inherit !important;
+  background-color: var(--sg-search-bg) !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  color: var(--sg-text) !important;
+  outline: none !important;
+  transition: border-color 0.15s ease, background-color 0.15s ease !important;
+}
+
+input.sg-search-input:focus {
+  background-color: var(--sg-bg) !important;
+  border-color: var(--sg-border-focus) !important;
+  box-shadow: 0 0 0 2px rgba(11, 94, 215, 0.15) !important;
+}
+
+input.sg-search-input::placeholder {
+  color: var(--sg-text-muted) !important;
+}
+
+/* Lista de opciones con scroll (máx 320px) */
+ul.sg-options-list {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  max-height: 320px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+ul.sg-options-list::-webkit-scrollbar {
+  width: 6px;
+}
+ul.sg-options-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+ul.sg-options-list::-webkit-scrollbar-thumb {
+  background: var(--sg-border);
+  border-radius: 9999px;
+}
+ul.sg-options-list::-webkit-scrollbar-thumb:hover {
+  background: var(--sg-text-muted);
+}
+
+/* Opciones de la lista con blindaje contra li:hover global */
+li.sg-option {
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 9px 12px !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  background: transparent !important;
+  color: var(--sg-text) !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+  user-select: none !important;
+  margin: 0 !important;
+  text-align: left !important;
+}
+
+li.sg-option.sg-hidden {
+  display: none !important;
+}
+
+/* Hover específico reseteando color y fondo */
+li.sg-option:hover,
+li.sg-option.sg-focused {
+  background-color: var(--sg-hover-bg) !important;
+  color: var(--sg-hover-text) !important;
+}
+
+/* Opción seleccionada: Fondo suave con check */
+li.sg-option[aria-selected="true"] {
+  background-color: var(--sg-selected-bg) !important;
+  color: var(--sg-selected-text) !important;
+}
+
+.sg-option-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  margin-left: 12px;
+}
+
+.sg-option-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: inherit;
+  line-height: 1.25;
+}
+
+.sg-option-desc {
+  font-size: 0.75rem;
+  color: var(--sg-text-muted);
+  line-height: 1.25;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+li.sg-option[aria-selected="true"] .sg-option-desc {
+  color: var(--sg-accent);
+  opacity: 0.85;
+}
+
+.sg-option-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+li.sg-option:hover .sg-option-icon-box {
+  transform: scale(1.05);
+}
+
+.sg-option-icon-box svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Colores de cajas de iconos */
+.sg-icon-blue    { background: #e0f2fe; color: #0284c7; }
+.sg-icon-purple  { background: #ede9fe; color: #7c3aed; }
+.sg-icon-amber   { background: #fef3c7; color: #d97706; }
+.sg-icon-green   { background: #dcfce7; color: #16a34a; }
+.sg-icon-red     { background: #fee2e2; color: #dc2626; }
+.sg-icon-indigo  { background: #e0e7ff; color: #4f46e5; }
+.sg-icon-pink    { background: #fce7f3; color: #db2777; }
+.sg-icon-cyan    { background: #cffafe; color: #0891b2; }
+.sg-icon-slate   { background: #f1f5f9; color: #475569; }
+
+[data-theme="dark"] .sg-icon-blue, html.dark .sg-icon-blue       { background: #0c2b4e; color: #38bdf8; }
+[data-theme="dark"] .sg-icon-purple, html.dark .sg-icon-purple   { background: #281a4d; color: #a78bfa; }
+[data-theme="dark"] .sg-icon-amber, html.dark .sg-icon-amber     { background: #3b2807; color: #fbbf24; }
+[data-theme="dark"] .sg-icon-green, html.dark .sg-icon-green     { background: #0e351b; color: #4ade80; }
+[data-theme="dark"] .sg-icon-red, html.dark .sg-icon-red         { background: #3c1212; color: #f87171; }
+[data-theme="dark"] .sg-icon-indigo, html.dark .sg-icon-indigo   { background: #1c1c4f; color: #818cf8; }
+[data-theme="dark"] .sg-icon-pink, html.dark .sg-icon-pink       { background: #3c1328; color: #f472b6; }
+[data-theme="dark"] .sg-icon-cyan, html.dark .sg-icon-cyan       { background: #0b323c; color: #22d3ee; }
+[data-theme="dark"] .sg-icon-slate, html.dark .sg-icon-slate     { background: #1e293b; color: #cbd5e1; }
+
+.sg-check-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--sg-accent);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+li.sg-option[aria-selected="true"] .sg-check-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.sg-no-results {
+  padding: 20px 14px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--sg-text-muted);
+}
+
+/* ==========================================================================
+   🛠️ BOTONES DE HERRAMIENTAS PREMIUM (.sg-tool-btn)
+   ========================================================================== */
+:root,
+[data-theme="light"] {
+  --sg-tool-bg: #ffffff;
+  --sg-tool-border: #dbe3f0;
+  --sg-tool-text: #0f2747;
+  --sg-tool-hover-bg: #eef4ff;
+  --sg-tool-hover-border: #0b5ed7;
+  --sg-tool-hover-text: #0f2747;
+  --sg-tool-active-bg: linear-gradient(135deg, #0b5ed7 0%, #0a3d91 100%);
+  --sg-tool-active-hover-bg: linear-gradient(135deg, #094cb0 0%, #083378 100%);
+  --sg-tool-active-border: #0b5ed7;
+  --sg-tool-active-text: #ffffff;
+  --sg-tool-active-shadow: 0 4px 14px rgba(11, 94, 215, 0.35);
+  --sg-tool-focus-ring: rgba(11, 94, 215, 0.35);
+}
+
+[data-theme="dark"],
+html.dark,
+.dark {
+  --sg-tool-bg: #12233f;
+  --sg-tool-border: #25395c;
+  --sg-tool-text: #e8eefc;
+  --sg-tool-hover-bg: #1f3a66;
+  --sg-tool-hover-border: #38bdf8;
+  --sg-tool-hover-text: #ffffff;
+  --sg-tool-active-bg: linear-gradient(135deg, #0b5ed7 0%, #0a3d91 100%);
+  --sg-tool-active-hover-bg: linear-gradient(135deg, #094cb0 0%, #083378 100%);
+  --sg-tool-active-border: #38bdf8;
+  --sg-tool-active-text: #ffffff;
+  --sg-tool-active-shadow: 0 4px 16px rgba(11, 94, 215, 0.45);
+  --sg-tool-focus-ring: rgba(56, 189, 248, 0.4);
+}
+
+.sg-tools-bar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+}
+
+/* Botón Normal */
+.sg-tool-btn,
+button.sg-tool-btn,
+a.sg-tool-btn {
+  all: unset !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  padding: 12px 20px !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  background: var(--sg-tool-bg) !important;
+  border: 1.5px solid var(--sg-tool-border) !important;
+  color: var(--sg-tool-text) !important;
+  text-decoration: none !important;
+  user-select: none !important;
+  white-space: nowrap !important;
+  transition: all 200ms ease !important;
+  box-shadow: 0 2px 4px rgba(15, 39, 71, 0.04) !important;
+}
+
+.sg-tool-btn::before,
+button.sg-tool-btn::before,
+a.sg-tool-btn::before {
+  display: none !important;
+}
+
+/* Iconos de 20x20px */
+.sg-tool-btn .sg-tool-icon,
+.sg-tool-btn svg,
+.sg-tool-btn img {
+  width: 20px !important;
+  height: 20px !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  color: currentColor !important;
+  stroke: currentColor !important;
+  transition: transform 200ms ease !important;
+}
+.sg-tool-btn svg path {
+  stroke: currentColor !important;
+}
+
+/* Hover del botón normal */
+.sg-tool-btn:hover {
+  background: var(--sg-tool-hover-bg) !important;
+  border-color: var(--sg-tool-hover-border) !important;
+  color: var(--sg-tool-hover-text) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(15, 39, 71, 0.08) !important;
+}
+
+.sg-tool-btn:hover .sg-tool-icon {
+  transform: scale(1.05) !important;
+}
+
+/* Estado presionado / active */
+.sg-tool-btn:active {
+  transform: translateY(1px) scale(0.98) !important;
+  box-shadow: none !important;
+}
+
+/* Botón Activo / Marcador seleccionado */
+.sg-tool-btn.active {
+  background: var(--sg-tool-active-bg) !important;
+  border: 1.5px solid var(--sg-tool-active-border) !important;
+  color: var(--sg-tool-active-text) !important;
+  box-shadow: var(--sg-tool-active-shadow) !important;
+}
+
+/* Forzar color blanco en todos los hijos del botón activo */
+.sg-tool-btn.active,
+.sg-tool-btn.active * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+.sg-tool-btn.active svg path {
+  stroke: #ffffff !important;
+}
+.sg-tool-btn.active img,
+.sg-tool-btn.active .sg-tool-icon-invert {
+  filter: brightness(0) invert(1) !important;
+}
+
+/* Hover del botón activo */
+.sg-tool-btn.active:hover {
+  background: var(--sg-tool-active-hover-bg) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 18px rgba(11, 94, 215, 0.45) !important;
+}
+.sg-tool-btn.active:hover * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Accesibilidad Focus Visible */
+.sg-tool-btn:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 3px var(--sg-tool-focus-ring) !important;
+}
+
+/* Estado deshabilitado */
+.sg-tool-btn:disabled,
+.sg-tool-btn[disabled],
+button.sg-tool-btn:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Responsive (< 700px): bajan a varias filas, padding 11px 16px y fuente 14px */
+@media (max-width: 700px) {
+  .sg-tools-bar {
+    gap: 8px !important;
+  }
+  .sg-tool-btn,
+  button.sg-tool-btn,
+  a.sg-tool-btn {
+    padding: 11px 16px !important;
+    font-size: 14px !important;
+    border-radius: 10px !important;
+  }
+  .sg-tool-btn .sg-tool-icon,
+  .sg-tool-btn svg,
+  .sg-tool-btn img {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 18px !important;
+  }
+}
