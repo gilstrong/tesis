@@ -1,4 +1,4 @@
-﻿// ============================================
+// ============================================
 // 📝 COTIZACIÓN - GLOBAL
 // ============================================
 let cotizacion = [];
@@ -2934,6 +2934,14 @@ async function generarReporte607() {
     return;
   }
 
+  try {
+    await window.ensureXlsx();
+  } catch (error) {
+    console.error('[Excel] No se pudo cargar SheetJS:', error);
+    mostrarNotificacion('No se pudo cargar la exportación a Excel. Revisa tu conexión e inténtalo de nuevo.', 'error');
+    return;
+  }
+
   // Preparar datos para Excel Profesional
   const data = facturasFiltradas.map(f => {
     const rnc = f.rnc_cliente || '';
@@ -3032,6 +3040,7 @@ async function generarReporteDiario() {
     });
 
     // Generar Excel
+    await window.ensureXlsx();
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Ventas Hoy");
@@ -3134,6 +3143,14 @@ async function generarReporteIT1(formato = 'excel') {
   
   if (formato === 'excel') {
     // --- EXPORTAR EXCEL ---
+    try {
+      await window.ensureXlsx();
+    } catch (error) {
+      console.error('[Excel] No se pudo cargar SheetJS:', error);
+      mostrarNotificacion('No se pudo cargar la exportación a Excel. Revisa tu conexión e inténtalo de nuevo.', 'error');
+      return;
+    }
+
     const data = [
       { "CONCEPTO": "Periodo Fiscal", "VALOR": filtro },
       { "CONCEPTO": "Cantidad Comprobantes", "VALOR": resumen.cantidadFacturas },
@@ -3680,7 +3697,7 @@ function inicializarCombos() {
     lista.innerHTML = '';
 
     if (!data) {
-      lista.innerHTML = '<p class="text-gray-400 text-sm col-span-full italic p-2">No hay combos guardados. Crea uno abajo.</p>';
+      lista.innerHTML = '<p class="text-gray-600 dark:text-gray-300 text-sm col-span-full italic p-2">No hay combos guardados. Crea uno abajo.</p>';
       return;
     }
 

@@ -12,21 +12,13 @@
   <!-- FUENTES: Montserrat -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
 
   <!-- ESTILOS -->
   <link rel="stylesheet" href="style.css" />
-
-  <!-- ICONOS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
-
-  <!-- TAILWIND CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-    }
-  </script>
+  <link rel="stylesheet" href="tailwind.css" />
+  <link rel="preload" as="image" href="/logo.webp" fetchpriority="high" />
 
 </head>
 
@@ -44,7 +36,7 @@
     <section class="form-card" aria-label="Formulario de cotización">
       <!-- Logo -->
       <figure class="logo-container">
-        <img src="logo.png" alt="Logo de la empresa" class="logo-form" width="150" height="80" />
+        <img src="/logo.webp" alt="Logo de la empresa" class="logo-form" width="384" height="297" fetchpriority="high" />
       </figure>
 
       <!-- Título principal -->
@@ -314,10 +306,10 @@
           aria-label="Tabla de precios y servicios"
         >
           <header class="tabla-header">
-            <h3>
+            <h2>
               <span class="tabla-icon">📋</span>
               Precios y Detalles
-            </h3>
+            </h2>
             <p class="tabla-subtitle">Todos los precios están en pesos dominicanos (RD$)</p>
           </header>
 
@@ -593,20 +585,15 @@
 
   <!-- SCRIPTS -->
   <!-- 🔥 FIREBASE SDK (Base de Datos) -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script defer src="lazy-vendor.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
-  <script src="components.js"></script>
-  <script src="script.js"></script>
+  <script defer src="script.js"></script>
+  <script defer src="components.js"></script>
   <!-- 📦 Notion Sync — cliente frontend para sincronización con Notion -->
-  <script src="notion-sync.js"></script>
-
-  <!-- PDF.js para análisis local -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script>
-    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  </script>
+  <script defer src="notion-sync.js"></script>
 
   <!-- ============================================ -->
   <!-- 3. MODAL ANALIZADOR PDF (ESTILO NATIVO)      -->
@@ -841,9 +828,11 @@
     pdfOcultarError();
     document.getElementById('pdfResults').classList.add('hidden');
   
-    // Verificar que pdf.js esté cargado
-    if (!window.pdfjsLib) {
-      pdfMostrarError('pdf.js aún no ha terminado de cargarse. Intenta de nuevo en unos segundos.');
+    try {
+      await window.ensurePdfJs();
+    } catch (error) {
+      console.error('[AnalizadorPDF] No se pudo cargar PDF.js:', error);
+      pdfMostrarError('No se pudo cargar el analizador de PDF. Revisa tu conexión e inténtalo de nuevo.');
       return;
     }
   
@@ -1044,6 +1033,6 @@
     }
   }
   </script>
-  <script src="tracker.js"></script>
+  <script defer src="tracker.js"></script>
 </body>
 </html>

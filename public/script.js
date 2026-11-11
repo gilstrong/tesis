@@ -107,7 +107,7 @@ const IMAGEN_EJEMPLAR_TAPA = {
   rojo: 'rojo.png',
   verde_botella: 'verde.png',
   amarillo_medicina: 'amarillo.png',
-  blanco: 'blanco.png',
+  blanco: 'blanca.png',
   azul_cielo: 'azulcielo.png'
 };
 

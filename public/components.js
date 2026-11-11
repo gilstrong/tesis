@@ -7,7 +7,7 @@ class ServiGacoNav extends HTMLElement {
         <div class="nav-container">
           <!-- Logo -->
           <div class="nav-brand">
-            <img src="logo.png" alt="Logo ServiGaco" class="nav-logo" />
+            <img src="/logo.webp" alt="Logo ServiGaco" class="nav-logo" width="384" height="297" />
           </div>
 
           <!-- Links de navegación -->
@@ -33,17 +33,17 @@ class ServiGacoNav extends HTMLElement {
           </ul>
 
           <!-- Botón Login/Logout (Seguridad) -->
-          <button id="btnAuthNav" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all" title="Acceso Empleados">
+          <button id="btnAuthNav" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all" title="Acceso Empleados" aria-label="Acceso de empleados">
             <span id="iconAuth">🔓</span>
           </button>
 
           <!-- Botón Configuración -->
-          <button id="btnSettings" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all" title="Configuración">
+          <button id="btnSettings" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all" title="Configuración" aria-label="Configuración">
             <span class="text-lg">⚙️</span>
           </button>
 
           <!-- Botón Dark Mode -->
-          <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 mr-2 transition-all duration-300">
+          <button id="theme-toggle" type="button" aria-label="Cambiar tema" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 mr-2 transition-all duration-300">
             <svg id="theme-toggle-dark-icon" class="hidden w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
             <svg id="theme-toggle-light-icon" class="hidden w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
           </button>
@@ -184,7 +184,7 @@ class ServiGacoFooter extends HTMLElement {
           
           <div class="w-full h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent my-2"></div>
 
-          <div class="text-xs font-medium text-gray-400 dark:text-gray-500">
+          <div class="text-xs font-medium text-gray-600 dark:text-gray-400">
             &copy; ${new Date().getFullYear()} ServiGaco. Todos los derechos reservados.
           </div>
         </div>
@@ -244,8 +244,9 @@ class ServigacoAIChat extends HTMLElement {
             #send-btn { background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-dark) 100%); border: none; color: white; border-radius: var(--radius-md); width: 42px; height: 42px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; margin: 0; transition: all var(--transition-fast); box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2); }
             #send-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(99, 102, 241, 0.3); }
             #send-btn:disabled { background: var(--border-medium); cursor: not-allowed; transform: none; box-shadow: none; }
-            .notif-dot { position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; background: var(--accent-orange); border-radius: 50%; display: none; border: 2.5px solid var(--bg-secondary); animation: pulse 2s infinite; }
-            @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.5); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(244, 63, 94, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); } }
+            .notif-dot { position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; background: var(--accent-orange); border-radius: 50%; display: none; border: 2.5px solid var(--bg-secondary); transform-origin: center; animation: pulse 2s infinite; }
+            @keyframes pulse { 0%, 100% { transform: scale(0.92); opacity: 0.85; } 50% { transform: scale(1.05); opacity: 1; } }
+            @media (prefers-reduced-motion: reduce) { .notif-dot { animation: none; } }
         </style>
 
         <button id="chat-bubble" aria-label="Abrir asistente">
@@ -257,7 +258,7 @@ class ServigacoAIChat extends HTMLElement {
             <div id="chat-header">
                 <i class="ti ti-robot" style="font-size:20px; color:white;"></i>
                 <span>Asistente ServiGaco</span>
-                <button id="clear-btn" title="Limpiar chat"><i class="ti ti-trash"></i></button>
+                <button id="clear-btn" title="Limpiar chat" aria-label="Limpiar chat"><i class="ti ti-trash"></i></button>
                 <button id="close-btn" aria-label="Cerrar"><i class="ti ti-x"></i></button>
             </div>
             <div id="chat-messages">
@@ -265,8 +266,8 @@ class ServigacoAIChat extends HTMLElement {
             </div>
             <div id="chat-input-area">
                 <input type="file" id="chat-file-input" accept="application/pdf" style="display:none">
-                <button id="chat-attach-btn" title="Adjuntar PDF" style="background:none; color:var(--primary-blue); box-shadow:none; padding:0; margin:0 6px 0 0; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform var(--transition-fast);">📎</button>
-                <textarea id="chat-input" placeholder="Ej: tesis de 100 páginas..." rows="1"></textarea>
+                <button id="chat-attach-btn" title="Adjuntar PDF" aria-label="Adjuntar PDF" style="background:none; color:var(--primary-blue); box-shadow:none; padding:0; margin:0 6px 0 0; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform var(--transition-fast);">📎</button>
+                <textarea id="chat-input" aria-label="Mensaje para el asistente" placeholder="Ej: tesis de 100 páginas..." rows="1"></textarea>
                 <button id="send-btn" aria-label="Enviar"><i class="ti ti-send"></i></button>
             </div>
         </div>
@@ -389,9 +390,7 @@ class ServigacoAIChat extends HTMLElement {
 
         try {
             // 🛡️ SOLUCIÓN: Analizar en el cliente para evitar caídas del servidor (OOM)
-            if (!window.pdfjsLib) {
-                throw new Error('Librería PDF.js no cargada');
-            }
+            await window.ensurePdfJs();
 
             const arrayBuffer = await file.arrayBuffer();
             const pdfDoc = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;

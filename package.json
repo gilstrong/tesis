@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "tailwindcss -i ./tailwind.input.css -o ./public/tailwind.css --minify"
   },
   "keywords": [
     "calculadora",
@@ -35,5 +36,8 @@
     "puppeteer": "^22.15.0",
     "ua-parser-js": "^2.0.10",
     "uuid": "^14.0.2"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
   }
 }

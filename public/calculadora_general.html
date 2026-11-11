@@ -12,25 +12,19 @@
   <!-- FUENTES: Montserrat -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
 
   <!-- ESTILOS -->
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="tailwind.css" />
+  <link rel="preload" as="image" href="/logo.webp" fetchpriority="high" />
 
-  <!-- ICONOS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 
-  <!-- TAILWIND CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-    }
-  </script>
 
   <!-- FAVICON -->
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/icono.png" />
-  <link rel="shortcut icon" href="assets/icono.png" />
+  <link rel="icon" type="image/webp" href="/logo.webp" />
+  <link rel="shortcut icon" href="/logo.webp" />
 
   <style>
     /* ANIMACIONES MODAL */
@@ -429,7 +423,7 @@
 
       <!-- Logo -->
       <figure class="logo-container">
-        <img src="logo.png" alt="Logo de la empresa" class="logo-form" width="150" height="80" />
+        <img src="/logo.webp" alt="Logo de la empresa" class="logo-form" width="384" height="297" fetchpriority="high" />
       </figure>
 
       <!-- Título principal -->
@@ -2089,35 +2083,26 @@
   <!-- ========================================
        📦 SCRIPTS EXTERNOS
        ======================================== -->
-  <!-- EXCEL (SheetJS) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
   <!-- 🔥 FIREBASE SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script defer src="lazy-vendor.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
   <!-- COMPONENTES Y LÓGICA PRINCIPAL -->
-  <script src="components.js"></script>
-  <script src="scriptgeneral.js"></script>
+  <script defer src="scriptgeneral.js"></script>
+  <script defer src="components.js"></script>
   <!-- 📦 Notion Sync — cliente frontend para sincronización con Notion -->
-  <script src="notion-sync.js"></script>
-
-  <!-- PDF.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script>
-    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  </script>
+  <script defer src="notion-sync.js"></script>
 
   <!-- ========================================
        📊 LÓGICA: EXPORTAR COTIZACIÓN A EXCEL
-       Reutiliza SheetJS (xlsx.full.min.js), ya cargado arriba.
+       Carga SheetJS solo cuando se solicita la exportación.
        Lee directamente la tabla real de la cotización (#cotizacionTabla),
        así funciona sin importar qué función haya armado las filas.
        ======================================== -->
   <script>
-    function cotizacion_exportarExcel() {
+    async function cotizacion_exportarExcel() {
       var body = document.getElementById('cotizacionBody');
       if (!body) { alert('No se encontró la tabla de cotización.'); return; }
 
@@ -2128,6 +2113,14 @@
 
       if (filas.length === 0) {
         alert('La cotización está vacía. Agregá al menos un servicio antes de exportar.');
+        return;
+      }
+
+      try {
+        await window.ensureXlsx();
+      } catch (error) {
+        console.error('[Excel] No se pudo cargar SheetJS:', error);
+        alert('No se pudo cargar la exportación a Excel. Revisa tu conexión e inténtalo de nuevo.');
         return;
       }
 
@@ -2536,8 +2529,11 @@
     // ── Iniciar cola de procesamiento (secuencial) ────────────────────────────
     async function pdfq_iniciarCola() {
       if (_PDFQ.procesando) return;
-      if (!window.pdfjsLib) {
-        mostrarNotificacion('pdf.js aún no terminó de cargarse. Intenta en unos segundos.', 'error');
+      try {
+        await window.ensurePdfJs();
+      } catch (error) {
+        console.error('[PDFQ] No se pudo cargar PDF.js:', error);
+        mostrarNotificacion('No se pudo cargar el analizador de PDF. Revisa tu conexión e inténtalo de nuevo.', 'error');
         return;
       }
 
@@ -3275,10 +3271,14 @@
     };
 
     // ── Renderizar portada/contraportada con File object ─────────────────────
-    function lomo_procesarArchivoFile(file) {
+    async function lomo_procesarArchivoFile(file) {
       if (!file) return;
-      if (typeof pdfjsLib === 'undefined') {
-        console.warn('[Lomo] PDF.js no disponible');
+
+      try {
+        await window.ensurePdfJs();
+      } catch (error) {
+        console.error('[Lomo] No se pudo cargar PDF.js:', error);
+        mostrarNotificacion('No se pudo cargar el analizador de PDF. Revisa tu conexión e inténtalo de nuevo.', 'error');
         return;
       }
 
@@ -3688,6 +3688,6 @@
 
     </div>
   </div>
-  <script src="tracker.js"></script>
+  <script defer src="tracker.js"></script>
 </body>
 </html>

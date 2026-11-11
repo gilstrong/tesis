@@ -1,6 +1,33 @@
 /* ======================================
    🎨 VARIABLES CSS - DESIGN SYSTEM
    ====================================== */
+/* Tabler Icons 3.51.0; MIT License: https://github.com/tabler/tabler-icons/blob/main/LICENSE */
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.51.0/dist/fonts/tabler-icons.core.woff2?ha900a4e2") format("woff2");
+  unicode-range: U+EB1E, U+EB41, U+EB55, U+F00B;
+}
+
+.ti {
+  font-family: "tabler-icons" !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ti-robot::before { content: "\f00b"; }
+.ti-trash::before { content: "\eb41"; }
+.ti-x::before { content: "\eb55"; }
+.ti-send::before { content: "\eb1e"; }
+
 :root {
   /* Colores principales - Indigo/Violeta Premium */
   --primary-blue: #6366f1;
@@ -197,6 +224,10 @@ html.dark body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+#listaCombos {
+  min-height: 56px;
 }
 
 /* ======================================
@@ -1036,7 +1067,7 @@ button.sec:hover {
   border-bottom: 2px solid var(--border-light);
 }
 
-.tabla-header h3 {
+.tabla-header h2 {
   margin: 0 0 var(--spacing-xs);
   color: var(--primary-blue);
   font-size: 1.5rem;
@@ -1346,6 +1377,12 @@ body {
   overflow: hidden;
 }
 
+servigaco-nav {
+  display: block;
+  width: 100%;
+  min-height: 144px;
+}
+
 .nav-container {
   display: flex;
   align-items: center;
@@ -1483,6 +1520,10 @@ body {
    ====================================== */
 
 @media (max-width: 640px) {
+  servigaco-nav {
+    min-height: 136px;
+  }
+
   .main-nav {
     border-radius: var(--radius-md);
   }
