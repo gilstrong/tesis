@@ -17,8 +17,10 @@
 
   <!-- ESTILOS -->
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/icons.css" />
   <link rel="stylesheet" href="tailwind.css" />
   <link rel="preload" as="image" href="/logo.webp" fetchpriority="high" />
+  <script defer src="/icons.js"></script>
 
 </head>
 
@@ -44,10 +46,10 @@
         <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Calculadora de Tesis</h1>
         <div class="flex items-center gap-2">
           <button type="button" id="btnDashboard" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-500 to-indigo-700 hover:from-indigo-400 hover:to-indigo-600 shadow-md shadow-indigo-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 text-sm">
-            <span class="text-lg">📊</span> Dashboard
+            <span class="text-lg"><i class="ti ti-chart-bar" aria-hidden="true"></i></span> Dashboard
           </button>
           <button type="button" id="btnVerGuardadas" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-400 hover:to-teal-600 shadow-md shadow-teal-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 text-sm">
-            <span class="text-lg">📂</span>
+            <span class="text-lg"><i class="ti ti-folder" aria-hidden="true"></i></span>
             Ver Guardadas
           </button>
           <button type="button" onclick="abrirModalAnalizadorPDF()" class="sg-tool-btn" title="Armar y analizar páginas de PDF">
@@ -64,7 +66,7 @@
         <div class="form-group" style="margin-bottom: 1.5rem;">
           <label for="itlaCheckbox" class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-900/20 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 transition-colors">
             <input type="checkbox" id="itlaCheckbox" name="itlaCheckbox" class="w-5 h-5 text-indigo-600 rounded border-indigo-300 focus:ring-indigo-500 cursor-pointer">
-            <span class="label-icon m-0" style="margin-bottom: 0;">🏫</span>
+            <span class="label-icon m-0" style="margin-bottom: 0;"><i class="ti ti-school" aria-hidden="true"></i></span>
             <span class="font-bold text-indigo-900 dark:text-indigo-200">UNIVERIDAD ITLA</span>
           </label>
         </div>
@@ -72,7 +74,7 @@
         <!-- Tamaño de papel -->
         <div class="form-group">
           <label for="tamano">
-            <span class="label-icon">📐</span>
+            <span class="label-icon"><i class="ti ti-ruler" aria-hidden="true"></i></span>
             Tamaño de papel
           </label>
           <select id="tamano" name="tamano" required aria-describedby="alertaTabloide">
@@ -84,14 +86,14 @@
 
         <!-- Alerta tamaño tabloide -->
         <div id="alertaTabloide" class="alerta" role="alert" aria-live="polite">
-          <span class="alert-icon">⚠️</span>
+          <span class="alert-icon"><i class="ti ti-alert-triangle" aria-hidden="true"></i></span>
           11×17 solo disponible en papel satinado con empastado vinil.
         </div>
 
         <!-- Tipo de papel -->
         <div class="form-group">
           <label for="papel">
-            <span class="label-icon">📄</span>
+            <span class="label-icon"><i class="ti ti-file-text" aria-hidden="true"></i></span>
             Tipo de papel
           </label>
           <select id="papel" name="papel" required>
@@ -105,7 +107,7 @@
         <div id="bnColorSection" class="form-section">
           <div class="form-group">
             <label for="bn">
-              <span class="label-icon">⚫</span>
+              <span class="label-icon"><i class="ti ti-contrast-2" aria-hidden="true"></i></span>
               Páginas Blanco y Negro
             </label>
             <input 
@@ -113,15 +115,13 @@
               id="bn" 
               name="bn"
               min="0" 
-              value="0"
-              placeholder="Ej: 50"
-              aria-label="Cantidad de páginas en blanco y negro"
+              value="0" placeholder="Ej: 50" aria-label="Cantidad de páginas en blanco y negro"
             />
           </div>
 
           <div class="form-group">
             <label for="color">
-              <span class="label-icon">🎨</span>
+              <span class="label-icon"><i class="ti ti-palette" aria-hidden="true"></i></span>
               Páginas a Color
             </label>
             <input 
@@ -129,9 +129,7 @@
               id="color" 
               name="color"
               min="0" 
-              value="0"
-              placeholder="Ej: 10"
-              aria-label="Cantidad de páginas a color"
+              value="0" placeholder="Ej: 10" aria-label="Cantidad de páginas a color"
             />
           </div>
         </div>
@@ -140,7 +138,7 @@
         <div id="soloPaginas" class="form-section">
           <div class="form-group">
             <label for="paginas">
-              <span class="label-icon">📊</span>
+              <span class="label-icon"><i class="ti ti-chart-bar" aria-hidden="true"></i></span>
               Total de páginas
             </label>
             <input 
@@ -148,9 +146,7 @@
               id="paginas" 
               name="paginas"
               min="1" 
-              value="1"
-              placeholder="Ej: 100"
-              aria-label="Total de páginas"
+              value="1" placeholder="Ej: 100" aria-label="Total de páginas"
             />
           </div>
         </div>
@@ -158,7 +154,7 @@
         <!-- Cantidad de tomos -->
         <div class="form-group">
           <label for="tomos">
-            <span class="label-icon">📚</span>
+            <span class="label-icon"><i class="ti ti-book-2" aria-hidden="true"></i></span>
             Cantidad de tomos
           </label>
           <input 
@@ -168,15 +164,14 @@
             value="1" 
             min="1" 
             max="10"
-            required
-            aria-label="Número de tomos a empastar"
+            required aria-label="Número de tomos a empastar"
           />
         </div>
 
         <!-- Tipo de empastado -->
         <div class="form-group">
           <label for="tipoEmpastado">
-            <span class="label-icon">📕</span>
+            <span class="label-icon"><i class="ti ti-book" aria-hidden="true"></i></span>
             Tipo de empastado
           </label>
           <select id="tipoEmpastado" name="tipoEmpastado" required>
@@ -190,7 +185,7 @@
         <div id="colorTapaSection" class="form-section">
           <div class="form-group">
             <label for="colorTapa">
-              <span class="label-icon">🎨</span>
+              <span class="label-icon"><i class="ti ti-palette" aria-hidden="true"></i></span>
               Color de tapa
             </label>
             <select id="colorTapa" name="colorTapa">
@@ -209,7 +204,7 @@
         <!-- ¿Lleva lomo? -->
         <div class="form-group">
           <label for="lomo">
-            <span class="label-icon">📏</span>
+            <span class="label-icon"><i class="ti ti-ruler" aria-hidden="true"></i></span>
             ¿Lleva lomo?
           </label>
           <select id="lomo" name="lomo">
@@ -221,7 +216,7 @@
         <!-- ¿Lleva CD? -->
         <div class="form-group">
           <label for="llevaCd">
-            <span class="label-icon">💿</span>
+            <span class="label-icon"><i class="ti ti-disc" aria-hidden="true"></i></span>
             ¿Lleva CD?
           </label>
           <select id="llevaCd" name="llevaCd">
@@ -234,7 +229,7 @@
         <div id="cdSection" class="form-section">
           <div class="form-group">
             <label for="cantidadCd">
-              <span class="label-icon">💿</span>
+              <span class="label-icon"><i class="ti ti-disc" aria-hidden="true"></i></span>
               Cantidad de CD
             </label>
             <input 
@@ -243,8 +238,7 @@
               name="cantidadCd"
               min="1" 
               max="10"
-              value="1"
-              aria-label="Número de CDs a incluir"
+              value="1" aria-label="Número de CDs a incluir"
             />
           </div>
         </div>
@@ -252,27 +246,27 @@
         <!-- Grupo de botones -->
         <div class="button-group">
           <button type="button" id="btnCalcular" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-500 via-indigo-600 to-indigo-700 hover:from-indigo-400 hover:to-indigo-500 shadow-lg shadow-indigo-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2">
-            <span class="text-xl">🧮</span>
+            <span class="text-xl"><i class="ti ti-calculator" aria-hidden="true"></i></span>
             Calcular Total
           </button>
 
           <button type="button" id="btnGuardarTesis" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-violet-500 via-violet-600 to-violet-700 hover:from-violet-400 hover:to-violet-550 shadow-lg shadow-violet-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2">
-            <span class="text-xl">💾</span>
+            <span class="text-xl"><i class="ti ti-device-floppy" aria-hidden="true"></i></span>
             Guardar en Nube
           </button>
 
           <button type="button" id="btnGenerar" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 hover:from-emerald-400 hover:to-emerald-550 shadow-lg shadow-emerald-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2">
-            <span class="text-xl">🖨️</span>
+            <span class="text-xl"><i class="ti ti-printer" aria-hidden="true"></i></span>
             Imprimir
           </button>
 
           <button type="button" id="btnDescargarPdf" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700 hover:from-rose-400 hover:to-rose-550 shadow-lg shadow-rose-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2">
-            <span class="text-xl">📄</span>
+            <span class="text-xl"><i class="ti ti-file-text" aria-hidden="true"></i></span>
             Descargar PDF
           </button>
 
           <button type="button" id="btnReiniciar" class="w-full py-3 px-6 rounded-xl font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 shadow-sm transform transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2">
-            <span class="text-xl">🔄</span>
+            <span class="text-xl"><i class="ti ti-refresh" aria-hidden="true"></i></span>
             Reiniciar
           </button>
         </div>
@@ -296,18 +290,17 @@
           aria-expanded="false"
           aria-controls="tablaPrecios"
         >
-          <span class="text-xl">📋</span>
+          <span class="text-xl"><i class="ti ti-clipboard-list" aria-hidden="true"></i></span>
           Ver precios y detalles
         </button>
 
         <section 
           class="tabla-precios" 
-          id="tablaPrecios" 
-          aria-label="Tabla de precios y servicios"
+          id="tablaPrecios" aria-label="Tabla de precios y servicios"
         >
           <header class="tabla-header">
             <h2>
-              <span class="tabla-icon">📋</span>
+              <span class="tabla-icon"><i class="ti ti-clipboard-list" aria-hidden="true"></i></span>
               Precios y Detalles
             </h2>
             <p class="tabla-subtitle">Todos los precios están en pesos dominicanos (RD$)</p>
@@ -417,7 +410,7 @@
       <!-- Header -->
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-600 to-blue-600 flex justify-between items-center flex-shrink-0">
         <div>
-          <h3 class="text-2xl font-bold text-white flex items-center gap-3"><span class="text-3xl">📊</span> Dashboard de Operaciones</h3>
+          <h3 class="text-2xl font-bold text-white flex items-center gap-3"><span class="text-3xl"><i class="ti ti-chart-bar" aria-hidden="true"></i></span> Dashboard de Operaciones</h3>
           <p class="text-indigo-100 text-sm mt-1">Resumen de Tesis y Trabajos realizados</p>
         </div>
         <div class="flex items-center gap-4">
@@ -430,9 +423,9 @@
             <button id="btnFiltrarDashboard" class="ml-2 px-3 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg font-medium text-sm transition-all">Filtrar</button>
           </div>
           <a href="analitica-visitantes.html" target="_blank" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-bold text-xs shadow transition-all flex items-center gap-1.5" title="Abrir panel de analítica de visitantes">
-            <span>🌐</span> Analítica Visitantes
+            <span><i class="ti ti-world" aria-hidden="true"></i></span> Analítica Visitantes
           </a>
-          <button id="btnCerrarDashboard" class="p-2 rounded-full text-white hover:bg-white/20 transition-all">✕</button>
+          <button id="btnCerrarDashboard" class="p-2 rounded-full text-white hover:bg-white/20 transition-all" aria-label="Cerrar dashboard" title="Cerrar dashboard"><i class="ti ti-x" aria-hidden="true"></i></button>
         </div>
       </div>
       <!-- Contenido -->
@@ -441,7 +434,7 @@
         <div class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex flex-col md:flex-row items-center justify-between gap-4 border border-indigo-500/20 shadow-md">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
-              <span>🌐</span>
+              <span><i class="ti ti-world" aria-hidden="true"></i></span>
             </div>
             <div>
               <h4 class="font-bold text-white text-sm flex items-center gap-2">
@@ -452,45 +445,45 @@
             </div>
           </div>
           <a href="analitica-visitantes.html" target="_blank" class="px-4 py-2 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 shadow transition-all flex items-center gap-2 text-xs whitespace-nowrap">
-            <span>📊</span> Abrir Dashboard de Visitantes
+            <span><i class="ti ti-chart-bar" aria-hidden="true"></i></span> Abrir Dashboard de Visitantes
           </a>
         </div>
 
         <!-- Tarjetas -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
           <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-            <span class="text-4xl mb-2">💰</span><p class="text-gray-500 text-sm font-bold uppercase">Ventas Hoy</p>
+            <span class="text-4xl mb-2"><i class="ti ti-currency-dollar" aria-hidden="true"></i></span><p class="text-gray-500 text-sm font-bold uppercase">Ventas Hoy</p>
             <p class="text-3xl font-black text-gray-800 dark:text-white mt-1" id="dashVentasHoy">RD$0.00</p>
           </div>
           <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-            <span class="text-4xl mb-2">📅</span><p class="text-gray-500 text-sm font-bold uppercase">Ventas del Mes</p>
+            <span class="text-4xl mb-2"><i class="ti ti-calendar" aria-hidden="true"></i></span><p class="text-gray-500 text-sm font-bold uppercase">Ventas del Mes</p>
             <p class="text-3xl font-black text-indigo-600 dark:text-indigo-400 mt-1" id="dashVentasMes">RD$0.00</p>
           </div>
           <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-            <span class="text-4xl mb-2">📊</span><p class="text-gray-500 text-sm font-bold uppercase">Ventas del Período</p>
+            <span class="text-4xl mb-2"><i class="ti ti-chart-bar" aria-hidden="true"></i></span><p class="text-gray-500 text-sm font-bold uppercase">Ventas del Período</p>
             <p class="text-3xl font-black text-green-600 dark:text-green-400 mt-1" id="dashVentasPeriodo">RD$0.00</p>
           </div>
           <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-            <span class="text-4xl mb-2">🎓</span><p class="text-gray-500 text-sm font-bold uppercase">Tesis Registradas</p>
+            <span class="text-4xl mb-2"><i class="ti ti-school" aria-hidden="true"></i></span><p class="text-gray-500 text-sm font-bold uppercase">Tesis Registradas</p>
             <p class="text-3xl font-black text-blue-600 dark:text-blue-400 mt-1" id="dashTotalTesis">0</p>
           </div>
           <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-            <span class="text-4xl mb-2">🧾</span><p class="text-gray-500 text-sm font-bold uppercase">Facturas Emitidas</p>
+            <span class="text-4xl mb-2"><i class="ti ti-receipt" aria-hidden="true"></i></span><p class="text-gray-500 text-sm font-bold uppercase">Facturas Emitidas</p>
             <p class="text-3xl font-black text-purple-600 dark:text-purple-400 mt-1" id="dashTotalFacturas">0</p>
           </div>
           <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-            <span class="text-4xl mb-2">📚</span><p class="text-gray-500 text-sm font-bold uppercase">Total Tesis Cotizadas</p>
+            <span class="text-4xl mb-2"><i class="ti ti-book-2" aria-hidden="true"></i></span><p class="text-gray-500 text-sm font-bold uppercase">Total Tesis Cotizadas</p>
             <p class="text-3xl font-black text-teal-600 dark:text-teal-400 mt-1" id="dashTotalMontoTesis">RD$0.00</p>
           </div>
         </div>
         <!-- Listas -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20"><h4 class="font-bold text-blue-800 dark:text-blue-300">🎓 Últimas Tesis</h4></div>
+            <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20"><h4 class="font-bold text-blue-800 dark:text-blue-300"><i class="ti ti-school" aria-hidden="true"></i> Últimas Tesis</h4></div>
             <div id="dashListaTesis" class="divide-y divide-gray-100 dark:divide-gray-700 max-h-[400px] overflow-y-auto"></div>
           </div>
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-purple-50 dark:bg-purple-900/20"><h4 class="font-bold text-purple-800 dark:text-purple-300">🧾 Últimos Trabajos</h4></div>
+            <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-purple-50 dark:bg-purple-900/20"><h4 class="font-bold text-purple-800 dark:text-purple-300"><i class="ti ti-receipt" aria-hidden="true"></i> Últimos Trabajos</h4></div>
             <div id="dashListaFacturas" class="divide-y divide-gray-100 dark:divide-gray-700 max-h-[400px] overflow-y-auto"></div>
           </div>
         </div>
@@ -506,7 +499,7 @@
       <!-- Header del Modal -->
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
         <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-3">
-          <span class="text-3xl">📂</span>
+          <span class="text-3xl"><i class="ti ti-folder" aria-hidden="true"></i></span>
           Tesis Guardadas
         </h3>
         <button id="btnCerrarModal" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 transition-all" aria-label="Cerrar modal">
@@ -526,7 +519,7 @@
   <div id="modalGuardarTesis" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[70] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md m-4 p-6 animate-slide-in-up border border-indigo-200 dark:border-indigo-900">
       <div class="text-center mb-6">
-        <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">💾</div>
+        <div class="text-3xl text-indigo-600 mx-auto mb-4"><i class="ti ti-device-floppy" aria-hidden="true"></i></div>
         <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Guardar Cotización</h3>
         <p class="text-gray-600 dark:text-gray-300 text-sm">Ingresa un nombre para identificar esta tesis en el futuro.</p>
       </div>
@@ -545,9 +538,9 @@
        ======================================== -->
   <div id="modalConfirmarEliminar" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[80] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-6 animate-slide-in-up border border-gray-200 dark:border-gray-700 text-center">
-      <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🗑️</div>
-      <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">¿Eliminar Cotización?</h3>
-      <p class="text-gray-600 dark:text-gray-300 text-sm mb-6">¿Estás seguro de eliminar <span id="nombreCotizacionEliminar" class="font-bold text-gray-800 dark:text-white">esta cotización</span>?<br>Esta acción no se puede deshacer.</p>
+      <div class="text-3xl text-red-600 mx-auto mb-4"><i class="ti ti-trash" aria-hidden="true"></i></div>
+      <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">¿Eliminar Cotización</h3>
+      <p class="text-gray-600 dark:text-gray-300 text-sm mb-6">¿Estás seguro de eliminar <span id="nombreCotizacionEliminar" class="font-bold text-gray-800 dark:text-white">esta cotización</span><br>Esta acción no se puede deshacer.</p>
       
       <div class="flex gap-3 justify-center">
         <button id="btnCancelarEliminar" class="flex-1 px-5 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancelar</button>
@@ -562,7 +555,7 @@
   <div id="modalLogin" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[2000] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-8 animate-slide-in-up border border-blue-200 dark:border-blue-900">
       <div class="text-center mb-6">
-        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🔐</div>
+        <div class="text-3xl text-blue-600 mx-auto mb-4"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
         <h3 class="text-xl font-bold text-gray-800 dark:text-white">Acceso Autorizado</h3>
         <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">Ingresa tus credenciales.</p>
       </div>
@@ -613,7 +606,7 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">Detecta páginas a color vs. blanco y negro</p>
           </div>
         </div>
-        <button onclick="cerrarModalAnalizadorPDF()" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Cerrar">
+        <button onclick="cerrarModalAnalizadorPDF()" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" aria-label="Cerrar analizador de PDF" title="Cerrar analizador de PDF">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
@@ -634,7 +627,7 @@
         <div id="pdfFileSelected" class="hidden items-center gap-3 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
           <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path></svg>
           <span id="pdfFileName" class="flex-1 font-mono text-sm text-gray-700 dark:text-gray-200 truncate">archivo.pdf</span>
-          <button onclick="pdfLimpiarArchivo()" class="p-1 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-800/50 dark:hover:text-red-400 transition-colors" title="Quitar archivo">
+          <button onclick="pdfLimpiarArchivo()" class="p-1 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-800/50 dark:hover:text-red-400 transition-colors" aria-label="Quitar archivo seleccionado" title="Quitar archivo">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
           </button>
         </div>
@@ -655,7 +648,7 @@
         </div>
         <!-- Process Button -->
         <button id="pdfBtnProcesar" onclick="pdfProcesar()" disabled class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-lg shadow-blue-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:shadow-none disabled:transform-none dark:disabled:bg-gray-600 disabled:cursor-not-allowed">
-          <span id="pdfBtnIcon">▶</span>
+          <span id="pdfBtnIcon"><i class="ti ti-file-type-pdf" aria-hidden="true"></i></span>
           <span id="pdfBtnText" class="ml-2">PROCESAR ARCHIVO</span>
         </button>
         <!-- Results -->
@@ -694,7 +687,7 @@
           </div>
           <!-- Use Data Button -->
           <button id="pdfBtnUsarDatos" onclick="pdfUsarDatos()" style="display: none;" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 shadow-lg shadow-green-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
-            👇 USAR DATOS EN CALCULADORA
+            <i class="ti ti-arrow-down" aria-hidden="true"></i> USAR DATOS EN CALCULADORA
           </button>
         </div>
       </div>
@@ -781,7 +774,7 @@
     document.getElementById('pdfDropzone').style.display = '';
     document.getElementById('pdfBtnProcesar').disabled = true;
     document.getElementById('pdfBtnText').textContent = 'PROCESAR ARCHIVO';
-    document.getElementById('pdfBtnIcon').textContent = '▶';
+    document.getElementById('pdfBtnIcon').innerHTML = window.servigacoIcon('file-type-pdf');
     document.getElementById('pdfResults').classList.add('hidden');
     pdfOcultarProgreso();
     pdfOcultarError();

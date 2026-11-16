@@ -100,22 +100,21 @@ const TIEMPO_ENTREGA = {
 // 🖼️ IMÁGENES DE EJEMPLARES POR COLOR
 // ============================================
 
-const IMAGEN_EJEMPLAR_TAPA = {
-  beige: 'beige.png',
-  morado: 'morado.png',
-  azul_marino: 'mclcielo.png',
-  rojo: 'rojo.png',
-  verde_botella: 'verde.png',
-  amarillo_medicina: 'amarillo.png',
-  blanco: 'blanca.png',
-  azul_cielo: 'azulcielo.png'
-};
+const SERVIGACO_ASSET_URL = (filename) =>
+  new URL(filename, `${window.location.origin}/`).href;
+
+const IMAGEN_EJEMPLAR_TAPA = Object.freeze({
+  beige: SERVIGACO_ASSET_URL('beige.png'),
+  morado: SERVIGACO_ASSET_URL('morado.png'),
+  blanco: SERVIGACO_ASSET_URL('blanca.png'),
+  azul_cielo: SERVIGACO_ASSET_URL('azulcielo.png')
+});
 
 const BLOQUE_CUENTAS = `
   <div class="cuentas-pago">
-    <img src="/bhd.jpg" alt="Cuenta BHD" class="img-cuenta">
-    <img src="/popular.jpg" alt="Cuenta Popular" class="img-cuenta">
-    <img src="/banreservas.jpg" alt="Cuenta Banreservas" class="img-cuenta">
+    <img src="${SERVIGACO_ASSET_URL('bhd.jpg')}" alt="Cuenta BHD" class="img-cuenta">
+    <img src="${SERVIGACO_ASSET_URL('popular.jpg')}" alt="Cuenta Popular" class="img-cuenta">
+    <img src="${SERVIGACO_ASSET_URL('banreservas.jpg')}" alt="Cuenta Banreservas" class="img-cuenta">
   </div>
 
 
@@ -509,10 +508,10 @@ function generarBloqueEjemplar(tipoEmp, colorTapa) {
   return `
     <div class="bloque-ejemplar">
       <div class="bloque-ejemplar-header">
-        📘 Ejemplar – Tapa ${nombreColor(colorTapa)}
+        ${window.servigacoIcon('book-2')} Ejemplar – Tapa ${nombreColor(colorTapa)}
       </div>
       <div class="bloque-ejemplar-img">
-        <img src="${src}" alt="Ejemplar color ${colorTapa}">
+        <img src="${src}" alt="Ejemplar color ${nombreColor(colorTapa)}" width="1024" height="1024">
       </div>
     </div>
   `;
@@ -667,7 +666,7 @@ function formatearMonto(valor) {
 function generarEncabezado(idCotizacion, fecha) {
   return `
     <div class="cotizacion-header">
-      <img src="logo.png" class="logo" alt="Logo ServiGaco">
+      <img src="${SERVIGACO_ASSET_URL('logo.webp')}" class="logo" alt="Logo ServiGaco" width="384" height="297">
       <div class="empresa-info">
         <h1>Cotización de Tesis</h1>
         <p>
@@ -824,7 +823,7 @@ function generarTiempoEntrega(tipoEmp) {
   if (tipoEmp === 'espiral') {
     return `
       <div class="tiempo-entrega">
-        ⏰ Tiempo de entrega: encuadernado espiral se entrega de inmediato.
+        ${window.servigacoIcon('history')} Tiempo de entrega: encuadernado espiral se entrega de inmediato.
       </div>
     `;
   }
@@ -835,7 +834,7 @@ function generarTiempoEntrega(tipoEmp) {
     
   return `
     <div class="tiempo-entrega">
-      ⏰ Tiempo de entrega: en tapa dura ${tiempo}, si es apartir de las 12:00 PM se entrega al otro dia / ${TIEMPO_ENTREGA.VINIL} vinil.
+      ${window.servigacoIcon('history')} Tiempo de entrega: en tapa dura ${tiempo}, si es apartir de las 12:00 PM se entrega al otro dia / ${TIEMPO_ENTREGA.VINIL} vinil.
     </div>
   `;
 }
@@ -872,6 +871,7 @@ function generarHTMLParaImprimir(datos) {
     <head>
       <meta charset="utf-8">
       <base href="${window.location.origin}/">
+      <link rel="stylesheet" href="icons.css">
       <title>Cotización Tesis - ${datos.idCotizacion}</title>
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -913,12 +913,12 @@ function generarHTMLParaImprimir(datos) {
       <div class="container">
         <div class="header">
           <div class="header-content">
-            <img src="logo.png" class="logo" alt="Logo ServiGaco" />
+            <img src="${SERVIGACO_ASSET_URL('logo.webp')}" class="logo" alt="Logo ServiGaco" width="384" height="297" />
             <h1>Cotización de Tesis</h1>
             <div class="header-divider"></div>
             <p>ID: ${datos.idCotizacion}</p>
             <div class="header-badge">
-              📅 ${datos.fecha} | ✓ Presupuesto Válido
+              ${window.servigacoIcon('calendar')} ${datos.fecha} | ${window.servigacoIcon('check')} Presupuesto Válido
             </div>
           </div>
         </div>
@@ -1049,7 +1049,8 @@ async function generarPDFDesdeBackend() {
   const btn = document.getElementById('btnDescargarPdf');
   const originalBtnHTML = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = `<span class="text-xl animate-spin">⚙️</span> Generando...`;
+  btn.innerHTML = `${window.servigacoIcon('settings')} Generando...`;
+  btn.querySelector('.ti').classList.add('animate-spin');
   
   try {
     const datos = datosUltimaCotizacion;
@@ -1134,7 +1135,7 @@ function reiniciar() {
  */
 function inicializar() {
   if (window.location.protocol === 'file:') {
-    alert("⚠️ ATENCIÓN: Estás abriendo el archivo directamente (file://).\n\nPara que la generación de PDF funcione, debes usar el servidor local.\n\nEjecuta 'node server.js' y abre http://localhost:3000");
+    alert("ATENCIÓN: Estás abriendo el archivo directamente (file://).\n\nPara que la generación de PDF funcione, debes usar el servidor local.\n\nEjecuta 'node server.js' y abre http://localhost:3000");
   }
 
   // Establecer valor por defecto
@@ -1303,9 +1304,15 @@ function mostrarNotificacion(mensaje, tipo = 'success') {
 
   const toast = document.createElement('div');
   toast.className = `toast ${tipo}`;
+  const iconoToast = {
+    success: 'circle-check',
+    error: 'circle-x',
+    warning: 'alert-triangle',
+    info: 'info-circle'
+  }[tipo] || 'info-circle';
   toast.innerHTML = `
-    <span class="toast-icon">${tipo === 'success' ? '✅' : tipo === 'error' ? '❌' : '⚠️'}</span>
-    <span class="toast-message">${mensaje}</span>
+    <span class="toast-icon">${window.servigacoIcon(iconoToast)}</span>
+    <span class="toast-message">${window.servigacoReplaceIconGlyphs(mensaje)}</span>
   `;
 
   container.appendChild(toast);
@@ -1432,7 +1439,7 @@ async function confirmarGuardarTesis() {
 
 async function abrirModalCotizaciones() {
   const container = document.getElementById('listaCotizacionesGuardadas');
-  if (container) container.innerHTML = '<div class="text-center py-10"><p class="text-xl animate-pulse">🔥 Cargando desde Base de Datos...</p></div>';
+  if (container) container.innerHTML = `<div class="text-center py-10"><p class="text-xl animate-pulse">${window.servigacoIcon('refresh')} Cargando desde Base de Datos...</p></div>`;
   
   document.getElementById('modalCotizacionesGuardadas')?.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
@@ -1485,11 +1492,11 @@ function renderizarCotizacionesGuardadas() {
     const total = Number(c.total || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     
     const esTesis = c.tipo === 'Tesis';
-    const icono = esTesis ? '🎓' : '📄';
+    const icono = window.servigacoIcon(esTesis ? 'school' : 'file-text');
     
     // Solo permitimos cargar si es Tesis, o borrar cualquiera
     const btnCargar = esTesis 
-      ? `<button onclick="cargarCotizacionGuardada('${c.id}')" class="flex-1 md:flex-none py-2 px-3 rounded-lg font-semibold text-sm text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-sm whitespace-nowrap">📂 Cargar</button>`
+      ? `<button onclick="cargarCotizacionGuardada('${c.id}')" class="flex-1 md:flex-none py-2 px-3 rounded-lg font-semibold text-sm text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-sm whitespace-nowrap">${window.servigacoIcon('folder')} Cargar</button>`
       : `<span class="text-xs text-gray-400 italic px-2 self-center">Ir a General para editar</span>`;
 
     return `
@@ -1501,7 +1508,7 @@ function renderizarCotizacionesGuardadas() {
         </div>
         <div class="flex flex-wrap gap-2 w-full md:w-auto justify-end mt-2 md:mt-0">
           ${btnCargar}
-          <button onclick="eliminarCotizacionGuardada('${c.id}')" class="flex-1 md:flex-none py-2 px-3 rounded-lg font-semibold text-sm text-white bg-red-600 hover:bg-red-700 transition-all shadow-sm whitespace-nowrap">🗑️ Borrar</button>
+          <button onclick="eliminarCotizacionGuardada('${c.id}')" class="flex-1 md:flex-none py-2 px-3 rounded-lg font-semibold text-sm text-white bg-red-600 hover:bg-red-700 transition-all shadow-sm whitespace-nowrap">${window.servigacoIcon('trash')} Borrar</button>
         </div>
       </div>
     `;
@@ -1735,10 +1742,10 @@ function actualizarIconoAuth(user) {
 
   if (user) {
     const nombre = user.email ? user.email.split('@')[0] : 'Admin';
-    btn.innerHTML = `<span class="mr-1 text-lg">🚪</span><span class="font-bold">Salir (${nombre})</span>`;
+    btn.innerHTML = `<span class="mr-1 text-lg">${window.servigacoIcon('logout')}</span><span class="font-bold">Salir (${nombre})</span>`;
     btn.className = "flex items-center text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm px-3 py-2 mr-2 transition-all shadow-md";
   } else {
-    btn.innerHTML = `<span id="iconAuth">🔓</span>`;
+    btn.innerHTML = `<span id="iconAuth">${window.servigacoIcon('lock-open')}</span>`;
     btn.className = "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all";
   }
 }

@@ -14,19 +14,19 @@ class ServiGacoNav extends HTMLElement {
           <ul class="nav-links">
             <li class="nav-item">
               <a href="index.html" class="nav-link" id="navTesis">
-                <span class="nav-icon">🎓</span>
+                <span class="nav-icon"><i class="ti ti-school" aria-hidden="true"></i></span>
                 <span class="nav-text">Calculadora de Tesis</span>
               </a>
             </li>
             <li class="nav-item">
               <a href="calculadora_general.html" class="nav-link" id="navGeneral">
-                <span class="nav-icon">📋</span>
+                <span class="nav-icon"><i class="ti ti-briefcase" aria-hidden="true"></i></span>
                 <span class="nav-text">Servicios Generales</span>
               </a>
             </li>
             <li class="nav-item hidden" id="navItemAnalytics">
               <a href="analitica-visitantes.html" class="nav-link" id="navAnalytics">
-                <span class="nav-icon">🌐</span>
+                <span class="nav-icon"><i class="ti ti-world" aria-hidden="true"></i></span>
                 <span class="nav-text">Visitantes</span>
               </a>
             </li>
@@ -34,18 +34,18 @@ class ServiGacoNav extends HTMLElement {
 
           <!-- Botón Login/Logout (Seguridad) -->
           <button id="btnAuthNav" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all" title="Acceso Empleados" aria-label="Acceso de empleados">
-            <span id="iconAuth">🔓</span>
+            <span id="iconAuth"><i class="ti ti-lock-open" aria-hidden="true"></i></span>
           </button>
 
           <!-- Botón Configuración -->
           <button id="btnSettings" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all" title="Configuración" aria-label="Configuración">
-            <span class="text-lg">⚙️</span>
+            <i class="ti ti-settings text-lg" aria-hidden="true"></i>
           </button>
 
           <!-- Botón Dark Mode -->
           <button id="theme-toggle" type="button" aria-label="Cambiar tema" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 mr-2 transition-all duration-300">
-            <svg id="theme-toggle-dark-icon" class="hidden w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
-            <svg id="theme-toggle-light-icon" class="hidden w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+            <i id="theme-toggle-dark-icon" class="ti ti-moon text-xl hidden" aria-hidden="true"></i>
+            <i id="theme-toggle-light-icon" class="ti ti-sun text-xl hidden" aria-hidden="true"></i>
           </button>
 
           <!-- Botón móvil (hamburguesa) -->
@@ -262,11 +262,11 @@ class ServigacoAIChat extends HTMLElement {
                 <button id="close-btn" aria-label="Cerrar"><i class="ti ti-x"></i></button>
             </div>
             <div id="chat-messages">
-                <div class="msg bot">¡Hola! Dime qué necesitas cotizar e imprimir, y te calcularé el precio de inmediato. 🖨️</div>
+                <div class="msg bot">¡Hola! Dime qué necesitas cotizar e imprimir, y te calcularé el precio de inmediato. <i class="ti ti-printer" aria-hidden="true"></i></div>
             </div>
             <div id="chat-input-area">
                 <input type="file" id="chat-file-input" accept="application/pdf" style="display:none">
-                <button id="chat-attach-btn" title="Adjuntar PDF" aria-label="Adjuntar PDF" style="background:none; color:var(--primary-blue); box-shadow:none; padding:0; margin:0 6px 0 0; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform var(--transition-fast);">📎</button>
+                <button id="chat-attach-btn" title="Adjuntar PDF" aria-label="Adjuntar PDF" style="background:none; color:var(--primary-blue); box-shadow:none; padding:0; margin:0 6px 0 0; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform var(--transition-fast);"><i class="ti ti-paperclip" aria-hidden="true"></i></button>
                 <textarea id="chat-input" aria-label="Mensaje para el asistente" placeholder="Ej: tesis de 100 páginas..." rows="1"></textarea>
                 <button id="send-btn" aria-label="Enviar"><i class="ti ti-send"></i></button>
             </div>
@@ -354,7 +354,7 @@ class ServigacoAIChat extends HTMLElement {
             this.history = [];
             this.saveHistory();
             const messages = this.querySelector('#chat-messages');
-            messages.innerHTML = '<div class="msg bot">¡Hola! Dime qué necesitas imprimir y te doy el precio al instante. 🖨️</div>';
+            messages.innerHTML = '<div class="msg bot">¡Hola! Dime qué necesitas imprimir y te doy el precio al instante. <i class="ti ti-printer" aria-hidden="true"></i></div>';
             if (typeof mostrarNotificacion === 'function') {
                 mostrarNotificacion('Historial del chat borrado', 'info');
             }
@@ -374,7 +374,7 @@ class ServigacoAIChat extends HTMLElement {
             let formattedText = text
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Negritas
                 .replace(/\n/g, '<br>'); // Saltos de línea
-            div.innerHTML = formattedText;
+            div.innerHTML = window.servigacoReplaceIconGlyphs(formattedText);
         } else {
             div.textContent = text;
         }
@@ -577,8 +577,8 @@ class ServigacoSettings extends HTMLElement {
         <div id="settings-overlay" class="hidden"></div>
         <div id="settings-modal" class="hidden">
             <div class="settings-header">
-                <h3 class="font-bold text-lg">⚙️ Configuración</h3>
-                <button id="close-settings" style="background:none; color:var(--text-muted); box-shadow:none; padding:6px; margin:0; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; border-radius:50%; width:32px; height:32px; transition:background var(--transition-fast); border:none;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='none'">✕</button>
+                <h3 class="font-bold text-lg"><i class="ti ti-settings" aria-hidden="true"></i> Configuración</h3>
+                <button id="close-settings" type="button" aria-label="Cerrar configuración" title="Cerrar configuración" style="background:none; color:var(--text-muted); box-shadow:none; padding:6px; margin:0; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; border-radius:50%; width:32px; height:32px; transition:background var(--transition-fast); border:none;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='none'"><i class="ti ti-x" aria-hidden="true"></i></button>
             </div>
             <div class="settings-body">
                 <div class="setting-item">

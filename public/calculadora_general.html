@@ -17,8 +17,10 @@
 
   <!-- ESTILOS -->
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/icons.css" />
   <link rel="stylesheet" href="tailwind.css" />
   <link rel="preload" as="image" href="/logo.webp" fetchpriority="high" />
+  <script defer src="/icons.js"></script>
 
 
 
@@ -434,11 +436,11 @@
         </div>
         <div class="sg-tools-bar">
           <button type="button" onclick="abrirModalCalculoHojas()" class="sg-tool-btn" title="Calculadora de Hojas para Impresión">
-            <span class="sg-tool-icon">📄</span>
+            <span class="sg-tool-icon"><i class="ti ti-file-text" aria-hidden="true"></i></span>
             <span>Calculadora de Hojas</span>
           </button>
           <button type="button" onclick="lomo_abrirModal()" class="sg-tool-btn" title="Estimador de Lomo de Tesis y Libros">
-            <span class="sg-tool-icon">📏</span>
+            <span class="sg-tool-icon"><i class="ti ti-ruler" aria-hidden="true"></i></span>
             <span>Estimador de Lomo</span>
           </button>
         </div>
@@ -449,7 +451,7 @@
            ======================================== -->
       <div class="bg-white rounded-2xl shadow-sm border border-purple-100 p-6 mt-8 mb-8">
         <h2 class="text-2xl font-black text-gray-800 mb-4 flex items-center gap-3">
-          <span class="bg-purple-600 text-white p-2 rounded-xl text-lg shadow-md shadow-purple-200">⚡</span>
+          <span class="bg-purple-600 text-white p-2 rounded-xl text-lg shadow-md shadow-purple-200"><i class="ti ti-bolt" aria-hidden="true"></i></span>
           Combos Rápidos
         </h2>
 
@@ -461,7 +463,7 @@
         <!-- Formulario para crear nuevo combo -->
         <details class="group">
           <summary class="flex items-center gap-2 font-bold text-purple-600 cursor-pointer list-none select-none">
-            <span class="bg-purple-100 p-1 rounded">➕</span> <span>Crear Nuevo Combo</span>
+            <span class="bg-purple-100 p-1 rounded"><i class="ti ti-plus" aria-hidden="true"></i></span> <span>Crear Nuevo Combo</span>
           </summary>
           <div class="mt-4 p-4 bg-purple-50 rounded-xl border border-purple-100 grid gap-4 animate-fade-in">
             <div>
@@ -484,14 +486,14 @@
            ======================================== -->
       <div class="agregar-servicio bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-8">
         <h2 class="text-2xl font-black text-gray-800 mb-6 flex items-center gap-3 border-b border-gray-100 pb-4">
-          <span class="bg-blue-600 text-white p-2 rounded-xl text-lg shadow-md shadow-blue-200">➕</span>
+          <span class="bg-blue-600 text-white p-2 rounded-xl text-lg shadow-md shadow-blue-200"><i class="ti ti-plus" aria-hidden="true"></i></span>
           Agregar Servicio
         </h2>
 
         <!-- Selector de tipo de servicio -->
         <div class="mb-8">
           <label for="sgTrigger" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-            <span class="bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 p-1.5 rounded-lg text-xs">📦</span>
+            <span class="bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 p-1.5 rounded-lg text-xs"><i class="ti ti-package" aria-hidden="true"></i></span>
             Tipo de servicio
           </label>
           <!-- SELECTOR PERSONALIZADO SERVIGACO -->
@@ -499,15 +501,15 @@
             <!-- Select nativo original (OCULTO y SINCRONIZADO para la lógica existente) -->
             <select id="tipoServicio" class="sg-native-select" tabindex="-1" aria-hidden="true">
               <option value="">-- Selecciona un servicio --</option>
-              <option value="impresion">📄 Impresiones</option>
-              <option value="encuadernado">📚 Encuadernado Espiral</option>
-              <option value="empastado">📕 Empastado</option>
-              <option value="ploteo">🖼️ Ploteo</option>
-              <option value="plastificado">💳 Plastificado</option>
-              <option value="libro">📘 Libro Completo (con Terminación)</option>
-              <option value="booklet">📖 Booklet / Folleto</option>
-              <option value="personalizado">🛠️ Servicio Personalizado</option>
-              <option value="lomo">📏 Estimador de Lomo</option>
+              <option value="impresion"> Impresiones</option>
+              <option value="encuadernado"> Encuadernado Espiral</option>
+              <option value="empastado"> Empastado</option>
+              <option value="ploteo"> Ploteo</option>
+              <option value="plastificado"> Plastificado</option>
+              <option value="libro"> Libro Completo (con Terminación)</option>
+              <option value="booklet"> Booklet / Folleto</option>
+              <option value="personalizado"> Servicio Personalizado</option>
+              <option value="lomo"> Estimador de Lomo</option>
             </select>
 
             <!-- Botón disparador visible (Combobox) -->
@@ -518,8 +520,7 @@
               role="combobox"
               aria-expanded="false"
               aria-haspopup="listbox"
-              aria-controls="sgDropdownList"
-              aria-label="Seleccionar tipo de servicio">
+              aria-controls="sgDropdownList" aria-label="Seleccionar tipo de servicio">
 
               <div class="sg-trigger-left">
                 <span class="sg-trigger-icon-box" id="sgTriggerIconBox">
@@ -553,10 +554,8 @@
                 <input
                   type="text"
                   class="sg-search-input"
-                  id="sgSearchInput"
-                  placeholder="Buscar servicio..."
-                  autocomplete="off"
-                  aria-label="Buscar servicio en la lista">
+                  id="sgSearchInput" placeholder="Buscar servicio..."
+                  autocomplete="off" aria-label="Buscar servicio en la lista">
               </div>
 
               <!-- Lista de opciones con scroll (Max-height: 320px) -->
@@ -739,7 +738,7 @@
              ======================================== -->
         <div id="formImpresion" class="form-servicio animate-fade-in-up" style="display: none;">
           <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <span class="text-2xl">📄</span>
+            <span class="text-2xl"><i class="ti ti-file-text" aria-hidden="true"></i></span>
             Impresiones
           </h3>
 
@@ -747,7 +746,7 @@
             <!-- Tamaño -->
             <div class="group">
               <label for="tamanoImpresion" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">📐</span> Tamaño
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-ruler" aria-hidden="true"></i></span> Tamaño
               </label>
               <div class="relative">
                 <select id="tamanoImpresion" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none appearance-none font-medium">
@@ -762,7 +761,7 @@
             <!-- Tipo de impresión -->
             <div class="group">
               <label for="tipoImpresion" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🎨</span> Tipo de impresión
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-palette" aria-hidden="true"></i></span> Tipo de impresión
               </label>
               <div class="relative">
                 <select id="tipoImpresion" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none appearance-none font-medium">
@@ -778,7 +777,7 @@
             <!-- Caras -->
             <div class="group">
               <label for="caras" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">📑</span> Caras
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-files" aria-hidden="true"></i></span> Caras
               </label>
               <div class="relative">
                 <select id="caras" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none appearance-none font-medium">
@@ -792,7 +791,7 @@
             <!-- Cantidad de páginas -->
             <div class="group">
               <label for="cantidadPaginas" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🔢</span> Cantidad de páginas
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span> Cantidad de páginas
               </label>
               <input type="number" id="cantidadPaginas" min="1" value="1" placeholder="Ej: 50" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
               <small class="text-xs text-gray-400 mt-1 ml-1">El precio se ajusta según la cantidad</small>
@@ -814,7 +813,7 @@
           <!-- Precio personalizado (opcional) -->
           <div class="mt-6 pt-6 border-t border-gray-100">
             <label for="precioPersonalImpresion" class="block text-sm font-bold text-gray-500 mb-2 flex items-center gap-2">
-              <span class="bg-gray-100 text-gray-500 p-1.5 rounded-lg text-xs">💰</span> Precio personalizado (opcional)
+              <span class="bg-gray-100 text-gray-500 p-1.5 rounded-lg text-xs"><i class="ti ti-currency-dollar" aria-hidden="true"></i></span> Precio personalizado (opcional)
             </label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -826,7 +825,7 @@
           </div>
 
           <button type="button" class="w-full mt-6 py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-lg shadow-blue-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 group" onclick="agregarImpresion()">
-            <span class="text-xl group-hover:scale-110 transition-transform">➕</span>
+            <span class="text-xl group-hover:scale-110 transition-transform"><i class="ti ti-plus" aria-hidden="true"></i></span>
             Agregar a la cotizacion
           </button>
         </div>
@@ -836,7 +835,7 @@
              ======================================== -->
         <div id="formEncuadernado" class="form-servicio animate-fade-in-up" style="display: none;">
           <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <span class="text-2xl">📚</span>
+            <span class="text-2xl"><i class="ti ti-book-2" aria-hidden="true"></i></span>
             Encuadernado Espiral
           </h3>
 
@@ -844,7 +843,7 @@
             <!-- Cantidad de páginas -->
             <div class="group">
               <label for="paginasEncuadernado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">📊</span> Cantidad de páginas
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-chart-bar" aria-hidden="true"></i></span> Cantidad de páginas
               </label>
               <input type="number" id="paginasEncuadernado" min="1" max="1000" value="100" placeholder="Ej: 100" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
               <small class="text-xs text-gray-400 mt-1 ml-1">Máximo 1000 páginas</small>
@@ -853,7 +852,7 @@
             <!-- Cantidad de encuadernados -->
             <div class="group">
               <label for="cantidadEncuadernado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🔢</span> Cantidad de encuadernados
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span> Cantidad de encuadernados
               </label>
               <input type="number" id="cantidadEncuadernado" min="1" value="1" placeholder="Ej: 3" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
             </div>
@@ -874,7 +873,7 @@
           <!-- Precio personalizado -->
           <div class="mt-6 pt-6 border-t border-gray-100">
             <label for="precioPersonalEncuadernado" class="block text-sm font-bold text-gray-500 mb-2 flex items-center gap-2">
-              <span class="bg-gray-100 text-gray-500 p-1.5 rounded-lg text-xs">💰</span> Precio personalizado (opcional)
+              <span class="bg-gray-100 text-gray-500 p-1.5 rounded-lg text-xs"><i class="ti ti-currency-dollar" aria-hidden="true"></i></span> Precio personalizado (opcional)
             </label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -885,7 +884,7 @@
           </div>
 
           <button type="button" class="w-full mt-6 py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-lg shadow-blue-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 group" onclick="agregarEncuadernado()">
-            <span class="text-xl group-hover:scale-110 transition-transform">➕</span>
+            <span class="text-xl group-hover:scale-110 transition-transform"><i class="ti ti-plus" aria-hidden="true"></i></span>
             Agregar a la cotizacion
           </button>
         </div>
@@ -895,7 +894,7 @@
              ======================================== -->
         <div id="formEmpastado" class="form-servicio animate-fade-in-up" style="display: none;">
           <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <span class="text-2xl">📕</span>
+            <span class="text-2xl"><i class="ti ti-book" aria-hidden="true"></i></span>
             Empastado
           </h3>
 
@@ -903,7 +902,7 @@
             <!-- Tipo de empastado -->
             <div class="group">
               <label for="tipoEmpastadoGeneral" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">📖</span> Tipo de empastado
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-book" aria-hidden="true"></i></span> Tipo de empastado
               </label>
               <div class="relative">
                 <select id="tipoEmpastadoGeneral" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none appearance-none font-medium">
@@ -917,7 +916,7 @@
             <!-- Tamaño -->
             <div class="group">
               <label for="tamanoEmpastado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">📐</span> Tamaño
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-ruler" aria-hidden="true"></i></span> Tamaño
               </label>
               <div class="relative">
                 <select id="tamanoEmpastado" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none appearance-none font-medium">
@@ -933,7 +932,7 @@
             <!-- Cantidad -->
             <div class="group md:col-span-2">
               <label for="cantidadEmpastado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🔢</span> Cantidad
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span> Cantidad
               </label>
               <input type="number" id="cantidadEmpastado" min="1" value="1" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
             </div>
@@ -954,7 +953,7 @@
           <!-- Precio personalizado -->
           <div class="mt-6 pt-6 border-t border-gray-100">
             <label for="precioPersonalEmpastado" class="block text-sm font-bold text-gray-500 mb-2 flex items-center gap-2">
-              <span class="bg-gray-100 text-gray-500 p-1.5 rounded-lg text-xs">💰</span> Precio personalizado (opcional)
+              <span class="bg-gray-100 text-gray-500 p-1.5 rounded-lg text-xs"><i class="ti ti-currency-dollar" aria-hidden="true"></i></span> Precio personalizado (opcional)
             </label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -965,7 +964,7 @@
           </div>
 
           <button type="button" class="w-full mt-6 py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-lg shadow-blue-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 group" onclick="agregarEmpastado()">
-            <span class="text-xl group-hover:scale-110 transition-transform">➕</span>
+            <span class="text-xl group-hover:scale-110 transition-transform"><i class="ti ti-plus" aria-hidden="true"></i></span>
             Agregar a la cotizacion
           </button>
         </div>
@@ -975,7 +974,7 @@
              ======================================== -->
         <div id="formPloteo" class="form-servicio animate-fade-in-up" style="display: none;">
           <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <span class="text-2xl">🖼️</span>
+            <span class="text-2xl"><i class="ti ti-photo" aria-hidden="true"></i></span>
             Ploteo
           </h3>
 
@@ -983,7 +982,7 @@
             <!-- Tipo de ploteo -->
             <div class="group">
               <label for="tipoPloteo" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🎨</span> Tipo
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-palette" aria-hidden="true"></i></span> Tipo
               </label>
               <div class="relative">
                 <select id="tipoPloteo" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none appearance-none font-medium">
@@ -1003,7 +1002,7 @@
             <!-- Tamaño - Predefinido o personalizado -->
             <div class="group">
               <label for="opcionTamanoPloteo" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">📐</span> Tamaño
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-ruler" aria-hidden="true"></i></span> Tamaño
               </label>
               <div class="relative">
                 <select id="opcionTamanoPloteo" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none appearance-none font-medium">
@@ -1047,7 +1046,7 @@
           <!-- Cantidad -->
           <div class="mt-5">
             <label for="cantidadPloteo" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-              <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🔢</span> Cantidad
+              <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span> Cantidad
             </label>
             <input type="number" id="cantidadPloteo" min="1" value="1" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
           </div>
@@ -1067,7 +1066,7 @@
           <!-- Precio personalizado -->
           <div class="mt-6 pt-6 border-t border-gray-100">
             <label for="precioPersonalPloteo" class="block text-sm font-bold text-gray-500 mb-2 flex items-center gap-2">
-              <span class="bg-gray-100 text-gray-500 p-1.5 rounded-lg text-xs">💰</span> Precio personalizado (opcional)
+              <span class="bg-gray-100 text-gray-500 p-1.5 rounded-lg text-xs"><i class="ti ti-currency-dollar" aria-hidden="true"></i></span> Precio personalizado (opcional)
             </label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -1078,7 +1077,7 @@
           </div>
 
           <button type="button" class="w-full mt-6 py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-lg shadow-blue-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 group" onclick="agregarPloteo()">
-            <span class="text-xl group-hover:scale-110 transition-transform">➕</span>
+            <span class="text-xl group-hover:scale-110 transition-transform"><i class="ti ti-plus" aria-hidden="true"></i></span>
             Agregar a la cotizacion
           </button>
         </div>
@@ -1088,7 +1087,7 @@
              ======================================== -->
         <div id="formPlastificado" class="form-servicio animate-fade-in-up" style="display: none;">
           <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <span class="text-2xl">💳</span>
+            <span class="text-2xl"><i class="ti ti-credit-card" aria-hidden="true"></i></span>
             Plastificado
           </h3>
 
@@ -1096,7 +1095,7 @@
             <!-- Tamaño -->
             <div class="group">
               <label for="tamanoPlastificado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">📐</span> Tamaño
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-ruler" aria-hidden="true"></i></span> Tamaño
               </label>
               <div class="relative">
                 <select id="tamanoPlastificado" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none appearance-none font-medium">
@@ -1112,7 +1111,7 @@
             <!-- ¿Lleva corte? -->
             <div class="group">
               <label for="llevaCorte" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">✂️</span> ¿Lleva corte?
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-scissors" aria-hidden="true"></i></span> ¿Lleva corte?
               </label>
               <div class="relative">
                 <select id="llevaCorte" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none appearance-none font-medium">
@@ -1127,7 +1126,7 @@
 
           <!-- Cantidad de piezas (si lleva corte) -->
           <div id="seccionPiezas" class="mt-5 p-4 bg-yellow-50 rounded-xl border border-yellow-100" style="display: none;">
-            <label for="cantidadPiezas" class="block text-sm font-bold text-yellow-800 mb-2">🔢 Cantidad de piezas por hoja</label>
+            <label for="cantidadPiezas" class="block text-sm font-bold text-yellow-800 mb-2"><i class="ti ti-list-numbers" aria-hidden="true"></i> Cantidad de piezas por hoja</label>
             <input type="number" id="cantidadPiezas" min="1" value="2" placeholder="Ej: 4 tarjetas por hoja" class="w-full px-4 py-3 rounded-xl bg-white border border-yellow-200 text-gray-700 focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/10 transition-all duration-200 outline-none font-medium" />
             <small class="text-xs text-yellow-600 mt-1 block">¿Cuántas piezas se cortan de cada hoja?</small>
           </div>
@@ -1135,7 +1134,7 @@
           <!-- Cantidad de hojas -->
           <div class="mt-5">
             <label for="cantidadPlastificado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-              <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">📄</span> Cantidad de hojas
+              <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-file-text" aria-hidden="true"></i></span> Cantidad de hojas
             </label>
             <input type="number" id="cantidadPlastificado" min="1" value="1" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
           </div>
@@ -1155,7 +1154,7 @@
           <!-- Precio personalizado -->
           <div class="mt-6 pt-6 border-t border-gray-100">
             <label for="precioPersonalPlastificado" class="block text-sm font-bold text-gray-500 mb-2 flex items-center gap-2">
-              <span class="bg-gray-100 text-gray-500 p-1.5 rounded-lg text-xs">💰</span> Precio personalizado (opcional)
+              <span class="bg-gray-100 text-gray-500 p-1.5 rounded-lg text-xs"><i class="ti ti-currency-dollar" aria-hidden="true"></i></span> Precio personalizado (opcional)
             </label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -1166,7 +1165,7 @@
           </div>
 
           <button type="button" class="w-full mt-6 py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-lg shadow-blue-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 group" onclick="agregarPlastificado()">
-            <span class="text-xl group-hover:scale-110 transition-transform">➕</span>
+            <span class="text-xl group-hover:scale-110 transition-transform"><i class="ti ti-plus" aria-hidden="true"></i></span>
             Agregar a la cotizacion
           </button>
         </div>
@@ -1176,24 +1175,24 @@
              ======================================== -->
         <div id="formLibro" class="form-servicio animate-fade-in-up" style="display: none;">
           <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <span class="text-2xl">📘</span>
+            <span class="text-2xl"><i class="ti ti-book-2" aria-hidden="true"></i></span>
             Libro Completo (Impresión + Terminación)
           </h3>
 
           <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 text-sm text-blue-800 flex gap-3 items-start">
-            <span class="text-xl">💡</span>
+            <span class="text-xl"><i class="ti ti-bulb" aria-hidden="true"></i></span>
             <p><strong>Ejemplo:</strong> 1 portada a color + 99 páginas B/N + encuadernado = 100 páginas totales</p>
           </div>
 
           <!-- SECCIÓN: IMPRESIÓN BLANCO Y NEGRO -->
           <div class="mb-6 pb-6 border-b border-gray-100">
             <h4 class="text-md font-bold text-gray-700 mb-4 flex items-center gap-2">
-              <span class="bg-gray-200 text-gray-700 p-1 rounded text-xs">⚫</span>
+              <span class="bg-gray-200 text-gray-700 p-1 rounded text-xs"><i class="ti ti-contrast-2" aria-hidden="true"></i></span>
               Páginas Blanco y Negro
             </h4>
             <div>
               <label for="libroPaginasBN" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🔢</span>
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span>
                 Cantidad de páginas B/N
               </label>
               <input type="number" id="libroPaginasBN" min="0" value="0" placeholder="Ej: 99" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
@@ -1204,12 +1203,12 @@
           <!-- SECCIÓN: IMPRESIÓN COLOR -->
           <div class="mb-6 pb-6 border-b border-gray-100">
             <h4 class="text-md font-bold text-gray-700 mb-4 flex items-center gap-2">
-              <span class="bg-pink-100 text-pink-600 p-1 rounded text-xs">🎨</span>
+              <span class="bg-pink-100 text-pink-600 p-1 rounded text-xs"><i class="ti ti-palette" aria-hidden="true"></i></span>
               Páginas a Color
             </h4>
             <div>
               <label for="libroPaginasColor" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🔢</span>
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span>
                 Cantidad de páginas a Color
               </label>
               <input type="number" id="libroPaginasColor" min="0" value="0" placeholder="Ej: 1 (portada)" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
@@ -1220,12 +1219,12 @@
           <!-- SECCIÓN: IMPRESIÓN FULL COLOR -->
           <div class="mb-6 pb-6 border-b border-gray-100">
             <h4 class="text-md font-bold text-gray-700 mb-4 flex items-center gap-2">
-              <span class="bg-purple-100 text-purple-600 p-1 rounded text-xs">🌈</span>
+              <span class="bg-purple-100 text-purple-600 p-1 rounded text-xs"><i class="ti ti-color-swatch" aria-hidden="true"></i></span>
               Páginas Full Color
             </h4>
             <div>
               <label for="libroPaginasFullColor" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🔢</span>
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span>
                 Cantidad de páginas Full Color
               </label>
               <input type="number" id="libroPaginasFullColor" min="0" value="0" placeholder="Ej: 0" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
@@ -1236,14 +1235,14 @@
           <!-- SECCIÓN: CONFIGURACIÓN GENERAL -->
           <div class="mb-6">
             <h4 class="text-md font-bold text-gray-700 mb-4 flex items-center gap-2">
-              <span class="bg-gray-200 text-gray-700 p-1 rounded text-xs">⚙️</span>
+              <span class="bg-gray-200 text-gray-700 p-1 rounded text-xs"><i class="ti ti-settings" aria-hidden="true"></i></span>
               Configuración del Libro
             </h4>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="group">
                 <label for="libroTamano" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                  <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">📐</span> Tamaño
+                  <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-ruler" aria-hidden="true"></i></span> Tamaño
                 </label>
                 <div class="relative">
                   <select id="libroTamano" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none appearance-none font-medium">
@@ -1257,7 +1256,7 @@
 
               <div class="group">
                 <label for="libroTerminacion" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                  <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">📚</span> Terminación
+                  <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-book-2" aria-hidden="true"></i></span> Terminación
                 </label>
                 <div class="relative">
                   <select id="libroTerminacion" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none appearance-none font-medium">
@@ -1273,7 +1272,7 @@
 
               <div class="group md:col-span-2">
                 <label for="libroJuegos" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                  <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">📚</span> Número de copias/juegos
+                  <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-book-2" aria-hidden="true"></i></span> Número de copias/juegos
                 </label>
                 <input type="number" id="libroJuegos" min="1" value="1" placeholder="¿Cuántos libros iguales?" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
                 <small class="text-xs text-gray-400 mt-1 ml-1">Todos los costos se multiplicarán por este número</small>
@@ -1283,12 +1282,12 @@
 
           <!-- RESUMEN AUTOMÁTICO -->
           <div class="resumen-libro mt-6 p-5 bg-indigo-50 border border-indigo-100 rounded-xl" id="resumenLibro" style="display: none;">
-            <h4 class="text-lg font-bold text-indigo-800 mb-3 flex items-center gap-2">📊 Resumen del Libro</h4>
+            <h4 class="text-lg font-bold text-indigo-800 mb-3 flex items-center gap-2"><i class="ti ti-chart-bar" aria-hidden="true"></i> Resumen del Libro</h4>
             <div class="text-sm text-indigo-700 space-y-1" id="resumenContent"></div>
           </div>
 
           <button type="button" class="w-full mt-6 py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-lg shadow-blue-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 group" onclick="agregarLibro()">
-            <span class="text-xl group-hover:scale-110 transition-transform">➕</span>
+            <span class="text-xl group-hover:scale-110 transition-transform"><i class="ti ti-plus" aria-hidden="true"></i></span>
             Agregar Libro a la cotizacion
           </button>
         </div>
@@ -1298,12 +1297,12 @@
              ======================================== -->
         <div id="formBooklet" class="form-servicio animate-fade-in-up" style="display: none;">
           <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <span class="text-2xl">📖</span>
+            <span class="text-2xl"><i class="ti ti-book" aria-hidden="true"></i></span>
             Booklet / Folleto
           </h3>
 
           <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-6 text-sm text-amber-800 flex gap-3 items-start">
-            <span class="text-xl">💡</span>
+            <span class="text-xl"><i class="ti ti-bulb" aria-hidden="true"></i></span>
             <p><strong>¿Cómo funciona?</strong> Las páginas del documento se dividen entre 2 para obtener las hojas físicas. Ej: 140 páginas ÷ 2 = 70 hojas.</p>
           </div>
 
@@ -1312,7 +1311,7 @@
             <!-- Páginas del documento -->
             <div class="group md:col-span-2">
               <label for="bookletPaginas" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🔢</span>
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span>
                 Cantidad de páginas del documento
               </label>
               <input type="number" id="bookletPaginas" min="2" value="4" placeholder="Ej: 140" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
@@ -1322,21 +1321,21 @@
             <!-- Tipo de interior -->
             <div class="group">
               <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🎨</span>
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-palette" aria-hidden="true"></i></span>
                 Tipo de impresión interior
               </label>
               <div class="flex flex-col gap-3">
                 <label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all">
                   <input type="radio" name="bookletTipoInterior" id="bookletInteriorBN" value="bn" checked class="accent-blue-600 w-4 h-4">
                   <div>
-                    <span class="font-bold text-gray-800 text-sm">⚫ Blanco y Negro</span>
+                    <span class="font-bold text-gray-800 text-sm"><i class="ti ti-contrast-2" aria-hidden="true"></i> Blanco y Negro</span>
                     <small class="block text-gray-500 text-xs" id="bookletPrecioBNLabel">RD\.50 por hoja</small>
                   </div>
                 </label>
                 <label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all">
                   <input type="radio" name="bookletTipoInterior" id="bookletInteriorColor" value="color" class="accent-blue-600 w-4 h-4">
                   <div>
-                    <span class="font-bold text-gray-800 text-sm">🎨 Color</span>
+                    <span class="font-bold text-gray-800 text-sm"><i class="ti ti-palette" aria-hidden="true"></i> Color</span>
                     <small class="block text-gray-500 text-xs" id="bookletPrecioColorLabel">RD\.00 por hoja</small>
                   </div>
                 </label>
@@ -1346,7 +1345,7 @@
             <!-- Portada cartonite -->
             <div class="group">
               <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">📋</span>
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-clipboard-list" aria-hidden="true"></i></span>
                 Portada en cartonite
               </label>
               <div class="flex flex-col gap-3">
@@ -1367,7 +1366,7 @@
             <!-- Cantidad de ejemplares -->
             <div class="group md:col-span-2">
               <label for="bookletEjemplares" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">📚</span>
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-book-2" aria-hidden="true"></i></span>
                 Cantidad de ejemplares
               </label>
               <input type="number" id="bookletEjemplares" min="1" value="1" placeholder="Ej: 5" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
@@ -1378,7 +1377,7 @@
 
           <!-- RESUMEN AUTOMÁTICO EN TIEMPO REAL -->
           <div class="mt-6 p-5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl" id="resumenBooklet" style="display: none;">
-            <h4 class="text-lg font-bold text-amber-800 mb-4 flex items-center gap-2">📊 Desglose del cálculo</h4>
+            <h4 class="text-lg font-bold text-amber-800 mb-4 flex items-center gap-2"><i class="ti ti-chart-bar" aria-hidden="true"></i> Desglose del cálculo</h4>
             <div class="space-y-2 text-sm" id="resumenBookletContent"></div>
             <div class="mt-4 pt-4 border-t border-amber-200 flex justify-between items-center">
               <span class="font-black text-gray-800 text-base">Total estimado:</span>
@@ -1387,7 +1386,7 @@
           </div>
 
           <button type="button" class="w-full mt-6 py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-amber-500 via-orange-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 shadow-lg shadow-orange-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 group" onclick="agregarBooklet()">
-            <span class="text-xl group-hover:scale-110 transition-transform">➕</span>
+            <span class="text-xl group-hover:scale-110 transition-transform"><i class="ti ti-plus" aria-hidden="true"></i></span>
             Agregar Booklet a la cotización
           </button>
         </div>
@@ -1397,7 +1396,7 @@
              ======================================== -->
         <div id="formPersonalizado" class="form-servicio animate-fade-in-up" style="display: none;">
           <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <span class="text-2xl">🛠️</span>
+            <span class="text-2xl"><i class="ti ti-tools" aria-hidden="true"></i></span>
             Servicio Personalizado
           </h3>
 
@@ -1405,7 +1404,7 @@
             <!-- Descripción -->
             <div class="group md:col-span-2">
               <label for="descPersonalizado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">📝</span> Descripción del servicio
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-notes" aria-hidden="true"></i></span> Descripción del servicio
               </label>
               <input type="text" id="descPersonalizado" placeholder="Ej: Letrero 2x4 pies, Diseño gráfico, etc." class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
             </div>
@@ -1413,7 +1412,7 @@
             <!-- Cantidad -->
             <div class="group">
               <label for="cantPersonalizado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🔢</span> Cantidad
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span> Cantidad
               </label>
               <input type="number" id="cantPersonalizado" min="1" value="1" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
             </div>
@@ -1421,7 +1420,7 @@
             <!-- Precio Unitario -->
             <div class="group">
               <label for="precioPersonalizado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">💰</span> Precio Unitario (RD$)
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-currency-dollar" aria-hidden="true"></i></span> Precio Unitario (RD$)
               </label>
               <input type="number" id="precioPersonalizado" min="0" step="0.01" placeholder="0.00" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
             </div>
@@ -1436,7 +1435,7 @@
           </div>
 
           <button type="button" class="w-full mt-6 py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-lg shadow-blue-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 group" onclick="agregarPersonalizado()">
-            <span class="text-xl group-hover:scale-110 transition-transform">➕</span>
+            <span class="text-xl group-hover:scale-110 transition-transform"><i class="ti ti-plus" aria-hidden="true"></i></span>
             Agregar a la cotizacion
           </button>
         </div>
@@ -1452,22 +1451,22 @@
       <div class="cotizacion-section">
         <div class="cotizacion-header flex flex-col md:flex-row justify-between items-center">
           <h2>
-            <span class="cotizacion-icon">📊</span>
+            <span class="cotizacion-icon"><i class="ti ti-chart-bar" aria-hidden="true"></i></span>
             Cotización en Tiempo Real
             <span class="cotizacion-count" id="cotizacionCount">0</span>
           </h2>
           <div class="flex flex-wrap gap-2 mt-3 md:mt-0">
             <button type="button" id="btnDashboard" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-500 hover:to-indigo-700 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
-              <span class="text-lg">📊</span> Dashboard
+              <span class="text-lg"><i class="ti ti-chart-bar" aria-hidden="true"></i></span> Dashboard
             </button>
             <button type="button" id="btnVerFacturas" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
-              <span class="text-lg">📜</span> Ver Facturas
+              <span class="text-lg"><i class="ti ti-file-invoice" aria-hidden="true"></i></span> Ver Facturas
             </button>
             <button type="button" id="btnVerGuardadas" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-400 hover:to-teal-600 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
-              <span class="text-lg">📂</span> Ver Guardadas
+              <span class="text-lg"><i class="ti ti-folder" aria-hidden="true"></i></span> Ver Guardadas
             </button>
             <button type="button" onclick="cotizacion_exportarExcel()" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-green-600 to-green-800 hover:from-green-500 hover:to-green-700 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
-              <span class="text-lg">📊</span> Exportar Excel
+              <span class="text-lg"><i class="ti ti-chart-bar" aria-hidden="true"></i></span> Exportar Excel
             </button>
             <button type="button" onclick="abrirModalAnalizadorPDF()" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center gap-2 text-sm">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -1492,7 +1491,7 @@
               <tr class="cotizacion-vacia bg-gray-50">
                 <td colspan="6" class="p-12 text-center">
                   <div class="flex flex-col items-center justify-center text-gray-500">
-                    <span class="text-6xl mb-4">📭</span>
+                    <span class="text-6xl mb-4"><i class="ti ti-mailbox" aria-hidden="true"></i></span>
                     <p class="text-lg font-medium">No hay servicios en la cotización</p>
                     <p class="text-sm text-gray-400 mt-1">Selecciona un servicio abajo para empezar</p>
                   </div>
@@ -1522,7 +1521,7 @@
         <!-- Botón para generar PDF -->
         <div class="pdf-button-container">
           <button id="generarPDF" class="w-full py-4 px-6 rounded-xl font-bold text-white text-lg bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 hover:from-orange-400 hover:to-orange-600 shadow-lg shadow-orange-500/40 transform transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] flex items-center justify-center gap-3 border border-orange-400/20">
-            <span class="text-2xl">📄</span>
+            <span class="text-2xl"><i class="ti ti-file-text" aria-hidden="true"></i></span>
             Generar PDF de Cotización
           </button>
         </div>
@@ -1532,12 +1531,12 @@
              ======================================== -->
         <div class="comprobante-section" id="comprobanteSection" style="display: none;">
           <h3 class="comprobante-title">
-            <span class="section-icon">🧾</span>
+            <span class="section-icon"><i class="ti ti-receipt" aria-hidden="true"></i></span>
             Tipo de Comprobante
           </h3>
           <div class="form-group">
             <label for="tipoComprobante">
-              <span class="label-icon">📋</span>
+              <span class="label-icon"><i class="ti ti-clipboard-list" aria-hidden="true"></i></span>
               Tipo de comprobante
             </label>
             <select id="tipoComprobante">
@@ -1549,16 +1548,16 @@
 
         <div class="acciones-cotizacion" id="cotizacionAcciones" style="display: none;">
           <button type="button" id="btnWhatsapp" class="font-bold text-white bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 shadow-lg shadow-green-500/30 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
-            <span class="text-xl">💬</span> Enviar a WhatsApp
+            <span class="text-xl"><i class="ti ti-message-circle" aria-hidden="true"></i></span> Enviar a WhatsApp
           </button>
           <button type="button" id="btnLimpiarCotizacion" class="font-bold text-gray-700 bg-white border-2 border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 shadow-md transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
-            <span class="text-xl">🗑️</span> Limpiar Cotización
+            <span class="text-xl"><i class="ti ti-trash" aria-hidden="true"></i></span> Limpiar Cotización
           </button>
           <button type="button" id="btnGuardarCotizacion" class="font-bold text-white bg-gradient-to-r from-indigo-500 to-indigo-700 hover:from-indigo-400 hover:to-indigo-600 shadow-lg shadow-indigo-500/30 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2" title="Guardar la cotización actual para editarla en el futuro">
-            <span class="text-xl">💾</span> Guardar
+            <span class="text-xl"><i class="ti ti-device-floppy" aria-hidden="true"></i></span> Guardar
           </button>
           <button type="button" id="btnGuardarCambios" class="font-bold text-white bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 shadow-lg shadow-purple-500/30 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2" style="display: none;" title="Actualizar la cotización existente">
-            <span class="text-xl">📝</span> Guardar Cambios
+            <span class="text-xl"><i class="ti ti-notes" aria-hidden="true"></i></span> Guardar Cambios
           </button>
         </div>
       </div> <!-- Fin de cotizacion-section -->
@@ -1575,7 +1574,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-slide-in-up m-4">
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
         <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-3">
-          <span class="text-3xl">📂</span> Cotizaciones Guardadas
+          <span class="text-3xl"><i class="ti ti-folder" aria-hidden="true"></i></span> Cotizaciones Guardadas
         </h3>
         <button id="btnCerrarModal" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 transition-all" aria-label="Cerrar modal">
           <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -1592,7 +1591,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg m-4 flex flex-col animate-slide-in-up border border-gray-200 dark:border-gray-700">
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 to-blue-800 rounded-t-2xl">
         <h3 class="text-xl font-bold text-white flex items-center gap-2">
-          <span>🧾</span> Generar Factura Fiscal
+          <span><i class="ti ti-receipt" aria-hidden="true"></i></span> Generar Factura Fiscal
         </h3>
         <p class="text-blue-100 text-sm mt-1">Convierte la cotización en una factura válida para DGII</p>
       </div>
@@ -1601,10 +1600,10 @@
           <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Buscar Cliente (RNC o Nombre)</label>
           <div class="flex gap-2">
             <input type="text" id="inputRNCFactura" placeholder="Escribe nombre o RNC..." autocomplete="off" class="flex-1 px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none font-mono text-lg dark:text-white" />
-            <button id="btnBuscarRNC" class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold">🔍</button>
+            <button id="btnBuscarRNC" class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold" aria-label="Buscar cliente por RNC o nombre" title="Buscar cliente"><i class="ti ti-search" aria-hidden="true"></i></button>
           </div>
           <div id="listaResultadosClientes" class="absolute left-0 right-0 top-[85px] bg-white dark:bg-gray-800 shadow-2xl rounded-xl border border-gray-200 dark:border-gray-600 max-h-60 overflow-y-auto z-50 hidden"></div>
-          <p id="infoClienteRNC" class="text-sm text-green-600 font-bold mt-2 hidden">✅ Cliente encontrado</p>
+          <p id="infoClienteRNC" class="text-sm text-green-600 font-bold mt-2 hidden"><i class="ti ti-circle-check" aria-hidden="true"></i> Cliente encontrado</p>
         </div>
         <div>
           <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Razón Social / Nombre</label>
@@ -1627,7 +1626,7 @@
       </div>
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex gap-3 justify-end bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl">
         <button id="btnCancelarFactura" class="px-5 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-200 transition-colors">Cancelar</button>
-        <button id="btnConfirmarFactura" class="px-6 py-2.5 rounded-xl font-bold text-white bg-green-600 hover:bg-green-700 shadow-lg shadow-green-500/30 transition-all transform hover:-translate-y-1">✅ Emitir Factura</button>
+        <button id="btnConfirmarFactura" class="px-6 py-2.5 rounded-xl font-bold text-white bg-green-600 hover:bg-green-700 shadow-lg shadow-green-500/30 transition-all transform hover:-translate-y-1"><i class="ti ti-circle-check" aria-hidden="true"></i> Emitir Factura</button>
       </div>
     </div>
   </div>
@@ -1639,10 +1638,10 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col animate-slide-in-up m-4">
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0 bg-gradient-to-r from-purple-600 to-purple-800 rounded-t-2xl text-white">
         <div>
-          <h3 class="text-2xl font-bold flex items-center gap-3"><span class="text-3xl">📜</span> Historial de Facturas</h3>
+          <h3 class="text-2xl font-bold flex items-center gap-3"><span class="text-3xl"><i class="ti ti-file-invoice" aria-hidden="true"></i></span> Historial de Facturas</h3>
           <p class="text-purple-100 text-sm mt-1">Registro de comprobantes fiscales emitidos</p>
         </div>
-        <button id="btnCerrarModalFacturas" class="p-2 rounded-full text-white hover:bg-white/20 transition-all">
+        <button id="btnCerrarModalFacturas" class="p-2 rounded-full text-white hover:bg-white/20 transition-all" aria-label="Cerrar historial de facturas" title="Cerrar historial de facturas">
           <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
@@ -1659,19 +1658,19 @@
         </div>
         <div class="flex gap-2">
           <button id="btnBackupFacturas" class="px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-lg font-bold text-sm flex items-center gap-2 shadow-sm transition-all" title="Descargar copia de seguridad completa">
-            <span>💾</span> Backup JSON
+            <span><i class="ti ti-device-floppy" aria-hidden="true"></i></span> Backup JSON
           </button>
           <button id="btnReporteDiario" class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-bold text-sm flex items-center gap-2 shadow-sm transition-all">
-            <span>📅</span> Ventas Hoy
+            <span><i class="ti ti-calendar" aria-hidden="true"></i></span> Ventas Hoy
           </button>
           <button id="btnExportar607" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-sm flex items-center gap-2 shadow-sm transition-all">
-            <span>📊</span> Reporte 607
+            <span><i class="ti ti-chart-bar" aria-hidden="true"></i></span> Reporte 607
           </button>
           <button id="btnReporteIT1Excel" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm flex items-center gap-2 shadow-sm transition-all">
-            <span>📗</span> IT-1 Excel
+            <span><i class="ti ti-file-spreadsheet" aria-hidden="true"></i></span> IT-1 Excel
           </button>
           <button id="btnReporteIT1PDF" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-sm flex items-center gap-2 shadow-sm transition-all">
-            <span>📕</span> IT-1 PDF
+            <span><i class="ti ti-book" aria-hidden="true"></i></span> IT-1 PDF
           </button>
         </div>
       </div>
@@ -1691,13 +1690,13 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col animate-slide-in-up m-4 overflow-hidden">
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-600 to-blue-600 flex justify-between items-center flex-shrink-0">
         <div>
-          <h3 class="text-2xl font-bold text-white flex items-center gap-3"><span class="text-3xl">📊</span> Dashboard de Operaciones</h3>
+          <h3 class="text-2xl font-bold text-white flex items-center gap-3"><span class="text-3xl"><i class="ti ti-chart-bar" aria-hidden="true"></i></span> Dashboard de Operaciones</h3>
           <p class="text-indigo-100 text-sm mt-1">Resumen de Tesis y Trabajos realizados</p>
         </div>
         <a href="analitica-visitantes.html" target="_blank" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-bold text-xs shadow transition-all flex items-center gap-1.5 mr-2" title="Abrir panel de analítica de visitantes">
-            <span>🌐</span> Analítica Visitantes
+            <span><i class="ti ti-world" aria-hidden="true"></i></span> Analítica Visitantes
           </a>
-          <button id="btnCerrarDashboard" class="p-2 rounded-full text-white hover:bg-white/20 transition-all">
+          <button id="btnCerrarDashboard" class="p-2 rounded-full text-white hover:bg-white/20 transition-all" aria-label="Cerrar dashboard" title="Cerrar dashboard">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
@@ -1706,7 +1705,7 @@
         <div class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex flex-col md:flex-row items-center justify-between gap-4 border border-indigo-500/20 shadow-md">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
-              <span>🌐</span>
+              <span><i class="ti ti-world" aria-hidden="true"></i></span>
             </div>
             <div>
               <h4 class="font-bold text-white text-sm flex items-center gap-2">
@@ -1717,7 +1716,7 @@
             </div>
           </div>
           <a href="analitica-visitantes.html" target="_blank" class="px-4 py-2 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 shadow transition-all flex items-center gap-2 text-xs whitespace-nowrap">
-            <span>📊</span> Abrir Dashboard de Visitantes
+            <span><i class="ti ti-chart-bar" aria-hidden="true"></i></span> Abrir Dashboard de Visitantes
           </a>
         </div>
         <div class="flex flex-wrap gap-4 mb-6 items-end bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
@@ -1729,26 +1728,26 @@
             <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">Hasta</label>
             <input type="date" id="dashFechaFin" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
-          <button id="btnFiltrarDashboard" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm shadow-md transition-all h-[38px] flex items-center gap-2"><span class="text-lg">🔍</span> Filtrar</button>
+          <button id="btnFiltrarDashboard" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm shadow-md transition-all h-[38px] flex items-center gap-2"><span class="text-lg"><i class="ti ti-search" aria-hidden="true"></i></span> Filtrar</button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center text-center">
-            <span class="text-4xl mb-2">💰</span>
+            <span class="text-4xl mb-2"><i class="ti ti-currency-dollar" aria-hidden="true"></i></span>
             <p class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase">Ventas Hoy</p>
             <p class="text-3xl font-black text-gray-800 dark:text-white mt-1" id="dashVentasHoy">RD$0.00</p>
           </div>
           <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center text-center">
-            <span class="text-4xl mb-2">📅</span>
+            <span class="text-4xl mb-2"><i class="ti ti-calendar" aria-hidden="true"></i></span>
             <p class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase">Ventas Periodo</p>
             <p class="text-3xl font-black text-indigo-600 dark:text-indigo-400 mt-1" id="dashVentasMes">RD$0.00</p>
           </div>
           <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center text-center">
-            <span class="text-4xl mb-2">🎓</span>
+            <span class="text-4xl mb-2"><i class="ti ti-school" aria-hidden="true"></i></span>
             <p class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase">Tesis Registradas</p>
             <p class="text-3xl font-black text-blue-600 dark:text-blue-400 mt-1" id="dashTotalTesis">0</p>
           </div>
           <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center text-center">
-            <span class="text-4xl mb-2">🧾</span>
+            <span class="text-4xl mb-2"><i class="ti ti-receipt" aria-hidden="true"></i></span>
             <p class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase">Facturas Emitidas</p>
             <p class="text-3xl font-black text-purple-600 dark:text-purple-400 mt-1" id="dashTotalFacturas">0</p>
           </div>
@@ -1756,7 +1755,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20 flex justify-between items-center">
-              <h4 class="font-bold text-blue-800 dark:text-blue-300 flex items-center gap-2"><span class="text-xl">🎓</span> Últimas Tesis</h4>
+              <h4 class="font-bold text-blue-800 dark:text-blue-300 flex items-center gap-2"><span class="text-xl"><i class="ti ti-school" aria-hidden="true"></i></span> Últimas Tesis</h4>
               <span class="text-xs font-semibold bg-blue-200 text-blue-800 px-2 py-1 rounded-full">Recientes</span>
             </div>
             <div id="dashListaTesis" class="divide-y divide-gray-100 dark:divide-gray-700 max-h-[400px] overflow-y-auto">
@@ -1765,7 +1764,7 @@
           </div>
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-purple-50 dark:bg-purple-900/20 flex justify-between items-center">
-              <h4 class="font-bold text-purple-800 dark:text-purple-300 flex items-center gap-2"><span class="text-xl">🧾</span> Últimos Trabajos Facturados</h4>
+              <h4 class="font-bold text-purple-800 dark:text-purple-300 flex items-center gap-2"><span class="text-xl"><i class="ti ti-receipt" aria-hidden="true"></i></span> Últimos Trabajos Facturados</h4>
               <span class="text-xs font-semibold bg-purple-200 text-purple-800 px-2 py-1 rounded-full">Recientes</span>
             </div>
             <div id="dashListaFacturas" class="divide-y divide-gray-100 dark:divide-gray-700 max-h-[400px] overflow-y-auto">
@@ -1783,7 +1782,7 @@
   <div id="modalConfirmarAnulacion" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[70] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md m-4 p-6 animate-slide-in-up border border-red-200 dark:border-red-900">
       <div class="text-center mb-6">
-        <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">⚠️</div>
+        <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4"><i class="ti ti-alert-triangle" aria-hidden="true"></i></div>
         <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">¿Confirmar Anulación?</h3>
         <p class="text-gray-600 dark:text-gray-300 text-sm">Esta acción es irreversible. Se generará una Nota de Crédito (B04).</p>
         <p class="text-gray-500 dark:text-gray-400 text-xs mt-2">Escribe <span class="font-bold text-red-600 select-all">anular</span> abajo para confirmar.</p>
@@ -1791,7 +1790,7 @@
       <input type="text" id="inputConfirmacionAnular" placeholder="Escribe 'anular'" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-red-500 outline-none text-center font-bold text-lg mb-6 dark:bg-gray-700 dark:border-gray-600 dark:text-white" autocomplete="off">
       <div class="flex gap-3">
         <button id="btnCancelarAnulacion" class="flex-1 px-4 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancelar</button>
-        <button id="btnEjecutarAnulacion" class="flex-1 px-4 py-2.5 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>🚫 Anular Factura</button>
+        <button id="btnEjecutarAnulacion" class="flex-1 px-4 py-2.5 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled><i class="ti ti-ban" aria-hidden="true"></i> Anular Factura</button>
       </div>
     </div>
   </div>
@@ -1801,7 +1800,7 @@
        ======================================== -->
   <div id="modalConfirmarEliminar" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[80] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-6 animate-slide-in-up border border-gray-200 dark:border-gray-700 text-center">
-      <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🗑️</div>
+      <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4"><i class="ti ti-trash" aria-hidden="true"></i></div>
       <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">¿Eliminar Cotización?</h3>
       <p class="text-gray-600 dark:text-gray-300 text-sm mb-6">¿Estás seguro de eliminar <span id="nombreCotizacionEliminar" class="font-bold text-gray-800 dark:text-white">esta cotización</span>?<br>Esta acción no se puede deshacer.</p>
       <div class="flex gap-3 justify-center">
@@ -1816,7 +1815,7 @@
        ======================================== -->
   <div id="modalConfirmarLimpiar" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[80] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-6 animate-slide-in-up border border-gray-200 dark:border-gray-700 text-center">
-      <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🧹</div>
+      <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4"><i class="ti ti-brush" aria-hidden="true"></i></div>
       <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">¿Limpiar Todo?</h3>
       <p id="textoConfirmarLimpiar" class="text-gray-600 dark:text-gray-300 text-sm mb-6">Se borrarán todos los datos actuales.</p>
       <div class="flex gap-3 justify-center">
@@ -1832,7 +1831,7 @@
   <div id="modalLogin" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[2000] hidden animate-fade-in">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm m-4 p-8 animate-slide-in-up border border-blue-200 dark:border-blue-900">
       <div class="text-center mb-6">
-        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🔐</div>
+        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
         <h3 class="text-xl font-bold text-gray-800 dark:text-white">Acceso Autorizado</h3>
         <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">Ingresa tus credenciales para facturar.</p>
       </div>
@@ -1852,9 +1851,9 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg m-4 p-6 animate-slide-in-up border border-gray-200 dark:border-gray-700">
       <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 dark:border-gray-700">
         <h3 class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-          <span class="text-2xl">📄</span> Cálculo de Hojas
+          <span class="text-2xl"><i class="ti ti-file-text" aria-hidden="true"></i></span> Cálculo de Hojas
         </h3>
-        <button onclick="cerrarModalCalculoHojas()" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+        <button onclick="cerrarModalCalculoHojas()" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" aria-label="Cerrar calculadora de hojas" title="Cerrar calculadora de hojas">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
@@ -1935,7 +1934,7 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">Detecta páginas a color vs. blanco y negro — múltiples archivos</p>
           </div>
         </div>
-        <button onclick="cerrarModalAnalizadorPDF()" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Cerrar">
+        <button onclick="cerrarModalAnalizadorPDF()" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" aria-label="Cerrar analizador de PDF" title="Cerrar">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
@@ -1957,7 +1956,7 @@
 
         <!-- Aviso de volumen grande (no bloqueante) -->
         <div id="pdfqAvisoVolumen" class="hidden items-center gap-3 p-3 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-lg border border-amber-200 dark:border-amber-700 text-sm">
-          <span class="text-xl flex-shrink-0">⏱️</span>
+          <span class="text-xl flex-shrink-0"><i class="ti ti-history" aria-hidden="true"></i></span>
           <span id="pdfqAvisoVolumenMsg"></span>
         </div>
 
@@ -1965,7 +1964,7 @@
         <div id="pdfqProgressWrap" class="hidden space-y-2">
           <div class="flex justify-between items-center">
             <span id="pdfqProgressLabel" class="text-xs font-mono text-gray-500 dark:text-gray-400">Analizando...</span>
-            <button id="pdfqBtnCancelar" onclick="pdfq_cancelarCola()" class="text-xs font-bold text-red-600 hover:text-red-700 dark:text-red-400 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">⏹ Cancelar</button>
+            <button id="pdfqBtnCancelar" onclick="pdfq_cancelarCola()" class="text-xs font-bold text-red-600 hover:text-red-700 dark:text-red-400 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"><i class="ti ti-x" aria-hidden="true"></i> Cancelar</button>
           </div>
           <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
             <div id="pdfqProgressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width:0%"></div>
@@ -1975,14 +1974,14 @@
         <!-- Tabla de documentos cargados -->
         <div id="pdfqTablaWrap" class="hidden">
           <div class="flex justify-between items-center mb-2">
-            <span class="text-sm font-bold text-gray-700 dark:text-gray-300">📋 Documentos cargados</span>
-            <button onclick="pdfq_limpiarTodo()" class="text-xs font-bold text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors flex items-center gap-1">🗑️ Limpiar todo</button>
+            <span class="text-sm font-bold text-gray-700 dark:text-gray-300"><i class="ti ti-clipboard-list" aria-hidden="true"></i> Documentos cargados</span>
+            <button onclick="pdfq_limpiarTodo()" class="text-xs font-bold text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors flex items-center gap-1"><i class="ti ti-trash" aria-hidden="true"></i> Limpiar todo</button>
           </div>
 
           <!-- Panel de precio maestro: aplica un precio/página a todos los documentos de una sola vez -->
           <div class="mb-3 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
             <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <span class="text-xs font-bold text-indigo-700 dark:text-indigo-300 whitespace-nowrap">💲 Aplicar precio a todos:</span>
+              <span class="text-xs font-bold text-indigo-700 dark:text-indigo-300 whitespace-nowrap"><i class="ti ti-currency-dollar" aria-hidden="true"></i> Aplicar precio a todos:</span>
               <div class="flex items-center gap-1">
                 <span class="text-xs text-gray-500 dark:text-gray-400 font-semibold">B/N RD$/pág</span>
                 <input type="number" step="0.01" min="0" id="pdfqMasterBN" placeholder="—"
@@ -2011,11 +2010,11 @@
               </div>
               <label class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 cursor-pointer whitespace-nowrap">
                 <input type="checkbox" id="pdfqMasterRespetarManual" checked class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500">
-                No pisar los que ya edité a mano ✏️
+                No pisar los que ya edité a mano <i class="ti ti-pencil" aria-hidden="true"></i>
               </label>
               <button onclick="pdfq_aplicarPrecioATodos()"
                 class="ml-auto text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600 px-3 py-1.5 rounded-lg shadow-sm transition-colors whitespace-nowrap">
-                ⚡ Aplicar a todas
+                <i class="ti ti-check" aria-hidden="true"></i> Aplicar a todas
               </button>
             </div>
           </div>
@@ -2040,13 +2039,13 @@
 
         <!-- Botón iniciar cola -->
         <button id="pdfqBtnIniciar" onclick="pdfq_iniciarCola()" disabled class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 shadow-lg shadow-blue-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 disabled:from-gray-300 disabled:to-gray-400 disabled:shadow-none disabled:transform-none dark:disabled:from-gray-600 dark:disabled:to-gray-700 disabled:cursor-not-allowed">
-          <span id="pdfqBtnIniciarIcon">▶</span>
+          <span id="pdfqBtnIniciarIcon"><i class="ti ti-file-type-pdf" aria-hidden="true"></i></span>
           <span id="pdfqBtnIniciarText">ANALIZAR PDF(s)</span>
         </button>
 
         <!-- Resumen general (solo PDFs completados) -->
         <div id="pdfqResumen" class="hidden pt-4 mt-2 border-t border-gray-200 dark:border-gray-700">
-          <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wider">📊 Resumen General</h4>
+          <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wider"><i class="ti ti-chart-bar" aria-hidden="true"></i> Resumen General</h4>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-center border-b-4 border-indigo-500">
               <div class="text-2xl font-black text-indigo-600 dark:text-indigo-400" id="pdfqResDocumentos">0/0</div>
@@ -2066,7 +2065,7 @@
             </div>
           </div>
           <button id="pdfqBtnCotizar" onclick="pdfq_cotizarTodos()" disabled class="w-full mt-4 py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 shadow-lg shadow-green-500/40 transform transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 disabled:from-gray-300 disabled:to-gray-400 disabled:shadow-none disabled:transform-none dark:disabled:from-gray-600 dark:disabled:to-gray-700 disabled:cursor-not-allowed">
-            👇 COTIZAR TODOS (usar datos en calculadora)
+            <i class="ti ti-arrow-down" aria-hidden="true"></i> COTIZAR TODOS (usar datos en calculadora)
           </button>
         </div>
 
@@ -2302,7 +2301,7 @@
       var badge = '';
       switch (item.estado) {
         case 'pendiente':
-          badge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">⏳ Pendiente</span>';
+          badge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">Pendiente</span>';
           break;
         case 'analizando':
           badge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">' +
@@ -2311,10 +2310,10 @@
             '<span id="pdfq-badge-progreso-' + item.id + '" class="font-mono"></span></span>';
           break;
         case 'completado':
-          badge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">✅ Listo</span>';
+          badge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300"><i class="ti ti-circle-check" aria-hidden="true"></i> Listo</span>';
           break;
         case 'error':
-          badge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">❌ Error</span>';
+          badge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"><i class="ti ti-circle-x" aria-hidden="true"></i> Error</span>';
           break;
       }
 
@@ -2324,9 +2323,9 @@
 
       var accion = '';
       if (item.estado === 'error') {
-        accion = '<button onclick="pdfq_reintentar(' + item.id + ')" class="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 px-2 py-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">🔄 Reintentar</button>';
+        accion = '<button onclick="pdfq_reintentar(' + item.id + ')" class="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 px-2 py-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"><i class="ti ti-refresh" aria-hidden="true"></i> Reintentar</button>';
       } else if (item.estado === 'completado' || item.estado !== 'analizando') {
-        accion = '<button onclick="pdfq_eliminarArchivo(' + item.id + ')" class="text-xs font-bold text-gray-400 hover:text-red-600 dark:hover:text-red-400 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="Eliminar">🗑️</button>';
+        accion = '<button onclick="pdfq_eliminarArchivo(' + item.id + ')" aria-label="Eliminar archivo" class="text-xs font-bold text-gray-400 hover:text-red-600 dark:hover:text-red-400 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="Eliminar"><i class="ti ti-trash" aria-hidden="true"></i></button>';
       }
 
       // ── Fila de datos principal (IDs en celdas para actualización puntual) ────
@@ -2367,7 +2366,7 @@
         ? 'border-orange-400 dark:border-orange-500'
         : 'border-gray-200 dark:border-gray-600';
       var labelManual = precioManual
-        ? ' <span class="text-orange-500 font-bold" title="Precio editado manualmente">✏️</span>'
+        ? ' <span class="text-orange-500 font-bold" title="Precio editado manualmente"><i class="ti ti-pencil" aria-hidden="true"></i></span>'
         : '';
 
       // Clase compartida para inputs de páginas
@@ -2394,8 +2393,8 @@
         // Botón individual
         '<button onclick="pdfq_agregarUno(' + item.id + ')" ' +
         'class="ml-auto text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 px-3 py-1 rounded-lg shadow-sm transition-colors flex items-center gap-1">' +
-        '➕ Agregar</button>' +
-        ' <button onclick="lomo_estimarDesdeAnalizador(' + item.id + ')" class="text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 px-3 py-1 rounded-lg border border-indigo-200 dark:border-indigo-700 shadow-sm transition-colors flex items-center gap-1">📏 Lomo</button>' +
+        window.servigacoIcon('plus') + ' Agregar</button>' +
+        ' <button onclick="lomo_estimarDesdeAnalizador(' + item.id + ')" class="text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 px-3 py-1 rounded-lg border border-indigo-200 dark:border-indigo-700 shadow-sm transition-colors flex items-center gap-1">' + window.servigacoIcon('ruler') + ' Lomo</button>' +
         '</div>' +
 
         // ── Sub-fila 2: Edición de composición de páginas ─────────────────────
@@ -2433,7 +2432,7 @@
         '<span class="text-xs font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap">Precios:</span>' +
         // Precio/página B/N + subtotal calculado (solo lectura)
         '<div class="flex items-center gap-1">' +
-        '<span class="text-xs text-gray-500 dark:text-gray-400 font-semibold">B/N RD$/pág' + (item.precioUnitBNManual ? ' ✏️' : '') + '</span>' +
+        '<span class="text-xs text-gray-500 dark:text-gray-400 font-semibold">B/N RD$/pág' + (item.precioUnitBNManual ? ' ' + window.servigacoIcon('pencil') : '') + '</span>' +
         '<input type="number" step="0.01" min="0" id="pdfq-inp-unitbn-' + item.id + '" value="' + (item.precioUnitBN || 0).toFixed(2) + '" ' +
         'oninput="pdfq_editarPrecioUnitBN(' + item.id + ', this.value)" ' +
         'class="text-xs w-16 px-1.5 py-1 rounded-lg border ' + (item.precioUnitBNManual ? 'border-orange-400 dark:border-orange-500' : 'border-gray-200 dark:border-gray-600') + ' bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-right">' +
@@ -2441,7 +2440,7 @@
         '</div>' +
         // Precio/página Color + subtotal calculado (solo lectura)
         '<div class="flex items-center gap-1">' +
-        '<span class="text-xs text-green-600 dark:text-green-400 font-semibold">Color RD$/pág' + (item.precioUnitColorManual ? ' ✏️' : '') + '</span>' +
+        '<span class="text-xs text-green-600 dark:text-green-400 font-semibold">Color RD$/pág' + (item.precioUnitColorManual ? ' ' + window.servigacoIcon('pencil') : '') + '</span>' +
         '<input type="number" step="0.01" min="0" id="pdfq-inp-unitcol-' + item.id + '" value="' + (item.precioUnitColor || 0).toFixed(2) + '" ' +
         'oninput="pdfq_editarPrecioUnitColor(' + item.id + ', this.value)" ' +
         'class="text-xs w-16 px-1.5 py-1 rounded-lg border ' + (item.precioUnitColorManual ? 'border-orange-400 dark:border-orange-500' : 'border-gray-200 dark:border-gray-600') + ' bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-right">' +
@@ -2449,7 +2448,7 @@
         '</div>' +
         // Terminación: sigue siendo un total editable (no es por página)
         '<div class="flex items-center gap-1">' +
-        '<span class="text-xs text-blue-600 dark:text-blue-400 font-semibold">Terminación (total)' + (item.costoTerminacionManual ? ' ✏️' : '') + '</span>' +
+        '<span class="text-xs text-blue-600 dark:text-blue-400 font-semibold">Terminación (total)' + (item.costoTerminacionManual ? ' ' + window.servigacoIcon('pencil') : '') + '</span>' +
         '<input type="number" step="0.01" min="0" id="pdfq-inp-costoterm-' + item.id + '" value="' + (item.costoTerminacion || 0).toFixed(2) + '" ' +
         'oninput="pdfq_editarCostoTerminacion(' + item.id + ', this.value)" ' +
         'class="text-xs w-20 px-1.5 py-1 rounded-lg border ' + (item.costoTerminacionManual ? 'border-orange-400 dark:border-orange-500' : 'border-gray-200 dark:border-gray-600') + ' bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-right">' +
@@ -2513,16 +2512,20 @@
       var btnIniciar     = document.getElementById('pdfqBtnIniciar');
       var btnCotizar     = document.getElementById('pdfqBtnCotizar');
       var txtIniciar     = document.getElementById('pdfqBtnIniciarText');
+      var iconoIniciar   = document.getElementById('pdfqBtnIniciarIcon');
 
       btnIniciar.disabled = !hayPendientes || _PDFQ.procesando;
       if (btnCotizar) btnCotizar.disabled = !hayCompletados || _PDFQ.procesando;
 
       if (_PDFQ.procesando) {
         txtIniciar.textContent = 'ANALIZANDO...';
+        iconoIniciar.innerHTML = window.servigacoIcon('refresh');
       } else if (hayPendientes) {
         txtIniciar.textContent = 'ANALIZAR PDF(s)';
+        iconoIniciar.innerHTML = window.servigacoIcon('file-type-pdf');
       } else {
         txtIniciar.textContent = 'ANÁLISIS COMPLETADO';
+        iconoIniciar.innerHTML = window.servigacoIcon('circle-check');
       }
     }
 
@@ -3123,7 +3126,7 @@
       if (item.precioManual) descripcion += ' · Precio personalizado';
 
       agregarACotizacion({
-        nombre: '📄 ' + item.nombre,
+        nombre: item.nombre,
         descripcion: descripcion,
         cantidad: 1,
         precioUnitario: precio,
@@ -3468,7 +3471,7 @@
       <div class="p-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-t-2xl flex justify-between items-center flex-shrink-0">
         <div>
           <h3 class="text-xl font-bold text-white flex items-center gap-2">
-            <span class="text-2xl">📏</span> Estimador de Lomo
+            <span class="text-2xl"><i class="ti ti-ruler" aria-hidden="true"></i></span> Estimador de Lomo
           </h3>
           <p class="text-indigo-200 text-sm mt-0.5">Grosor estimado del lomo · Bond 20 · Dúplex</p>
         </div>
@@ -3486,15 +3489,13 @@
           <!-- Input páginas -->
           <div>
             <label for="lomoInputPaginas" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-              <span class="bg-indigo-100 text-indigo-600 p-1.5 rounded-lg text-xs">📄</span>
+              <span class="bg-indigo-100 text-indigo-600 p-1.5 rounded-lg text-xs"><i class="ti ti-file-text" aria-hidden="true"></i></span>
               Cantidad de páginas
             </label>
             <input
               type="number"
               id="lomoInputPaginas"
-              min="1"
-              placeholder="Ej: 185"
-              aria-label="Cantidad de páginas del libro"
+              min="1" placeholder="Ej: 185" aria-label="Cantidad de páginas del libro"
               class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200 outline-none font-medium dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             />
             <small class="text-xs text-gray-400 mt-1 ml-1">Impresión dúplex · Bond 20</small>
@@ -3503,7 +3504,7 @@
           <!-- Upload PDF -->
           <div>
             <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-              <span class="bg-purple-100 text-purple-600 p-1.5 rounded-lg text-xs">📎</span>
+              <span class="bg-purple-100 text-purple-600 p-1.5 rounded-lg text-xs"><i class="ti ti-paperclip" aria-hidden="true"></i></span>
               Subir PDF del libro <span class="text-xs font-normal text-gray-400">(opcional)</span>
             </label>
             <label for="lomoFilePDF" class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-gray-50 border-2 border-dashed border-gray-200 hover:border-indigo-400 hover:bg-indigo-50 cursor-pointer transition-all duration-200 text-sm text-gray-500 hover:text-indigo-600 font-medium dark:bg-gray-700 dark:border-gray-600">
@@ -3577,7 +3578,7 @@
 
           <!-- Aviso escala topada -->
           <p class="lomo-scale-notice" id="lomoScaleNotice">
-            ⚠️ Escala visual limitada — los valores numéricos son exactos.
+            <i class="ti ti-alert-triangle" aria-hidden="true"></i> Escala visual limitada — los valores numéricos son exactos.
           </p>
         </div>
 
@@ -3596,7 +3597,7 @@
        Visible SOLO para administradores autenticados
        ======================================== -->
   <button id="btnAdminPreciosBooklet" class="btn-admin-precios" onclick="abrirModalAdminPreciosBooklet()" style="display:none;" title="Configurar precios de Booklet">
-    ⚙️ Precios Booklet
+    <i class="ti ti-settings" aria-hidden="true"></i> Precios Booklet
   </button>
 
   <!-- ========================================
@@ -3608,22 +3609,22 @@
       <!-- Header -->
       <div class="modal-precios-header">
         <h2 id="modalAdminPreciosTitle" style="color:white; font-size:1.1rem; font-weight:800; display:flex; align-items:center; gap:8px;">
-          ⚙️ Configurar Precios — Booklet / Libro
+          <i class="ti ti-settings" aria-hidden="true"></i> Configurar Precios — Booklet / Libro
         </h2>
-        <button class="btn-cerrar-modal" onclick="cerrarModalAdminPreciosBooklet()" aria-label="Cerrar">✕</button>
+        <button class="btn-cerrar-modal" onclick="cerrarModalAdminPreciosBooklet()" aria-label="Cerrar"><i class="ti ti-x" aria-hidden="true"></i></button>
       </div>
 
       <!-- Body -->
       <div class="modal-precios-body">
 
         <p style="font-size:0.85rem; color:#64748b; margin-bottom:1.5rem; background:#f0f9ff; padding:10px 14px; border-radius:10px; border:1px solid #bae6fd;">
-          💡 Los cambios se guardan en Firebase y se aplican automáticamente al calculador sin recargar la página.
+          <i class="ti ti-bulb" aria-hidden="true"></i> Los cambios se guardan en Firebase y se aplican automáticamente al calculador sin recargar la página.
         </p>
 
         <!-- Sección: Precios Booklet -->
         <div style="margin-bottom:1.5rem;">
           <h3 style="font-size:1rem; font-weight:800; color:#1e293b; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:2px solid #e2e8f0; display:flex; align-items:center; gap:8px;">
-            📖 Precios para Booklet / Folleto
+            <i class="ti ti-book" aria-hidden="true"></i> Precios para Booklet / Folleto
           </h3>
 
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
@@ -3631,13 +3632,12 @@
             <!-- Precio hoja Bond B/N -->
             <div>
               <label style="display:block; font-size:0.8rem; font-weight:700; color:#374151; margin-bottom:6px;">
-                ⚫ Precio por hoja Bond B/N
+                <i class="ti ti-contrast-2" aria-hidden="true"></i> Precio por hoja Bond B/N
               </label>
               <div style="display:flex; align-items:center; gap:6px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:8px 12px;">
                 <span style="font-size:0.8rem; font-weight:700; color:#6b7280;">RD$</span>
                 <input type="number" id="adminBookletBondBN" step="0.50" min="0" value="2.50"
-                  style="flex:1; background:transparent; border:none; outline:none; font-size:1rem; font-weight:700; color:#1e293b;"
-                  placeholder="2.50">
+                  style="flex:1; background:transparent; border:none; outline:none; font-size:1rem; font-weight:700; color:#1e293b;" placeholder="2.50">
               </div>
               <small style="font-size:0.7rem; color:#94a3b8; margin-top:4px; display:block;">Precio por hoja física impresa en B/N</small>
             </div>
@@ -3645,13 +3645,12 @@
             <!-- Precio hoja Bond Color -->
             <div>
               <label style="display:block; font-size:0.8rem; font-weight:700; color:#374151; margin-bottom:6px;">
-                🎨 Precio por hoja Bond Color
+                <i class="ti ti-palette" aria-hidden="true"></i> Precio por hoja Bond Color
               </label>
               <div style="display:flex; align-items:center; gap:6px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:8px 12px;">
                 <span style="font-size:0.8rem; font-weight:700; color:#6b7280;">RD$</span>
                 <input type="number" id="adminBookletBondColor" step="0.50" min="0" value="15.00"
-                  style="flex:1; background:transparent; border:none; outline:none; font-size:1rem; font-weight:700; color:#1e293b;"
-                  placeholder="15.00">
+                  style="flex:1; background:transparent; border:none; outline:none; font-size:1rem; font-weight:700; color:#1e293b;" placeholder="15.00">
               </div>
               <small style="font-size:0.7rem; color:#94a3b8; margin-top:4px; display:block;">Precio por hoja física impresa en color</small>
             </div>
@@ -3659,13 +3658,12 @@
             <!-- Precio portada cartonite -->
             <div style="grid-column:1 / -1;">
               <label style="display:block; font-size:0.8rem; font-weight:700; color:#374151; margin-bottom:6px;">
-                📋 Precio portada en Cartonite
+                <i class="ti ti-clipboard-list" aria-hidden="true"></i> Precio portada en Cartonite
               </label>
               <div style="display:flex; align-items:center; gap:6px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:8px 12px;">
                 <span style="font-size:0.8rem; font-weight:700; color:#6b7280;">RD$</span>
                 <input type="number" id="adminBookletCartonite" step="5" min="0" value="150"
-                  style="flex:1; background:transparent; border:none; outline:none; font-size:1rem; font-weight:700; color:#1e293b;"
-                  placeholder="150">
+                  style="flex:1; background:transparent; border:none; outline:none; font-size:1rem; font-weight:700; color:#1e293b;" placeholder="150">
               </div>
               <small style="font-size:0.7rem; color:#94a3b8; margin-top:4px; display:block;">Se agrega al costo del booklet cuando el cliente elige portada en cartonite</small>
             </div>
@@ -3676,7 +3674,7 @@
         <!-- Botón guardar -->
         <button onclick="guardarPreciosBooklet()"
           style="width:100%; padding:14px; background:linear-gradient(135deg,#2563eb,#1d4ed8); color:white; border:none; border-radius:12px; font-size:1rem; font-weight:800; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px;">
-          💾 Guardar Precios en Firebase
+          <i class="ti ti-device-floppy" aria-hidden="true"></i> Guardar Precios en Firebase
         </button>
 
       </div>

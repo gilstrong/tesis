@@ -1,33 +1,6 @@
 /* ======================================
    🎨 VARIABLES CSS - DESIGN SYSTEM
    ====================================== */
-/* Tabler Icons 3.51.0; MIT License: https://github.com/tabler/tabler-icons/blob/main/LICENSE */
-@font-face {
-  font-family: "tabler-icons";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.51.0/dist/fonts/tabler-icons.core.woff2?ha900a4e2") format("woff2");
-  unicode-range: U+EB1E, U+EB41, U+EB55, U+F00B;
-}
-
-.ti {
-  font-family: "tabler-icons" !important;
-  speak: none;
-  font-style: normal;
-  font-weight: normal;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.ti-robot::before { content: "\f00b"; }
-.ti-trash::before { content: "\eb41"; }
-.ti-x::before { content: "\eb55"; }
-.ti-send::before { content: "\eb1e"; }
-
 :root {
   /* Colores principales - Indigo/Violeta Premium */
   --primary-blue: #6366f1;
@@ -1449,7 +1422,7 @@ servigaco-nav {
 }
 
 .nav-icon {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   display: flex;
   align-items: center;
 }
@@ -2068,21 +2041,17 @@ button.sg-trigger:focus-visible,
 }
 
 .sg-trigger-icon-box {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--sg-accent-light);
+  width: 28px;
+  height: 28px;
   color: var(--sg-accent);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all 0.2s ease;
 }
 
-.sg-icon-svg {
-  width: 20px;
-  height: 20px;
+.sg-trigger-icon-box .ti {
+  font-size: 1.25rem;
 }
 
 .sg-trigger-text {
@@ -2296,50 +2265,24 @@ li.sg-option[aria-selected="true"] .sg-option-desc {
 }
 
 .sg-option-icon-box {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 24px;
+  height: 24px;
+  color: var(--sg-accent);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: transform 0.15s ease;
 }
 
-li.sg-option:hover .sg-option-icon-box {
-  transform: scale(1.05);
+.sg-option-icon-box .ti {
+  font-size: 1.125rem;
 }
-
-.sg-option-icon-box svg {
-  width: 18px;
-  height: 18px;
-}
-
-/* Colores de cajas de iconos */
-.sg-icon-blue    { background: #e0f2fe; color: #0284c7; }
-.sg-icon-purple  { background: #ede9fe; color: #7c3aed; }
-.sg-icon-amber   { background: #fef3c7; color: #d97706; }
-.sg-icon-green   { background: #dcfce7; color: #16a34a; }
-.sg-icon-red     { background: #fee2e2; color: #dc2626; }
-.sg-icon-indigo  { background: #e0e7ff; color: #4f46e5; }
-.sg-icon-pink    { background: #fce7f3; color: #db2777; }
-.sg-icon-cyan    { background: #cffafe; color: #0891b2; }
-.sg-icon-slate   { background: #f1f5f9; color: #475569; }
-
-[data-theme="dark"] .sg-icon-blue, html.dark .sg-icon-blue       { background: #0c2b4e; color: #38bdf8; }
-[data-theme="dark"] .sg-icon-purple, html.dark .sg-icon-purple   { background: #281a4d; color: #a78bfa; }
-[data-theme="dark"] .sg-icon-amber, html.dark .sg-icon-amber     { background: #3b2807; color: #fbbf24; }
-[data-theme="dark"] .sg-icon-green, html.dark .sg-icon-green     { background: #0e351b; color: #4ade80; }
-[data-theme="dark"] .sg-icon-red, html.dark .sg-icon-red         { background: #3c1212; color: #f87171; }
-[data-theme="dark"] .sg-icon-indigo, html.dark .sg-icon-indigo   { background: #1c1c4f; color: #818cf8; }
-[data-theme="dark"] .sg-icon-pink, html.dark .sg-icon-pink       { background: #3c1328; color: #f472b6; }
-[data-theme="dark"] .sg-icon-cyan, html.dark .sg-icon-cyan       { background: #0b323c; color: #22d3ee; }
-[data-theme="dark"] .sg-icon-slate, html.dark .sg-icon-slate     { background: #1e293b; color: #cbd5e1; }
 
 .sg-check-icon {
   width: 18px;
   height: 18px;
   color: var(--sg-accent);
+  font-size: 1.125rem;
   opacity: 0;
   transform: scale(0.6);
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);

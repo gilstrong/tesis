@@ -1,4 +1,4 @@
-// ============================================
+﻿// ============================================
 // 📝 COTIZACIÓN - GLOBAL
 // ============================================
 let cotizacion = [];
@@ -478,7 +478,7 @@ function actualizarCotizacion() {
         <tr class="cotizacion-vacia bg-gray-50 dark:bg-gray-800">
           <td colspan="6" class="p-12 text-center">
             <div class="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
-              <span class="text-6xl mb-4">📭</span>
+              <span class="text-6xl mb-4">${window.servigacoIcon('mailbox')}</span>
               <p class="text-lg font-medium">No hay servicios en la cotización</p>
               <p class="text-sm text-gray-400 mt-1">Selecciona un servicio abajo para empezar</p>
             </div>
@@ -497,7 +497,7 @@ function actualizarCotizacion() {
     const nombre = nombreCotizacionActiva || '...';
     const indicator = document.createElement('span');
     indicator.className = 'editing-indicator ml-4 text-sm font-normal bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 px-3 py-1 rounded-full';
-    indicator.textContent = `📝 Editando: ${nombre}`;
+    window.servigacoSetIconText(indicator, 'notes', `Editando: ${nombre}`);
     headerH2.appendChild(indicator);
   }
 
@@ -557,7 +557,7 @@ function actualizarCotizacion() {
         <td class="px-6 py-4 text-right font-bold text-blue-700 dark:text-blue-300 bg-blue-50/30 dark:bg-blue-900/20">RD$${item.precio.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</td>
         <td class="px-6 py-4 text-center">
           <button class="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-100 transition-all duration-200 transform hover:scale-110 shadow-sm border border-transparent hover:border-red-200" onclick="eliminarDeCotizacion(${i})" title="Eliminar">
-            🗑️
+            ${window.servigacoIcon('trash')}
           </button>
         </td>
       </tr>
@@ -677,7 +677,7 @@ function agregarLibro() {
   // ===============================================
   
   agregarACotizacion({
-    nombre: '📘 Libro Completo',
+    nombre: 'Libro Completo',
     descripcion: descripcion,
     cantidad: juegos,
     precioUnitario: costos.costoPorLibro,
@@ -1555,7 +1555,8 @@ async function imprimirCotizacion() {
   if (btn) {
     originalBtnHTML = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = `<span class="text-2xl animate-spin">⚙️</span> Generando PDF...`;
+    btn.innerHTML = `${window.servigacoIcon('settings')} Generando PDF...`;
+    btn.querySelector('.ti').classList.add('text-2xl', 'animate-spin');
   }
 
   try {
@@ -1671,8 +1672,7 @@ async function imprimirCotizacion() {
         <!-- HEADER -->
         <div class="header">
           <div class="header-content">
-            <img src="logo.png" alt="Servigaco Logo" class="logo" />
-            <img src="assets/logo.png" alt="Servigaco Logo" class="logo" />
+            <img src="${new URL('/logo.webp', window.location.origin).href}" alt="Logo de ServiGaco" class="logo" width="384" height="297" />
             <div class="header-divider"></div>
             <p>COTIZACIÓN DE SERVICIOS PROFESIONALES</p>
             <div class="header-badge">
@@ -2000,15 +2000,15 @@ function renderizarCotizacionesGuardadas() {
     
     // Diferenciar visualmente entre Tesis y General
     const esTesis = c.tipo === 'Tesis';
-    const icono = esTesis ? '🎓' : '📄';
+    const icono = window.servigacoIcon(esTesis ? 'school' : 'file-text');
     const descripcion = esTesis 
       ? `Tesis: ${c.descripcion || 'Sin detalle'}` 
       : `${c.items ? c.items.length : 0} servicio(s)`;
     
     // Botón de facturar (habilitado para General y Tesis)
     const btnFacturar = (!c.ncf) 
-      ? `<button onclick="abrirModalFacturacion('${c.id}')" class="flex-1 md:flex-none min-w-[100px] py-2 px-3 rounded-lg font-semibold text-sm text-white bg-green-600 hover:bg-green-700 transition-all shadow-sm whitespace-nowrap">🧾 Facturar</button>`
-      : (c.ncf ? `<span class="text-xs font-bold text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded whitespace-nowrap">✅ ${c.ncf}</span>` : '');
+      ? `<button onclick="abrirModalFacturacion('${c.id}')" class="flex-1 md:flex-none min-w-[100px] py-2 px-3 rounded-lg font-semibold text-sm text-white bg-green-600 hover:bg-green-700 transition-all shadow-sm whitespace-nowrap">${window.servigacoIcon('receipt')} Facturar</button>`
+      : (c.ncf ? `<span class="text-xs font-bold text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded whitespace-nowrap">${window.servigacoIcon('circle-check')} ${c.ncf}</span>` : '');
 
     return `
       <div class="p-4 mb-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 hover:bg-blue-50 dark:hover:bg-gray-700/60 transition-colors">
@@ -2019,8 +2019,8 @@ function renderizarCotizacionesGuardadas() {
         </div>
         <div class="flex flex-wrap gap-2 w-full md:w-auto justify-end mt-2 md:mt-0">
           ${btnFacturar}
-          ${!esTesis ? `<button onclick="cargarCotizacionGuardada('${c.id}')" class="flex-1 md:flex-none min-w-[90px] py-2 px-3 rounded-lg font-semibold text-sm text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-sm whitespace-nowrap">📝 Editar</button>` : ''}
-          <button onclick="eliminarCotizacionGuardada('${c.id}')" class="flex-1 md:flex-none min-w-[90px] py-2 px-3 rounded-lg font-semibold text-sm text-white bg-red-600 hover:bg-red-700 transition-all shadow-sm whitespace-nowrap">🗑️ Borrar</button>
+          ${!esTesis ? `<button onclick="cargarCotizacionGuardada('${c.id}')" class="flex-1 md:flex-none min-w-[90px] py-2 px-3 rounded-lg font-semibold text-sm text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-sm whitespace-nowrap">${window.servigacoIcon('notes')} Editar</button>` : ''}
+          <button onclick="eliminarCotizacionGuardada('${c.id}')" class="flex-1 md:flex-none min-w-[90px] py-2 px-3 rounded-lg font-semibold text-sm text-white bg-red-600 hover:bg-red-700 transition-all shadow-sm whitespace-nowrap">${window.servigacoIcon('trash')} Borrar</button>
         </div>
       </div>
     `;
@@ -2198,7 +2198,7 @@ function renderizarResultadosBusqueda(resultados, termino, esOffline) {
     lista.innerHTML = '<div class="p-3 text-center text-gray-500">No se encontraron resultados</div>';
     return;
   }
-  const badge = esOffline ? '<span class="text-[10px] bg-gray-200 text-gray-600 px-1 rounded ml-2">📡 Offline</span>' : '';
+  const badge = esOffline ? `<span class="text-[10px] bg-gray-200 text-gray-600 px-1 rounded ml-2">${window.servigacoIcon('ban')} Offline</span>` : '';
   const safeTerm = termino.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const html = Object.keys(resultados).map(key => {
     const datos = resultados[key];
@@ -2225,7 +2225,7 @@ window.seleccionarClienteBusqueda = function(rnc, nombre) {
   
   // Validar RNC visualmente
   const infoLabel = document.getElementById('infoClienteRNC');
-  infoLabel.textContent = '✅ Cliente seleccionado';
+  window.servigacoSetIconText(infoLabel, 'circle-check', 'Cliente seleccionado');
   infoLabel.classList.remove('hidden');
   
   // Auto-seleccionar tipo NCF
@@ -2257,7 +2257,7 @@ async function buscarClientePorRNC() {
 
     if (datos) {
       nombreInput.value = datos.n || datos.nombre; // 'n' si usaste el script optimizado
-      infoLabel.textContent = '✅ Cliente encontrado en DGII';
+      window.servigacoSetIconText(infoLabel, 'circle-check', 'Cliente encontrado en DGII');
       infoLabel.classList.remove('hidden');
       
       // Sugerir NCF
@@ -2270,9 +2270,9 @@ async function buscarClientePorRNC() {
       mostrarNotificacion('RNC válido pero no registrado en local. Ingrese nombre manual.', 'warning');
       // MODIFICADO: Botón para guardar cliente nuevo
       infoLabel.innerHTML = `
-        <span class="text-yellow-600 font-bold">⚠️ Nuevo Cliente</span>
+        <span class="text-yellow-600 font-bold">${window.servigacoIcon('alert-triangle')} Nuevo Cliente</span>
         <button onclick="guardarNuevoCliente()" type="button" class="ml-3 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded border border-blue-200 transition-colors font-bold shadow-sm">
-          💾 Guardar en BD
+          ${window.servigacoIcon('device-floppy')} Guardar en BD
         </button>
       `;
       infoLabel.classList.remove('hidden');
@@ -2307,7 +2307,7 @@ async function guardarNuevoCliente() {
   const btn = infoLabel.querySelector('button');
   if(btn) {
       btn.disabled = true;
-      btn.textContent = '⏳ Guardando...';
+      window.servigacoSetIconText(btn, 'refresh', 'Guardando...');
   }
 
   try {
@@ -2320,7 +2320,7 @@ async function guardarNuevoCliente() {
     });
 
     mostrarNotificacion('✅ Cliente agregado a la base de datos', 'success');
-    infoLabel.innerHTML = '<span class="text-green-600 font-bold">✅ Cliente registrado exitosamente</span>';
+    infoLabel.innerHTML = `<span class="text-green-600 font-bold">${window.servigacoIcon('circle-check')} Cliente registrado exitosamente</span>`;
     
     // Auto-seleccionar tipo NCF si no estaba seleccionado
     const selectNCF = document.getElementById('selectTipoNCF');
@@ -2334,7 +2334,7 @@ async function guardarNuevoCliente() {
     mostrarNotificacion('Error al guardar: ' + error.message, 'error');
     if(btn) {
         btn.disabled = false;
-        btn.textContent = '💾 Guardar en BD';
+        window.servigacoSetIconText(btn, 'device-floppy', 'Guardar en BD');
     }
   }
 }
@@ -2348,7 +2348,7 @@ async function actualizarPreviewNCF() {
   const label = document.getElementById('previewProximoNCF');
   if (!label) return;
 
-  label.textContent = '🔄 Verificando secuencia...';
+  window.servigacoSetIconText(label, 'refresh', 'Verificando secuencia...');
   label.className = 'text-xs font-bold mt-2 text-right text-gray-500';
   
   try {
@@ -2363,7 +2363,7 @@ async function actualizarPreviewNCF() {
     
   } catch (e) {
     console.error(e);
-    label.textContent = '⚠️ Error al consultar secuencia';
+    window.servigacoSetIconText(label, 'alert-triangle', 'Error al consultar secuencia');
     label.className = 'text-xs font-bold mt-2 text-right text-red-500';
   }
 }
@@ -2499,7 +2499,7 @@ async function abrirModalFacturas() {
   if (!modal) return;
   
   modal.classList.remove('hidden');
-  lista.innerHTML = '<div class="text-center py-10"><p class="text-xl animate-pulse">🔄 Cargando facturas...</p></div>';
+  lista.innerHTML = `<div class="text-center py-10"><p class="text-xl animate-pulse">${window.servigacoIcon('refresh')} Cargando facturas...</p></div>`;
 
   // Establecer mes actual por defecto si no tiene valor
   if (!filtro.value) {
@@ -2534,7 +2534,7 @@ async function cargarFacturasPorMes() {
   if (!filtro) return;
 
   const lista = document.getElementById('listaFacturas');
-  if (lista) lista.innerHTML = '<div class="text-center py-10"><p class="text-xl animate-pulse">🔄 Buscando en el servidor...</p></div>';
+  if (lista) lista.innerHTML = `<div class="text-center py-10"><p class="text-xl animate-pulse">${window.servigacoIcon('search')} Buscando en el servidor...</p></div>`;
 
   // Rango de fechas para el mes seleccionado
   const start = filtro + "-01";
@@ -2607,17 +2607,17 @@ function renderizarFacturas() {
     
     let etiquetaEstado;
     if (esAnulada) {
-        etiquetaEstado = '<span class="text-xs text-red-500 dark:text-red-400 font-bold border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded">🚫 Anulada</span>';
+        etiquetaEstado = `<span class="text-xs text-red-500 dark:text-red-400 font-bold border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded">${window.servigacoIcon('ban')} Anulada</span>`;
         // Modificar estilos para anuladas (Gris, tachado y opaco)
         estiloContenedor = "bg-gray-100 dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 flex justify-between items-center opacity-60 grayscale";
         estiloTexto = "font-bold text-gray-500 line-through";
         estiloMonto = "text-gray-400 line-through";
     } else if (esNotaCredito) {
-        etiquetaEstado = '<span class="text-xs text-purple-600 dark:text-purple-400 font-bold border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/30 px-2 py-1 rounded">↩️ Nota Crédito</span>';
+        etiquetaEstado = `<span class="text-xs text-purple-600 dark:text-purple-400 font-bold border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/30 px-2 py-1 rounded">${window.servigacoIcon('arrow-left')} Nota Crédito</span>`;
     } else {
         etiquetaEstado = `
-          <button onclick="imprimirFactura('${f.id}')" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded border border-blue-200 transition-colors font-bold mr-2">🖨️ Imprimir</button>
-          <button onclick="anularFactura('${f.id}')" class="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded border border-red-200 transition-colors font-bold">🚫 Anular</button>
+          <button onclick="imprimirFactura('${f.id}')" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded border border-blue-200 transition-colors font-bold mr-2">${window.servigacoIcon('printer')} Imprimir</button>
+          <button onclick="anularFactura('${f.id}')" class="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded border border-red-200 transition-colors font-bold">${window.servigacoIcon('ban')} Anular</button>
         `;
     }
 
@@ -2903,7 +2903,7 @@ async function procesarAnulacion() {
 
 // ⛔ SEGURIDAD FISCAL: Función de eliminación desactivada
 window.eliminarFacturaPermanente = function() {
-  alert("⛔ ACCIÓN DENEGADA POR SEGURIDAD FISCAL\n\nSegún la Norma General 06-2018 de la DGII, las facturas con NCF emitido NO pueden ser eliminadas.\n\nDebe realizar una Nota de Crédito (Anulación) para revertir la operación.");
+  alert("ACCIÓN DENEGADA POR SEGURIDAD FISCAL\n\nSegún la Norma General 06-2018 de la DGII, las facturas con NCF emitido NO pueden ser eliminadas.\n\nDebe realizar una Nota de Crédito (Anulación) para revertir la operación.");
 };
 
 async function generarReporte607() {
@@ -3253,7 +3253,7 @@ function imprimirReporteIT1(resumen, itbisAPagar) {
 
 async function abrirModalCotizaciones() {
   const container = document.getElementById('listaCotizacionesGuardadas');
-  if (container) container.innerHTML = '<div class="text-center py-10"><p class="text-xl animate-pulse">🔥 Cargando desde Base de Datos...</p></div>';
+  if (container) container.innerHTML = `<div class="text-center py-10"><p class="text-xl animate-pulse">${window.servigacoIcon('refresh')} Cargando desde Base de Datos...</p></div>`;
   
   document.getElementById('modalCotizacionesGuardadas')?.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
@@ -3492,16 +3492,17 @@ function mostrarNotificacion(mensaje, tipo = 'success') {
 
   // Iconos según tipo
   const iconos = {
-    success: '✅',
-    error: '❌',
-    warning: '⚠️'
+    success: 'circle-check',
+    error: 'circle-x',
+    warning: 'alert-triangle',
+    info: 'info-circle'
   };
 
   const toast = document.createElement('div');
   toast.className = `toast ${tipo}`;
   toast.innerHTML = `
-    <span class="toast-icon">${iconos[tipo]}</span>
-    <span class="toast-message">${mensaje}</span>
+    <span class="toast-icon">${window.servigacoIcon(iconos[tipo] || iconos.info)}</span>
+    <span class="toast-message">${window.servigacoReplaceIconGlyphs(mensaje)}</span>
   `;
 
   container.appendChild(toast);
@@ -3539,7 +3540,7 @@ function registrarLogVenta(datos, accion = 'guardar') {
 
 document.addEventListener('DOMContentLoaded', () => {
   if (window.location.protocol === 'file:') {
-    alert("⚠️ ATENCIÓN: Estás abriendo el archivo directamente (file://).\n\nPara que la generación de PDF funcione, debes usar el servidor local.\n\nEjecuta 'node server.js' y abre http://localhost:3000");
+    alert("ATENCIÓN: Estás abriendo el archivo directamente (file://).\n\nPara que la generación de PDF funcione, debes usar el servidor local.\n\nEjecuta 'node server.js' y abre http://localhost:3000");
   }
 
   marcarPaginaActiva();
@@ -3584,10 +3585,10 @@ window.probarConexionFirebase = async function() {
     await writeRef.remove();
     console.log("   ✅ Borrado exitoso.");
 
-    alert("✅ CONEXIÓN EXITOSA\n\nTu calculadora está conectada correctamente a Firebase Realtime Database.");
+    alert("CONEXIÓN EXITOSA\n\nTu calculadora está conectada correctamente a Firebase Realtime Database.");
   } catch (e) {
     console.error("❌ FALLO:", e);
-    alert("❌ ERROR DE CONEXIÓN: " + e.message);
+    alert("ERROR DE CONEXIÓN: " + e.message);
   }
   console.groupEnd();
 };
@@ -3651,12 +3652,12 @@ function actualizarIconoAuth(user) {
   if (user) {
     const nombreUsuario = user.email ? user.email.split('@')[0] : 'Usuario';
     // Botón rojo explícito con texto "Salir" y el nombre del usuario
-    btn.innerHTML = `<span class="mr-1 text-lg">🚪</span><span class="font-bold">Salir (${nombreUsuario})</span>`;
+    btn.innerHTML = `<span class="mr-1 text-lg">${window.servigacoIcon('logout')}</span><span class="font-bold">Salir (${nombreUsuario})</span>`;
     btn.className = "flex items-center text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-3 py-2 mr-2 transition-all shadow-md";
     btn.title = "Cerrar Sesión";
   } else {
     // Estado original (Candado gris discreto)
-    btn.innerHTML = `<span id="iconAuth">🔒</span>`;
+    btn.innerHTML = `<span id="iconAuth">${window.servigacoIcon('lock')}</span>`;
     btn.className = "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all";
     btn.title = "Acceso Empleados";
   }
@@ -3713,7 +3714,7 @@ function inicializarCombos() {
           <span class="font-bold text-gray-700 text-sm leading-tight">${combo.nombre}</span>
           <span class="text-purple-700 font-black text-md bg-purple-50 px-2 py-1 rounded whitespace-nowrap">RD$${precio}</span>
         </button>
-        <button onclick="eliminarCombo('${key}')" class="absolute -top-2 -right-2 bg-red-100 text-red-500 rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-600 hover:text-white transition-all shadow-sm text-xs font-bold z-10" title="Eliminar Combo">✕</button>
+        <button onclick="eliminarCombo('${key}')" aria-label="Eliminar combo" class="absolute -top-2 -right-2 bg-red-100 text-red-500 rounded-lg w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-600 hover:text-white transition-all shadow-sm text-xs font-bold z-10" title="Eliminar Combo">${window.servigacoIcon('x')}</button>
       `;
       lista.appendChild(btn);
     });
@@ -3759,7 +3760,7 @@ async function usarCombo(id) {
     
     if (combo) {
       agregarACotizacion({
-        nombre: '📦 Combo / Paquete',
+        nombre: 'Combo / Paquete',
         descripcion: combo.nombre,
         cantidad: 1,
         precioUnitario: parseFloat(combo.precio),
@@ -3832,12 +3833,12 @@ function mostrarBienvenida(nombre) {
   card.style.transition = 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'; 
 
   card.innerHTML = `
-    <div class="text-8xl mb-6 animate-bounce">👋</div>
+    <div class="text-8xl mb-6">${window.servigacoIcon('user-circle')}</div>
     <h2 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-6 tracking-tight">
       ¡Hola, ${nombre}!
     </h2>
     <p class="text-2xl text-gray-600 dark:text-gray-300 font-medium">
-      Qué alegría verte de nuevo. 🚀
+      Qué alegría verte de nuevo.
     </p>
   `;
 
@@ -4042,39 +4043,39 @@ function actualizarResumenBooklet() {
 
   let html = `
     <div class="flex justify-between items-center py-1 border-b border-amber-100">
-      <span class="text-gray-600">📄 Páginas del documento</span>
+      <span class="text-gray-600">${window.servigacoIcon('file-text')} Páginas del documento</span>
       <span class="font-bold text-gray-800">${datos.paginas} páginas</span>
     </div>
     <div class="flex justify-between items-center py-1 border-b border-amber-100">
-      <span class="text-gray-600">➗ Conversión a hojas físicas</span>
+      <span class="text-gray-600">${window.servigacoIcon('calculator')} Conversión a hojas físicas</span>
       <span class="font-bold text-gray-800">${datos.paginas} ÷ 2 = <strong class="text-blue-600">${datos.hojasFisicas} hojas</strong></span>
     </div>
     <div class="flex justify-between items-center py-1 border-b border-amber-100">
-      <span class="text-gray-600">🎨 Interior (${tipoTexto})</span>
+      <span class="text-gray-600">${window.servigacoIcon('palette')} Interior (${tipoTexto})</span>
       <span class="font-bold text-gray-800">${datos.hojasFisicas} × RD$${datos.precioHoja.toFixed(2)} = <strong>RD$${datos.costoInterior.toFixed(2)}</strong></span>
     </div>`;
 
   if (datos.tienePortada) {
     html += `
     <div class="flex justify-between items-center py-1 border-b border-amber-100">
-      <span class="text-gray-600">📋 Portada en cartonite</span>
+      <span class="text-gray-600">${window.servigacoIcon('file-text')} Portada en cartonite</span>
       <span class="font-bold text-orange-600">+ RD$${datos.costoPortada.toFixed(2)}</span>
     </div>`;
   } else {
     html += `
     <div class="flex justify-between items-center py-1 border-b border-amber-100">
-      <span class="text-gray-600">📋 Portada en cartonite</span>
+      <span class="text-gray-600">${window.servigacoIcon('file-text')} Portada en cartonite</span>
       <span class="text-gray-400 italic">Sin portada</span>
     </div>`;
   }
 
   html += `
     <div class="flex justify-between items-center py-1 border-b border-amber-100">
-      <span class="text-gray-600">💰 Costo por ejemplar</span>
+      <span class="text-gray-600">${window.servigacoIcon('currency-dollar')} Costo por ejemplar</span>
       <span class="font-bold text-gray-800">RD$${datos.costoEjemplar.toFixed(2)}</span>
     </div>
     <div class="flex justify-between items-center py-1">
-      <span class="text-gray-600">📚 Cantidad de ejemplares</span>
+      <span class="text-gray-600">${window.servigacoIcon('book-2')} Cantidad de ejemplares</span>
       <span class="font-bold text-gray-800">${datos.ejemplares} ejemplar(es)</span>
     </div>`;
 
@@ -4122,7 +4123,7 @@ function agregarBooklet() {
   descripcion += `\n[${desglose}]`;
 
   agregarACotizacion({
-    nombre: '📖 Booklet / Folleto',
+    nombre: 'Booklet / Folleto',
     descripcion: descripcion,
     cantidad: datos.ejemplares,
     precioUnitario: datos.costoEjemplar,
