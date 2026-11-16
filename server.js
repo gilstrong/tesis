@@ -127,28 +127,6 @@ app.get('/favicon.ico', (req, res) => {
     res.status(204).end();
 });
 
-app.get('/logo.png', (req, res) => {
-    res.sendFile(
-        path.join(__dirname, 'tesis', 'public', 'logo.png'),
-        { maxAge: '1d' }
-    );
-});
-
-app.get([
-    '/azulcielo.png',
-    '/beige.png',
-    '/bhd.jpg',
-    '/blanca.png',
-    '/morado.png',
-    '/popular.jpg',
-    '/banreservas.jpg'
-], (req, res) => {
-    res.sendFile(
-        path.join(__dirname, 'tesis', 'public', path.basename(req.path)),
-        { maxAge: '1d' }
-    );
-});
-
 // ------------------------
 // INDEX
 // ------------------------
