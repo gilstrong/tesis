@@ -385,7 +385,7 @@ app.use(express.static(
     {
         maxAge: '1d',
         setHeaders(res, filePath) {
-            if (path.extname(filePath).toLowerCase() === '.html') {
+            if (['.html', '.js', '.css'].includes(path.extname(filePath).toLowerCase())) {
                 res.setHeader('Cache-Control', 'no-cache');
             }
         }
