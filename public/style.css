@@ -1357,32 +1357,45 @@ servigaco-nav {
 }
 
 .nav-container {
-  display: flex;
+  display: grid;
+  grid-template-areas: "brand links actions";
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   padding: var(--spacing-md) var(--spacing-lg);
   gap: var(--spacing-lg);
 }
 
 /* Logo */
 .nav-brand {
+  grid-area: brand;
   display: flex;
   align-items: center;
+  justify-self: start;
 }
 
 .nav-logo {
-  height: 40px;
+  height: 44px;
   width: auto;
   object-fit: contain;
 }
 
 /* Links de navegación */
 .nav-links {
+  grid-area: links;
   display: flex;
   list-style: none;
-  gap: var(--spacing-sm);
+  justify-self: center;
+  gap: var(--spacing-md);
   margin: 0;
   padding: 0;
+}
+
+.nav-actions {
+  grid-area: actions;
+  display: flex;
+  align-items: center;
+  justify-self: end;
+  gap: var(--spacing-xs);
 }
 
 .nav-item {
@@ -1393,12 +1406,12 @@ servigaco-nav {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 0.875rem 1.125rem;
   border-radius: var(--radius-md);
   text-decoration: none;
   color: var(--text-secondary);
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 1rem;
   transition: all var(--transition-fast);
   white-space: nowrap;
 }
@@ -1492,7 +1505,7 @@ servigaco-nav {
    📱 RESPONSIVE - MOBILE
    ====================================== */
 
-@media (max-width: 640px) {
+@media (max-width: 920px) {
   servigaco-nav {
     min-height: 136px;
   }
@@ -1502,20 +1515,29 @@ servigaco-nav {
   }
 
   .nav-container {
-    flex-wrap: wrap;
+    grid-template-areas:
+      "brand actions"
+      "links links";
+    grid-template-columns: minmax(0, 1fr) auto;
     padding: var(--spacing-md);
+    gap: var(--spacing-sm) var(--spacing-md);
   }
 
   .nav-toggle {
     display: flex;
-    order: 3;
   }
 
   .nav-brand {
-    flex: 1;
+    justify-self: start;
+  }
+
+  .nav-actions {
+    gap: 0.25rem;
+    justify-self: end;
   }
 
   .nav-links {
+    justify-self: stretch;
     width: 100%;
     flex-direction: column;
     gap: var(--spacing-xs);
@@ -1523,7 +1545,6 @@ servigaco-nav {
     overflow: hidden;
     opacity: 0;
     transition: all var(--transition-normal);
-    order: 4;
   }
 
   .nav-links.active {

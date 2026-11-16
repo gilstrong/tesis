@@ -32,26 +32,28 @@ class ServiGacoNav extends HTMLElement {
             </li>
           </ul>
 
-          <!-- Botón Login/Logout (Seguridad) -->
-          <button id="btnAuthNav" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all" title="Acceso Empleados" aria-label="Acceso de empleados">
-            <span id="iconAuth"><i class="ti ti-lock-open" aria-hidden="true"></i></span>
-          </button>
+          <div class="nav-actions">
+            <!-- Botón Login/Logout (Seguridad) -->
+            <button id="btnAuthNav" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all" title="Acceso Empleados" aria-label="Acceso de empleados">
+              <span id="iconAuth"><i class="ti ti-lock-open" aria-hidden="true"></i></span>
+            </button>
 
-          <!-- Botón Configuración -->
-          <button id="btnSettings" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all" title="Configuración" aria-label="Configuración">
-            <i class="ti ti-settings text-lg" aria-hidden="true"></i>
-          </button>
+            <!-- Botón Configuración -->
+            <button id="btnSettings" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all" title="Configuración" aria-label="Configuración">
+              <i class="ti ti-settings text-lg" aria-hidden="true"></i>
+            </button>
 
-          <!-- Botón Dark Mode -->
-          <button id="theme-toggle" type="button" aria-label="Cambiar tema" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 mr-2 transition-all duration-300">
-            <i id="theme-toggle-dark-icon" class="ti ti-moon text-xl hidden" aria-hidden="true"></i>
-            <i id="theme-toggle-light-icon" class="ti ti-sun text-xl hidden" aria-hidden="true"></i>
-          </button>
+            <!-- Botón Dark Mode -->
+            <button id="theme-toggle" type="button" aria-label="Cambiar tema" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 mr-2 transition-all duration-300">
+              <i id="theme-toggle-dark-icon" class="ti ti-moon text-xl hidden" aria-hidden="true"></i>
+              <i id="theme-toggle-light-icon" class="ti ti-sun text-xl hidden" aria-hidden="true"></i>
+            </button>
 
-          <!-- Botón móvil (hamburguesa) -->
-          <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
-            <span class="hamburger"></span>
-          </button>
+            <!-- Botón móvil (hamburguesa) -->
+            <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+              <span class="hamburger"></span>
+            </button>
+          </div>
         </div>
       </nav>
     `;
