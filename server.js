@@ -2,9 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const https = require('https');
+const crypto = require('crypto');
 const { GoogleGenAI } = require('@google/genai');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const { DEFAULTS: DEFAULT_PRICE_CATALOG, buildCatalog, validate: validatePriceCatalog } = require('./public/pricing-config');
 
 // Inicialización consolidada y robusta de Firebase Admin SDK
 const { admin, db } = require('./config/firebase');
@@ -28,6 +31,9 @@ const ai = new GoogleGenAI({
 
 const responseCache = new Map();
 const MAX_CACHE_SIZE = 50;
+const PRICE_CACHE_MS = 5000;
+let cachedPriceCatalog = null;
+let cachedPriceCatalogAt = 0;
 
 // Diccionario de respuestas rápidas para ahorrar API
 const STATIC_RESPONSES = {
@@ -61,17 +67,15 @@ CAPACIDAD OPERATIVA:
 - Puedes recibir análisis de PDFs (páginas, color, b/n).
 - Si el PDF tiene muchas páginas (ej. > 50) o el usuario dice "tesis", asume que es una tesis.
 
-TABLA DE PRECIOS:
-IMPRESIÓN B/N (carta): 1-50 págs = RD$2.50/pág | 51-200 = RD$2.00 | 201+ = RD$1.75
-IMPRESIÓN COLOR (carta): 1-50 = RD$15 | 51-200 = RD$10 | 201+ = RD$8
-ENCUADERNADO ESPIRAL: 1-100 págs = RD$60 | 101-160 = RD$70 | 161-220 = RD$80 | 221-300 = RD$100 | 301-400 = RD$150 | 401-500 = RD$200 | 501+ = RD$250
-EMPASTADO TAPA DURA: colores estándar = RD$500 | blanco/beige = RD$600
-PAPEL HILO (tesis): +RD$1.00 extra por página sobre precio base
-PAPEL SATINADO: +RD$2.00 extra por página
-CD ROTULADO: RD$150
-ROTULACIÓN DE LOMO: RD$50
-PLASTIFICADO: RD$25/hoja carta | RD$40/hoja tabloide
-PLOTEO: Cartonite RD$80/pie² | Fotográfico RD$160/pie² | Lona RD$100/pie² | Canvas RD$300/pie²
+PRECIOS:
+- Consulta exclusivamente el catálogo dinámico de precios incluido en la petición.
+- No uses precios memorizados, fijos ni calculados desde una tabla anterior.
+- En impresión, busca el precio unitario del rango que corresponda a la cantidad y multiplícalo por las páginas.
+- En tesis tamaño legal con papel hilo, suma al precio base el recargo configurado para B/N o color; aplica los precios especiales ITLA solo cuando corresponda.
+- En Booklet, calcula las hojas físicas como páginas ÷ 2 redondeadas hacia arriba; suma portada solo si el cliente la solicita y multiplica por ejemplares.
+- En ploteo personalizado, calcula pies cuadrados como ancho en pulgadas × alto en pulgadas ÷ 144 y usa la tarifa por pie cuadrado del material.
+- Aplica el múltiplo de redondeo configurado al total de tesis.
+- Si faltan datos para calcular, pregunta solo lo esencial y no inventes valores.
 
 REGLAS:
 - Responde siempre en español dominicano, informal y directo.
@@ -80,6 +84,67 @@ REGLAS:
 - Nunca inventes precios que no estén en la tabla.
 - Sé breve. Máximo 3-4 líneas de respuesta.
 - Si te preguntan algo que no es de impresión, redirige amablemente.`;
+
+function fetchRealtimeJson(nodePath) {
+    const databaseUrl = (process.env.FIREBASE_DATABASE_URL || 'https://servigaco-default-rtdb.firebaseio.com').replace(/\/+$/, '');
+    const url = `${databaseUrl}/${nodePath}.json`;
+    return new Promise((resolve, reject) => {
+        const request = https.get(url, { timeout: 5000 }, response => {
+            let body = '';
+            response.setEncoding('utf8');
+            response.on('data', chunk => {
+                body += chunk;
+                if (body.length > 200000) request.destroy(new Error('Respuesta de precios demasiado grande.'));
+            });
+            response.on('end', () => {
+                if (response.statusCode < 200 || response.statusCode >= 300) {
+                    reject(new Error(`Firebase respondió HTTP ${response.statusCode}.`));
+                    return;
+                }
+                try {
+                    resolve(JSON.parse(body));
+                } catch (error) {
+                    reject(new Error(`Firebase devolvió JSON inválido: ${error.message}`));
+                }
+            });
+        });
+        request.on('timeout', () => request.destroy(new Error('Tiempo agotado al leer los precios de Firebase.')));
+        request.on('error', reject);
+    });
+}
+
+async function cargarCatalogoPreciosIA() {
+    if (cachedPriceCatalog && Date.now() - cachedPriceCatalogAt < PRICE_CACHE_MS) {
+        return cachedPriceCatalog;
+    }
+
+    const [central, legacy] = await Promise.allSettled([
+        fetchRealtimeJson('config/precios_app'),
+        fetchRealtimeJson('config/precios_booklet')
+    ]);
+    const centralData = central.status === 'fulfilled' ? central.value : null;
+    const legacyData = legacy.status === 'fulfilled' ? legacy.value : null;
+
+    if (central.status === 'rejected' && legacy.status === 'rejected') {
+        console.error('[Chat IA] No se pudo leer el catálogo remoto; se usarán los valores iniciales compartidos.', {
+            central: central.reason.message,
+            legacy: legacy.reason.message
+        });
+    } else if (central.status === 'rejected') {
+        console.error('[Chat IA] No se pudo leer config/precios_app:', central.reason);
+    } else if (legacy.status === 'rejected') {
+        console.error('[Chat IA] No se pudo leer config/precios_booklet:', legacy.reason);
+    }
+
+    const catalog = buildCatalog(centralData, legacyData);
+    const validationErrors = validatePriceCatalog(catalog);
+    if (validationErrors.length) {
+        console.error('[Chat IA] Catálogo remoto inválido; se usarán los valores iniciales compartidos:', validationErrors);
+    }
+    cachedPriceCatalog = validationErrors.length ? DEFAULT_PRICE_CATALOG : catalog;
+    cachedPriceCatalogAt = Date.now();
+    return cachedPriceCatalog;
+}
 
 // ------------------------
 // MULTER
@@ -186,8 +251,11 @@ app.post('/chat-ia', async (req, res) => {
             return res.json({ reply: trivial });
         }
 
+        const priceCatalog = await cargarCatalogoPreciosIA();
+        const priceVersion = crypto.createHash('sha256').update(JSON.stringify(priceCatalog)).digest('hex');
+
         // 2. CACHÉ DE RESPUESTAS (Para preguntas idénticas sin historial)
-        const cacheKey = mensaje.toLowerCase().trim();
+        const cacheKey = `${mensaje.toLowerCase().trim()}:${priceVersion}`;
         if (history.length === 0 && responseCache.has(cacheKey)) {
             console.log('⚡ [CACHÉ] Respuesta servida desde memoria local.');
             return res.json({ reply: responseCache.get(cacheKey) });
@@ -207,6 +275,9 @@ app.post('/chat-ia', async (req, res) => {
         // Construcción del prompt unificado
         const prompt = `
 ${SYSTEM}
+
+CATÁLOGO ACTUAL DE PRECIOS (JSON):
+${JSON.stringify(priceCatalog)}
 
 HISTORIAL:
 ${historialTexto}

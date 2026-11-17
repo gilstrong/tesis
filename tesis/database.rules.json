@@ -2,32 +2,57 @@
   "rules": {
     ".read": false,
     ".write": false,
-    "maestro_contribuyentes": {
-      ".read": true,
-      ".write": false,
-      ".indexOn": ["n"]
-    },
-    "facturas": {
-      ".read": true,
-      ".write": true,
-      ".indexOn": ["fecha_facturacion", "ncf", "rnc_cliente"]
+    "config": {
+      "precios_app": {
+        ".read": true,
+        ".write": "auth != null && auth.token.admin === true"
+      },
+      "precios_booklet": {
+        ".read": true,
+        ".write": "auth != null && auth.token.admin === true"
+      }
     },
     "cotizaciones": {
       ".read": true,
       ".write": true,
-      ".indexOn": ["timestamp", "nombre"]
+      ".indexOn": ["tipo", "timestamp"],
+      "$cotizacionId": {
+        ".validate": "newData.hasChildren(['total', 'fecha']) && newData.child('total').isString()"
+      }
+    },
+    "facturas": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".indexOn": ["fecha_facturacion", "ncf", "rnc_cliente"],
+      "$facturaId": {
+        ".validate": "newData.exists()"
+      }
     },
     "secuencias_ncf": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "maestro_contribuyentes": {
       ".read": true,
-      ".write": true
+      ".write": "auth != null && auth.token.email == 'admin@servigaco.com'",
+      ".indexOn": ["n"]
     },
     "ventas_log": {
-      ".read": true,
-      ".write": true
+      ".read": "auth != null",
+      ".write": "auth != null"
     },
     "diagnostico": {
       ".read": true,
-      ".write": true
+      ".write": false
+    },
+    "combos": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "analisis_pdf": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["fecha", "timestamp"]
     }
   }
 }

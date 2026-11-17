@@ -2089,6 +2089,7 @@
   <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
   <!-- COMPONENTES Y LÓGICA PRINCIPAL -->
+  <script defer src="pricing-config.js"></script>
   <script defer src="scriptgeneral.js"></script>
   <script defer src="components.js"></script>
   <!-- 📦 Notion Sync — cliente frontend para sincronización con Notion -->
@@ -3592,100 +3593,6 @@
     </div>
   </div>
 
-  <!-- ========================================
-       ⚙️ BOTÓN FLOTANTE: ADMIN PRECIOS BOOKLET
-       Visible SOLO para administradores autenticados
-       ======================================== -->
-  <button id="btnAdminPreciosBooklet" class="btn-admin-precios" onclick="abrirModalAdminPreciosBooklet()" style="display:none;" title="Configurar precios de Booklet">
-    <i class="ti ti-settings" aria-hidden="true"></i> Precios Booklet
-  </button>
-
-  <!-- ========================================
-       ⚙️ MODAL: ADMINISTRACIÓN DE PRECIOS BOOKLET / LIBRO
-       ======================================== -->
-  <div id="modalAdminPreciosBooklet" class="modal-precios" role="dialog" aria-modal="true" aria-labelledby="modalAdminPreciosTitle">
-    <div class="modal-precios-content">
-
-      <!-- Header -->
-      <div class="modal-precios-header">
-        <h2 id="modalAdminPreciosTitle" style="color:white; font-size:1.1rem; font-weight:800; display:flex; align-items:center; gap:8px;">
-          <i class="ti ti-settings" aria-hidden="true"></i> Configurar Precios — Booklet / Libro
-        </h2>
-        <button class="btn-cerrar-modal" onclick="cerrarModalAdminPreciosBooklet()" aria-label="Cerrar"><i class="ti ti-x" aria-hidden="true"></i></button>
-      </div>
-
-      <!-- Body -->
-      <div class="modal-precios-body">
-
-        <p style="font-size:0.85rem; color:#64748b; margin-bottom:1.5rem; background:#f0f9ff; padding:10px 14px; border-radius:10px; border:1px solid #bae6fd;">
-          <i class="ti ti-bulb" aria-hidden="true"></i> Los cambios se guardan en Firebase y se aplican automáticamente al calculador sin recargar la página.
-        </p>
-
-        <!-- Sección: Precios Booklet -->
-        <div style="margin-bottom:1.5rem;">
-          <h3 style="font-size:1rem; font-weight:800; color:#1e293b; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:2px solid #e2e8f0; display:flex; align-items:center; gap:8px;">
-            <i class="ti ti-book" aria-hidden="true"></i> Precios para Booklet / Folleto
-          </h3>
-
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-
-            <!-- Precio hoja Bond B/N -->
-            <div>
-              <label style="display:block; font-size:0.8rem; font-weight:700; color:#374151; margin-bottom:6px;">
-                <i class="ti ti-contrast-2" aria-hidden="true"></i> Precio por hoja Bond B/N
-              </label>
-              <div style="display:flex; align-items:center; gap:6px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:8px 12px;">
-                <span style="font-size:0.8rem; font-weight:700; color:#6b7280;">RD$</span>
-                <input type="number" id="adminBookletBondBN" step="0.50" min="0" value="2.50"
-                  style="flex:1; background:transparent; border:none; outline:none; font-size:1rem; font-weight:700; color:#1e293b;" placeholder="2.50">
-              </div>
-              <small style="font-size:0.7rem; color:#94a3b8; margin-top:4px; display:block;">Precio por hoja física impresa en B/N</small>
-            </div>
-
-            <!-- Precio hoja Bond Color -->
-            <div>
-              <label style="display:block; font-size:0.8rem; font-weight:700; color:#374151; margin-bottom:6px;">
-                <i class="ti ti-palette" aria-hidden="true"></i> Precio por hoja Bond Color
-              </label>
-              <div style="display:flex; align-items:center; gap:6px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:8px 12px;">
-                <span style="font-size:0.8rem; font-weight:700; color:#6b7280;">RD$</span>
-                <input type="number" id="adminBookletBondColor" step="0.50" min="0" value="15.00"
-                  style="flex:1; background:transparent; border:none; outline:none; font-size:1rem; font-weight:700; color:#1e293b;" placeholder="15.00">
-              </div>
-              <small style="font-size:0.7rem; color:#94a3b8; margin-top:4px; display:block;">Precio por hoja física impresa en color</small>
-            </div>
-
-            <!-- Precio portada cartonite -->
-            <div style="grid-column:1 / -1;">
-              <label style="display:block; font-size:0.8rem; font-weight:700; color:#374151; margin-bottom:6px;">
-                <i class="ti ti-clipboard-list" aria-hidden="true"></i> Precio portada en Cartonite
-              </label>
-              <div style="display:flex; align-items:center; gap:6px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:8px 12px;">
-                <span style="font-size:0.8rem; font-weight:700; color:#6b7280;">RD$</span>
-                <input type="number" id="adminBookletCartonite" step="5" min="0" value="150"
-                  style="flex:1; background:transparent; border:none; outline:none; font-size:1rem; font-weight:700; color:#1e293b;" placeholder="150">
-              </div>
-              <small style="font-size:0.7rem; color:#94a3b8; margin-top:4px; display:block;">Se agrega al costo del booklet cuando el cliente elige portada en cartonite</small>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Botón guardar -->
-        <button onclick="guardarPreciosBooklet()"
-          style="width:100%; padding:14px; background:linear-gradient(135deg,#2563eb,#1d4ed8); color:white; border:none; border-radius:12px; font-size:1rem; font-weight:800; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px;">
-          <i class="ti ti-device-floppy" aria-hidden="true"></i> Guardar Precios en Firebase
-        </button>
-
-      </div>
-
-      <!-- Footer -->
-      <div class="modal-precios-footer">
-        <p style="font-size:0.75rem; color:#94a3b8;">Los cambios son inmediatos y permanentes. Solo administradores pueden modificar estos precios.</p>
-      </div>
-
-    </div>
-  </div>
   <script defer src="tracker.js"></script>
 </body>
 </html>

@@ -50,103 +50,40 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================
 
 // IMPRESIONES B/N (Blanco y Negro)
-const preciosBN = {
-  'carta': [
-    { min: 1, max: 50, precio: 2.50 },
-    { min: 51, max: Infinity, precio: 2.00 }
-  ],
-  'legal': [
-    { min: 1, max: 50, precio: 10.00 },
-    { min: 51, max: 200, precio: 8.00 },
-    { min: 201, max: Infinity, precio: 6.00 }
-  ],
-  'tabloide': [
-    { min: 1, max: 50, precio: 20.00 },
-    { min: 51, max: 200, precio: 15.00 },
-    { min: 201, max: Infinity, precio: 10.00 }
-  ]
+let preciosBN = window.ServigacoPricing.get().general.impresion.bn;
+let preciosColor = window.ServigacoPricing.get().general.impresion.color;
+let preciosFullColor = window.ServigacoPricing.get().general.impresion.fullColor;
+let preciosEspeciales = window.ServigacoPricing.get().general.impresion.especiales;
+let preciosEncuadernado = window.ServigacoPricing.get().general.encuadernado;
+let preciosEmpastado = {
+  'Tapa Dura': window.ServigacoPricing.get().general.empastado.tapaDura,
+  'Tapa Blanda': window.ServigacoPricing.get().general.empastado.tapaBlanda
 };
+let preciosPlastificado = window.ServigacoPricing.get().general.plastificado;
+let preciosPloteo = window.ServigacoPricing.get().general.ploteo;
 
-// IMPRESIONES COLOR (papel bond)
-const preciosColor = {
-  'carta': [
-    { min: 1, max: 50, precio: 15.00 },
-    { min: 51, max: 200, precio: 10.00 },
-    { min: 201, max: Infinity, precio: 8.00 }
-  ],
-  'legal': [
-    { min: 1, max: 50, precio: 30.00 },
-    { min: 51, max: 200, precio: 25.00 },
-    { min: 201, max: Infinity, precio: 20.00 }
-  ],
-  'tabloide': [
-    { min: 1, max: 50, precio: 40.00 },
-    { min: 51, max: 200, precio: 35.00 },
-    { min: 201, max: Infinity, precio: 30.00 }
-  ]
-};
+function aplicarCatalogoPreciosGeneral(catalog) {
+  const prices = catalog.general;
+  preciosBN = prices.impresion.bn;
+  preciosColor = prices.impresion.color;
+  preciosFullColor = prices.impresion.fullColor;
+  preciosEspeciales = prices.impresion.especiales;
+  preciosEncuadernado = prices.encuadernado;
+  preciosEmpastado = {
+    'Tapa Dura': prices.empastado.tapaDura,
+    'Tapa Blanda': prices.empastado.tapaBlanda
+  };
+  preciosPlastificado = prices.plastificado;
+  preciosPloteo = prices.ploteo;
+  preciosBooklet = catalog.booklet;
 
-// IMPRESIONES FULL COLOR (papel bond)
-const preciosFullColor = {
-  'carta': [
-    { min: 1, max: 50, precio: 20.00 },
-    { min: 51, max: 200, precio: 18.00 },
-    { min: 201, max: Infinity, precio: 15.00 }
-  ],
-  'legal': [
-    { min: 1, max: 50, precio: 35.00 },
-    { min: 51, max: 200, precio: 30.00 },
-    { min: 201, max: Infinity, precio: 25.00 }
-  ],
-  'tabloide': [
-    { min: 1, max: 50, precio: 60.00 },
-    { min: 51, max: 200, precio: 50.00 },
-    { min: 201, max: Infinity, precio: 40.00 }
-  ]
-};
-
-// IMPRESIONES EN CARTONITE, SATINADO Y ADHESIVO
-const preciosEspeciales = {
-  'carta': [
-    { min: 1, max: 50, precio: 35.00 },
-    { min: 51, max: 200, precio: 30.00 },
-    { min: 201, max: Infinity, precio: 25.00 }
-  ],
-  'legal': [
-    { min: 1, max: 50, precio: 45.00 },
-    { min: 51, max: 200, precio: 40.00 },
-    { min: 201, max: Infinity, precio: 35.00 }
-  ],
-  'tabloide': [
-    { min: 1, max: 50, precio: 70.00 },
-    { min: 51, max: 200, precio: 60.00 },
-    { min: 201, max: Infinity, precio: 50.00 }
-  ]
-};
-
-// Encuadernado Espiral (precio por encuadernado según páginas)
-const preciosEncuadernado = [
-  { min: 1, max: 50, precio: 60 },
-  { min: 51, max: 80, precio: 70 },
-  { min: 81, max: 100, precio: 100 },
-  { min: 101, max: 150, precio: 120 },
-  { min: 151, max: 200, precio: 150 },
-  { min: 201, max: Infinity, precio: 250 }
-];
-
-// Empastado (precio por unidad)
-const preciosEmpastado = {
-  'Tapa Dura': { carta: 500, legal: 800, tabloide: 1000 },
-  'Tapa Blanda': { carta: 350 }
-};
-
-// Plastificado (precio base por tamaño)
-const preciosPlastificado = {
-  cedula: 30,
-  carta: 40,
-  legal: 50,
-  tabloide: 60
-};
+  if (typeof inicializarPreciosBooklet === 'function') {
+    actualizarEtiquetasPreciosBooklet();
+    actualizarResumenBooklet();
+  }
+  recalcularResumenesPrecioTiempoReal();
+  if (cotizacion.length && !idCotizacionActiva) recalcularCotizacionConCatalogo();
+}
 
 // ============================================
 // 🧮 FUNCIONES DE CÁLCULO
@@ -175,7 +112,7 @@ function calcularPrecioImpresion(cantidad, tipo, tamano) {
   if (!tablaPrecios) return 0;
   
   // Buscar el rango correspondiente
-  const rango = tablaPrecios.find(r => cantidad >= r.min && cantidad <= r.max);
+  const rango = tablaPrecios.find(r => cantidad >= r.min && (r.max === null || cantidad <= r.max));
   
   if (!rango) return 0;
   
@@ -184,7 +121,7 @@ function calcularPrecioImpresion(cantidad, tipo, tamano) {
 }
 
 function calcularPrecioEncuadernado(paginas) {
-  const rango = preciosEncuadernado.find(r => paginas >= r.min && paginas <= r.max);
+  const rango = preciosEncuadernado.find(r => paginas >= r.min && (r.max === null || paginas <= r.max));
   return rango ? rango.precio : 0;
 }
 
@@ -193,66 +130,32 @@ function calcularPrecioEmpastado(tipo, tamano) {
 }
 
 function calcularPrecioPloteo(tipo, tamano, cantidad, anchoCustom = 0, altoCustom = 0) {
-  // Precios Bond Full Color (precio completo)
-  const preciosBondFullColor = {
-    '17x22': 150,
-    '18x24': 150,
-    '24x36': 360
-  };
-  
-  // Precios Bond Color Normal (mitad del full color)
-  const preciosBondColor = {
-    '17x22': 75,
-    '18x24': 75,
-    '24x36': 180
-  };
-  
-  // Precios Bond B/N
-  const preciosBondBN = {
-    '17x22': 50,
-    '18x24': 50,
-    '24x36': 90
-  };
-  
-  const preciosBondPorPie = {
-    bond_bn: 15,
-    bond_color: 25,
-    bond_full_color: 60
-  };
-
-  // Precios por pie cuadrado
-  const preciosPorPie = {
-    'cartonite': 80,
-    'fotografico': 160,
-    'lona': 100,
-    'cintra': 250,
-    'canvas': 300
-  };
+  const { bondFullColor, bondColor, bondBN, bondPorPie, porPie, fallbackPorPie } = preciosPloteo;
   
   // Si es tamaño personalizado
   if (tamano === 'custom') {
     const pulgadasCuadradas = anchoCustom * altoCustom;
     const piesCuadrados = pulgadasCuadradas / 144;
-    const precioPorPie = preciosBondPorPie[tipo] ?? preciosPorPie[tipo];
+    const precioPorPie = bondPorPie[tipo] ?? porPie[tipo];
     if (precioPorPie === undefined) return 0;
     return piesCuadrados * precioPorPie * cantidad;
   }
   
   // Si es Bond B/N
   if (tipo === 'bond_bn') {
-    const precioUnitario = preciosBondBN[tamano] || 0;
+    const precioUnitario = bondBN[tamano] || 0;
     return precioUnitario * cantidad;
   }
   
   // Si es Bond Color
   if (tipo === 'bond_color') {
-    const precioUnitario = preciosBondColor[tamano] || 0;
+    const precioUnitario = bondColor[tamano] || 0;
     return precioUnitario * cantidad;
   }
   
   // Si es Bond Full Color
   if (tipo === 'bond_full_color') {
-    const precioUnitario = preciosBondFullColor[tamano] || 0;
+    const precioUnitario = bondFullColor[tamano] || 0;
     return precioUnitario * cantidad;
   }
   
@@ -260,7 +163,7 @@ function calcularPrecioPloteo(tipo, tamano, cantidad, anchoCustom = 0, altoCusto
   const [ancho, alto] = tamano.split('x').map(Number);
   const pulgadasCuadradas = ancho * alto;
   const piesCuadrados = pulgadasCuadradas / 144;
-  const precioPorPie = preciosPorPie[tipo] || 100;
+  const precioPorPie = porPie[tipo] ?? fallbackPorPie;
   
   return piesCuadrados * precioPorPie * cantidad;
 }
@@ -313,6 +216,65 @@ function calcularCostosLibro({ paginasBN, paginasColor, paginasFullColor, tamano
     costoPorLibro,
     costoTotal: costoPorLibro * juegos
   };
+}
+
+function recalcularResumenesPrecioTiempoReal() {
+  [
+    calcularPrecioImpresionTiempoReal,
+    calcularPrecioEncuadernadoTiempoReal,
+    calcularPrecioEmpastadoTiempoReal,
+    calcularPrecioPloteoTiempoReal,
+    calcularPrecioPlastificadoTiempoReal,
+    actualizarResumenLibro,
+    actualizarResumenBooklet
+  ].forEach(update => {
+    if (typeof update === 'function') update();
+  });
+}
+
+function recalcularCotizacionConCatalogo() {
+  if (idCotizacionActiva) return;
+
+  cotizacion.forEach(item => {
+    const data = item.datosPrecio;
+    if (!data) return;
+
+    if (data.tipo === 'impresion') {
+      const precioUnitario = data.precioManual > 0
+        ? item.precioUnitario
+        : calcularPrecioImpresion(item.cantidad, data.tipoImpresion, data.tamano) / item.cantidad;
+      item.precioUnitario = precioUnitario;
+      item.precio = precioUnitario * item.cantidad;
+    } else if (data.tipo === 'libro') {
+      const costos = calcularCostosLibro(data);
+      item.precioUnitario = costos.costoPorLibro;
+      item.precio = costos.costoTotal;
+      item.descripcion = construirDescripcionLibro(data, costos);
+    } else if (data.tipo === 'encuadernado') {
+      const unitario = data.precioManual > 0 ? item.precioUnitario : calcularPrecioEncuadernado(data.paginas);
+      item.precioUnitario = unitario;
+      item.precio = unitario * item.cantidad;
+    } else if (data.tipo === 'empastado') {
+      const unitario = data.precioManual > 0
+        ? item.precioUnitario
+        : calcularPrecioEmpastado(data.tipoEmpastado, data.tamano);
+      item.precioUnitario = unitario;
+      item.precio = unitario * item.cantidad;
+    } else if (data.tipo === 'ploteo') {
+      const unitario = data.precioManual > 0
+        ? item.precioUnitario
+        : data.tipoTam === 'personalizado'
+          ? calcularPrecioPloteo(data.tipoPloteo, 'custom', 1, data.ancho, data.alto)
+          : calcularPrecioPloteo(data.tipoPloteo, data.tamano, 1);
+      item.precioUnitario = unitario;
+      item.precio = unitario * item.cantidad;
+    } else if (data.tipo === 'plastificado') {
+      const unitario = data.precioManual > 0 ? item.precioUnitario : preciosPlastificado[data.tamano] || 0;
+      item.precioUnitario = unitario;
+      item.precio = unitario * item.cantidad;
+    }
+  });
+  actualizarCotizacion();
 }
 
 function construirDescripcionLibro(datos, costos) {
@@ -728,7 +690,8 @@ function agregarEncuadernado() {
     descripcion: `${cant} encuadernado(s) de ${pag} páginas`, 
     cantidad: cant,
     precioUnitario: precioUnitario,
-    precio: precioTotal 
+    precio: precioTotal,
+    datosPrecio: { tipo: 'encuadernado', paginas: pag, precioManual: manual }
   });
   limpiarFormulario('formEncuadernado');
 }
@@ -772,7 +735,8 @@ function agregarEmpastado() {
     descripcion: `${cant} empastado(s) ${tamanoTexto}`, 
     cantidad: cant,
     precioUnitario: precioUnitario,
-    precio: precioTotal 
+    precio: precioTotal,
+    datosPrecio: { tipo: 'empastado', tipoEmpastado: tipo, tamano: tam, precioManual: manual }
   });
   limpiarFormulario('formEmpastado');
 }
@@ -834,7 +798,8 @@ function agregarPloteo() {
     descripcion: desc,
     cantidad: cant,
     precioUnitario: precioUnitario,
-    precio: precio
+    precio: precio,
+    datosPrecio: { tipo: 'ploteo', tipoPloteo, tipoTam, tamano: tam, ancho, alto, precioManual: manual }
   });
   limpiarFormulario('formPloteo');
 }
@@ -874,7 +839,14 @@ function agregarPlastificado() {
     precioTotal = calcularPrecioPlastificado(tam, corte, cant, piezas);
   }
 
-  agregarACotizacion({ nombre: 'Plastificado', descripcion: desc, cantidad: corte ? cant * piezas : cant, precioUnitario: corte ? precioTotal / (cant * piezas) : precioTotal / cant, precio: precioTotal });
+  agregarACotizacion({
+    nombre: 'Plastificado',
+    descripcion: desc,
+    cantidad: corte ? cant * piezas : cant,
+    precioUnitario: corte ? precioTotal / (cant * piezas) : precioTotal / cant,
+    precio: precioTotal,
+    datosPrecio: { tipo: 'plastificado', tamano: tam, llevaCorte: corte, cantidadHojas: cant, piezas, precioManual: manual }
+  });
   limpiarFormulario('formPlastificado');
 }
 
@@ -3938,31 +3910,19 @@ function calcularHojas() {
 
 /**
  * Precios del booklet con valores por defecto.
- * Se sobrescriben en tiempo real desde Firebase (config/precios_booklet).
+ * Se actualizan en tiempo real desde el catálogo compartido.
  */
-let preciosBooklet = {
-  bondBN: 2.50,       // Precio por hoja física en Blanco y Negro
-  bondColor: 15.00,   // Precio por hoja física en Color
-  cartonite: 150.00   // Precio de la portada en cartonite
-};
+let preciosBooklet = window.ServigacoPricing.get().booklet;
+window.ServigacoPricing.onChange(aplicarCatalogoPreciosGeneral);
 
 /**
  * Carga y escucha en tiempo real los precios del booklet desde Firebase.
  * Si el nodo no existe, se usan los valores por defecto definidos arriba.
  */
 function inicializarPreciosBooklet() {
-  db.ref('config/precios_booklet').on('value', (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-      preciosBooklet.bondBN     = parseFloat(data.bondBN)    || 2.50;
-      preciosBooklet.bondColor  = parseFloat(data.bondColor) || 15.00;
-      preciosBooklet.cartonite  = parseFloat(data.cartonite) || 150.00;
-    }
-    // Actualizar etiquetas de precios en el formulario
-    actualizarEtiquetasPreciosBooklet();
-    // Recalcular resumen si el form está visible
-    actualizarResumenBooklet();
-  });
+  preciosBooklet = window.ServigacoPricing.get().booklet;
+  actualizarEtiquetasPreciosBooklet();
+  actualizarResumenBooklet();
 }
 
 /**
@@ -4136,73 +4096,6 @@ function agregarBooklet() {
   if (resumenDiv) resumenDiv.style.display = 'none';
 }
 
-// ============================================
-// ⚙️ ADMINISTRACIÓN DE PRECIOS BOOKLET
-// ============================================
-
-/**
- * Abre el modal de administración de precios del booklet.
- * Solo accesible para usuarios autenticados con Firebase Auth.
- */
-function abrirModalAdminPreciosBooklet() {
-  if (!verificarPermisoAdmin()) return;
-
-  const modal = document.getElementById('modalAdminPreciosBooklet');
-  if (!modal) return;
-
-  // Rellenar los campos con los valores actuales
-  const inputBN        = document.getElementById('adminBookletBondBN');
-  const inputColor     = document.getElementById('adminBookletBondColor');
-  const inputCartonite = document.getElementById('adminBookletCartonite');
-
-  if (inputBN)        inputBN.value        = preciosBooklet.bondBN;
-  if (inputColor)     inputColor.value     = preciosBooklet.bondColor;
-  if (inputCartonite) inputCartonite.value = preciosBooklet.cartonite;
-
-  modal.classList.add('show');
-}
-
-/**
- * Cierra el modal de administración de precios del booklet.
- */
-function cerrarModalAdminPreciosBooklet() {
-  const modal = document.getElementById('modalAdminPreciosBooklet');
-  if (modal) modal.classList.remove('show');
-}
-
-/**
- * Guarda los precios del booklet en Firebase.
- * Los cambios se propagan automáticamente gracias al listener 'on value'.
- */
-async function guardarPreciosBooklet() {
-  if (!verificarPermisoAdmin()) return;
-
-  const bondBN     = parseFloat(document.getElementById('adminBookletBondBN')?.value);
-  const bondColor  = parseFloat(document.getElementById('adminBookletBondColor')?.value);
-  const cartonite  = parseFloat(document.getElementById('adminBookletCartonite')?.value);
-
-  if (isNaN(bondBN) || isNaN(bondColor) || isNaN(cartonite) ||
-      bondBN < 0    || bondColor < 0    || cartonite < 0) {
-    mostrarNotificacion('❌ Los precios deben ser números válidos y positivos', 'error');
-    return;
-  }
-
-  try {
-    await db.ref('config/precios_booklet').set({
-      bondBN:         bondBN,
-      bondColor:      bondColor,
-      cartonite:      cartonite,
-      actualizadoPor: auth.currentUser?.email || 'admin',
-      actualizadoEn:  firebase.database.ServerValue.TIMESTAMP
-    });
-    mostrarNotificacion('✅ Precios guardados correctamente', 'success');
-    cerrarModalAdminPreciosBooklet();
-  } catch (error) {
-    console.error('Error al guardar precios booklet:', error);
-    mostrarNotificacion('❌ Error al guardar. Intenta de nuevo.', 'error');
-  }
-}
-
 /**
  * Inicializa los event listeners del formulario del booklet para el resumen en tiempo real.
  */
@@ -4226,13 +4119,6 @@ function inicializarEventListenersBooklet() {
     radio.addEventListener('change', actualizarResumenBooklet);
   });
 
-  // Cerrar modal de admin al hacer clic fuera del contenido
-  const modalAdmin = document.getElementById('modalAdminPreciosBooklet');
-  if (modalAdmin) {
-    modalAdmin.addEventListener('click', (e) => {
-      if (e.target === modalAdmin) cerrarModalAdminPreciosBooklet();
-    });
-  }
 }
 
 

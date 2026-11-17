@@ -321,67 +321,67 @@
                 <tr>
                   <td data-label="Concepto">Bond</td>
                   <td data-label="Detalle">B/N</td>
-                  <td data-label="Precio">$6 / pág.</td>
+                  <td id="tesisTableBondBN" data-label="Precio">$6 / pág.</td>
                 </tr>
                 <tr>
                   <td data-label="Concepto">Bond</td>
                   <td data-label="Detalle">Color</td>
-                  <td data-label="Precio">$12 / pág.</td>
+                  <td id="tesisTableBondColor" data-label="Precio">$12 / pág.</td>
                 </tr>
 
                 <!-- Papel Hilo -->
                 <tr>
                   <td data-label="Concepto">Hilo</td>
                   <td data-label="Detalle">B/N</td>
-                  <td data-label="Precio">$8 / pág.</td>
+                  <td id="tesisTableHiloBN" data-label="Precio">$8 / pág.</td>
                 </tr>
                 <tr>
                   <td data-label="Concepto">Hilo</td>
                   <td data-label="Detalle">Color</td>
-                  <td data-label="Precio">$15 / pág.</td>
+                  <td id="tesisTableHiloColor" data-label="Precio">$15 / pág.</td>
                 </tr>
 
                 <!-- Papel Satinado -->
                 <tr>
                   <td data-label="Concepto">Satinado (Carta)</td>
                   <td data-label="Detalle">B/N o Color</td>
-                  <td data-label="Precio">$25 / pág.</td>
+                  <td id="tesisTableSatinadoCarta" data-label="Precio">$25 / pág.</td>
                 </tr>
                 <tr>
                   <td data-label="Concepto">Satinado (11×17)</td>
                   <td data-label="Detalle">B/N o Color</td>
-                  <td data-label="Precio">$45 / pág.</td>
+                  <td id="tesisTableSatinadoTabloide" data-label="Precio">$45 / pág.</td>
                 </tr>
 
                 <!-- Empastado Tapa Dura -->
                 <tr>
                   <td data-label="Concepto">Empastado Tapa Dura</td>
                   <td data-label="Detalle">Carta</td>
-                  <td data-label="Precio">$500–600</td>
+                  <td id="tesisTableTapaDuraCarta" data-label="Precio">$500–600</td>
                 </tr>
 
                 <!-- Empastado Vinil -->
                 <tr>
                   <td data-label="Concepto">Empastado Vinil</td>
                   <td data-label="Detalle">Carta</td>
-                  <td data-label="Precio">$1,200</td>
+                  <td id="tesisTableVinilCarta" data-label="Precio">$1,200</td>
                 </tr>
                 <tr>
                   <td data-label="Concepto">Empastado Vinil</td>
                   <td data-label="Detalle">11×17</td>
-                  <td data-label="Precio">$1,500</td>
+                  <td id="tesisTableVinilTabloide" data-label="Precio">$1,500</td>
                 </tr>
 
                 <!-- Extras -->
                 <tr>
                   <td data-label="Concepto">Lomo</td>
                   <td data-label="Detalle">Por tomo</td>
-                  <td data-label="Precio">$50</td>
+                  <td id="tesisTableLomo" data-label="Precio">$50</td>
                 </tr>
                 <tr>
                   <td data-label="Concepto">CD rotulado</td>
                   <td data-label="Detalle">Por unidad</td>
-                  <td data-label="Precio">$200</td>
+                  <td id="tesisTableCD" data-label="Precio">$200</td>
                 </tr>
               </tbody>
             </table>
@@ -583,6 +583,7 @@
   <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
+  <script defer src="pricing-config.js"></script>
   <script defer src="script.js"></script>
   <script defer src="components.js"></script>
   <!-- 📦 Notion Sync — cliente frontend para sincronización con Notion -->

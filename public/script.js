@@ -18,68 +18,19 @@ const firebaseConfig = {
   appId: "1:516579834487:web:e7fb1c46d93bb62a98a472"
 };
 
-const PRECIOS = {
-  carta: {
-    bond: { bn: 6, color: 12 },
-    hilo: { bn: 8, color: 15 },
-    satinado: { precio: 25 }
-  },
-  tabloide: {
-    satinado: { precio: 45 }
-  }
-};
-
-// Rangos de precios para tamaño Legal tomados de la calculadora general
-const PRECIOS_LEGAL_BN = [
-  { min: 1, max: 50, precio: 10 },
-  { min: 51, max: 200, precio: 8 },
-  { min: 201, max: Infinity, precio: 6 }
-];
-
-const PRECIOS_LEGAL_COLOR = [
-  { min: 1, max: 50, precio: 30 },
-  { min: 51, max: 200, precio: 25 },
-  { min: 201, max: Infinity, precio: 20 }
-];
-
-const PRECIOS_LEGAL_SATINADO = [
-  { min: 1, max: 50, precio: 45 },
-  { min: 51, max: 200, precio: 40 },
-  { min: 201, max: Infinity, precio: 35 }
-];
-
-const TAPA_DURA = {
-  beige: 600,
-  morado: 500,
-  azul_marino: 500,
-  azul_cielo: 500,
-  rojo: 500,
-  verde_botella: 500,
-  amarillo_medicina: 500,
-  blanco: 600,
-};
-
-const VINIL = {
-  carta: 1200,
-  legal: 1200,
-  tabloide: 1500
-};
-
-const PRECIOS_ENCUADERNADO = [
-  { min: 1, max: 50, precio: 60 },
-  { min: 51, max: 80, precio: 70 },
-  { min: 81, max: 100, precio: 100 },
-  { min: 101, max: 150, precio: 120 },
-  { min: 151, max: 200, precio: 150 },
-  { min: 201, max: Infinity, precio: 250 }
-];
-
-// Constantes de servicios adicionales
-const PRECIOS_SERVICIOS = {
-  LOMO: 50,
-  CD: 200,
-  REDONDEO_MULTIPLO: 5
-};
+let PRECIOS;
+let PRECIOS_LEGAL_BN;
+let PRECIOS_LEGAL_COLOR;
+let PRECIOS_LEGAL_SATINADO;
+let PRECIOS_LEGAL_HILO_EXTRA;
+let PRECIO_ITLA_SATINADO;
+let TAPA_DURA;
+let PRECIO_TAPA_DURA_LEGAL;
+let PRECIO_TAPA_DURA_ITLA;
+let VINIL;
+let PRECIOS_ENCUADERNADO;
+let PRECIOS_SERVICIOS;
+let TIEMPO_ENTREGA;
 
 const BLOQUE_MENSAJE_PAGINA_SIGUIENTE = `
   <div class="mensaje-pagina-siguiente">
@@ -90,11 +41,6 @@ const BLOQUE_MENSAJE_PAGINA_SIGUIENTE = `
   </div>
 `;
 
-
-const TIEMPO_ENTREGA = {
-  TAPA_DURA: '6 horas',
-  VINIL: '24 horas'
-};
 
 // ============================================
 // 🖼️ IMÁGENES DE EJEMPLARES POR COLOR
@@ -151,7 +97,7 @@ function redondearA5(num) {
  * @returns {number} Precio unitario
  */
 function obtenerPrecioRango(tabla, cantidad) {
-  const rango = tabla.find(r => cantidad >= r.min && cantidad <= r.max);
+  const rango = tabla.find(r => cantidad >= r.min && (r.max === null || cantidad <= r.max));
   return rango ? rango.precio : 0;
 }
 
@@ -269,6 +215,63 @@ if (!firebase.apps.length) {
 const db = firebase.database();
 const auth = firebase.auth();
 const ACTIVAR_SEGURIDAD = true; // Control de seguridad
+let cotizacionHistoricaCargada = false;
+
+function aplicarCatalogoPreciosTesis(catalog) {
+  const prices = catalog.tesis;
+  PRECIOS = {
+    carta: prices.impresion.carta,
+    tabloide: prices.impresion.tabloide
+  };
+  PRECIOS_LEGAL_BN = prices.impresion.legal.bondBN;
+  PRECIOS_LEGAL_COLOR = prices.impresion.legal.bondColor;
+  PRECIOS_LEGAL_SATINADO = prices.impresion.legal.satinado;
+  PRECIOS_LEGAL_HILO_EXTRA = prices.impresion.legal.hiloExtra;
+  PRECIO_ITLA_SATINADO = prices.impresion.legal.itlaSatinado;
+  TAPA_DURA = prices.tapaDura.colores;
+  PRECIO_TAPA_DURA_LEGAL = prices.tapaDura.legal;
+  PRECIO_TAPA_DURA_ITLA = prices.tapaDura.itla;
+  VINIL = prices.vinil;
+  PRECIOS_ENCUADERNADO = prices.encuadernado;
+  PRECIOS_SERVICIOS = {
+    LOMO: prices.servicios.lomo,
+    CD: prices.servicios.cd,
+    REDONDEO_MULTIPLO: prices.servicios.redondeoMultiplo
+  };
+  TIEMPO_ENTREGA = {
+    TAPA_DURA: prices.entrega.tapaDura,
+    VINIL: prices.entrega.vinil
+  };
+
+  actualizarTablaPreciosTesis();
+  if (ultimaCotizacion && datosUltimaCotizacion && !cotizacionHistoricaCargada) {
+    calcular({ soloVista: true });
+  }
+}
+
+window.ServigacoPricing.onChange(aplicarCatalogoPreciosTesis);
+
+function actualizarTablaPreciosTesis() {
+  const setText = (id, value) => {
+    const cell = document.getElementById(id);
+    if (cell) cell.textContent = value;
+  };
+  const money = value => Number(value).toLocaleString('en-US');
+  const carta = PRECIOS.carta;
+  const colors = Object.values(TAPA_DURA);
+
+  setText('tesisTableBondBN', `$${money(carta.bond.bn)} / pág.`);
+  setText('tesisTableBondColor', `$${money(carta.bond.color)} / pág.`);
+  setText('tesisTableHiloBN', `$${money(carta.hilo.bn)} / pág.`);
+  setText('tesisTableHiloColor', `$${money(carta.hilo.color)} / pág.`);
+  setText('tesisTableSatinadoCarta', `$${money(carta.satinado.precio)} / pág.`);
+  setText('tesisTableSatinadoTabloide', `$${money(PRECIOS.tabloide.satinado.precio)} / pág.`);
+  setText('tesisTableTapaDuraCarta', `$${money(Math.min(...colors))}–${money(Math.max(...colors))}`);
+  setText('tesisTableVinilCarta', `$${money(VINIL.carta)}`);
+  setText('tesisTableVinilTabloide', `$${money(VINIL.tabloide)}`);
+  setText('tesisTableLomo', `$${money(PRECIOS_SERVICIOS.LOMO)}`);
+  setText('tesisTableCD', `$${money(PRECIOS_SERVICIOS.CD)}`);
+}
 
 
 // ============================================
@@ -411,7 +414,7 @@ function calcularImpresionSatinado() {
 
   let precio;
   if (elementos.itlaCheckbox?.checked) {
-    precio = 30;
+    precio = PRECIO_ITLA_SATINADO;
   } else if (elementos.tamano.value === 'legal') {
     precio = obtenerPrecioRango(PRECIOS_LEGAL_SATINADO, paginas);
   } else {
@@ -479,9 +482,9 @@ function calcularEmpastado(tomos, totalPaginas) {
   } else if (tipoEmp === 'espiral') {
     costoUnitario = calcularPrecioEncuadernado(totalPaginas);
   } else {
-    costoUnitario = elementos.tamano.value === 'legal' ? 800 : TAPA_DURA[colorTapa];
+    costoUnitario = elementos.tamano.value === 'legal' ? PRECIO_TAPA_DURA_LEGAL : TAPA_DURA[colorTapa];
     if (elementos.itlaCheckbox?.checked) {
-      costoUnitario = 700;
+      costoUnitario = PRECIO_TAPA_DURA_ITLA;
     }
   }
 
@@ -537,11 +540,16 @@ function calcularServiciosAdicionales(tomos) {
 /**
  * Función principal de cálculo de cotización
  */
-async function calcular() {
+async function calcular({ soloVista = false } = {}) {
   try {
 
-    const idCotizacion = generarIdCotizacion();
-    const fecha = fechaFormateada();
+    if (!soloVista) cotizacionHistoricaCargada = false;
+    const idCotizacion = soloVista && datosUltimaCotizacion
+      ? datosUltimaCotizacion.idCotizacion
+      : generarIdCotizacion();
+    const fecha = soloVista && datosUltimaCotizacion
+      ? datosUltimaCotizacion.fecha
+      : fechaFormateada();
 
     const tomos = Math.max(1, obtenerValorNumerico('tomos', 1));
     
@@ -598,23 +606,24 @@ ultimaCotizacion = generarHTMLCotizacion(datosUltimaCotizacion);
     
     elementos.resultado.innerHTML = ultimaCotizacion;
     elementos.resultado.style.display = 'block';
-    mostrarNotificacion('Cotización calculada exitosamente', 'success');
+    if (!soloVista) mostrarNotificacion('Cotización calculada exitosamente', 'success');
 
-    // Guardar en Firebase para el dashboard
-    const datosDashboard = {
-      fecha: new Date().toISOString(),
-      timestamp: firebase.database.ServerValue.TIMESTAMP,
-      tipo: "Tesis",
-      nombre: idCotizacion, // Usar el ID como nombre
-      total: totalRedondeado.toFixed(2),
-      descripcion: `Cotización automática - ${tomos} tomos`
-    };
+    if (!soloVista) {
+      const datosDashboard = {
+        fecha: new Date().toISOString(),
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        tipo: "Tesis",
+        nombre: idCotizacion,
+        total: totalRedondeado.toFixed(2),
+        descripcion: `Cotización automática - ${tomos} tomos`
+      };
 
-    try {
-      await db.ref("cotizaciones").push(datosDashboard);
-      console.log("Tesis guardada en dashboard");
-    } catch (error) {
-      console.error("Error al guardar tesis:", error);
+      try {
+        await db.ref("cotizaciones").push(datosDashboard);
+        console.log("Tesis guardada en dashboard");
+      } catch (error) {
+        console.error("Error al guardar tesis:", error);
+      }
     }
     
   } catch (error) {
@@ -1352,6 +1361,9 @@ async function guardarTesisEnFirebase() {
   if (isProcessingAction) {
     return mostrarNotificacion('Espere a que la acción actual termine.', 'warning');
   }
+  if (cotizacionHistoricaCargada) {
+    return mostrarNotificacion('Esta cotización es histórica. Calcula una nueva para guardar los precios vigentes.', 'warning');
+  }
   if (!ultimaCotizacion) {
     calcular();
     if (!ultimaCotizacion) return;
@@ -1387,6 +1399,7 @@ async function confirmarGuardarTesis() {
     tomos: document.getElementById('tomos').value,
     tipoEmpastado: elementos.tipoEmpastado.value,
     colorTapa: document.getElementById('colorTapa').value,
+    itlaAplicado: elementos.itlaCheckbox?.checked || false,
     lomo: document.getElementById('lomo').value,
     llevaCd: elementos.llevaCd.value,
     cantidadCd: document.getElementById('cantidadCd').value
@@ -1400,7 +1413,8 @@ async function confirmarGuardarTesis() {
     total: datosParaGuardar.total,
     descripcion: `Tesis: ${inputs.tomos} tomos, ${nombreColor(inputs.tamano)}, ${nombreColor(inputs.papel)}, ${nombreColor(inputs.tipoEmpastado)}`,
     detalle_tecnico: datosParaGuardar.detalle,
-    inputs: inputs
+    inputs: inputs,
+    snapshotPrecio: datosUltimaCotizacion
   };
 
   try {
@@ -1518,6 +1532,7 @@ function renderizarCotizacionesGuardadas() {
 function cargarCotizacionGuardada(id) {
   const cotizacion = todasLasCotizaciones.find(c => c.id === id);
   if (cotizacion && cotizacion.inputs) {
+    cotizacionHistoricaCargada = true;
     const d = cotizacion.inputs;
     
     if (d.tamano) elementos.tamano.value = d.tamano;
@@ -1528,13 +1543,43 @@ function cargarCotizacionGuardada(id) {
     if (d.tomos) document.getElementById('tomos').value = d.tomos;
     if (d.tipoEmpastado) elementos.tipoEmpastado.value = d.tipoEmpastado;
     if (d.colorTapa) document.getElementById('colorTapa').value = d.colorTapa;
+    if (typeof d.itlaAplicado === 'boolean' && elementos.itlaCheckbox) {
+      elementos.itlaCheckbox.checked = d.itlaAplicado;
+    }
     if (d.lomo) document.getElementById('lomo').value = d.lomo;
     if (d.llevaCd) elementos.llevaCd.value = d.llevaCd;
     if (d.cantidadCd) document.getElementById('cantidadCd').value = d.cantidadCd;
 
     actualizarVista();
     toggleSeccionCD();
-    calcular(); // Recalcular automáticamente
+    datosParaGuardar = null;
+    if (cotizacion.snapshotPrecio) {
+      datosUltimaCotizacion = cotizacion.snapshotPrecio;
+      ultimaCotizacion = generarHTMLCotizacion(datosUltimaCotizacion);
+      elementos.resultado.innerHTML = ultimaCotizacion;
+      elementos.resultado.style.display = 'block';
+    } else {
+      datosUltimaCotizacion = null;
+      ultimaCotizacion = '';
+      elementos.resultado.replaceChildren();
+      const historical = document.createElement('div');
+      const title = document.createElement('h3');
+      const description = document.createElement('p');
+      const amount = document.createElement('p');
+      const note = document.createElement('p');
+      historical.className = 'rounded-xl border border-amber-200 bg-amber-50 p-5 text-gray-800';
+      title.className = 'font-bold';
+      title.textContent = `Cotización histórica: ${cotizacion.nombre}`;
+      description.textContent = cotizacion.descripcion || 'Sin descripción guardada.';
+      amount.className = 'mt-3 text-lg font-bold';
+      amount.textContent = `Total histórico: RD$${formatearMonto(Number(cotizacion.total || 0))}`;
+      note.className = 'mt-2 text-sm';
+      note.textContent = 'Este importe guardado se conserva; pulsa Calcular para crear una cotización con los precios vigentes.';
+      historical.append(title, description, amount, note);
+      elementos.resultado.append(historical);
+      elementos.resultado.style.display = 'block';
+    }
+    cotizacionHistoricaCargada = true;
     cerrarModalCotizaciones();
     mostrarNotificacion(`Tesis de "${cotizacion.nombre}" cargada`, 'success');
   }
