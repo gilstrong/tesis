@@ -8,6 +8,12 @@ Los precios antiguos de Booklet siguen en `config/precios_booklet`. La aplicaci�
 
 Las cotizaciones guardadas no se actualizan cuando cambia el catálogo. En servicios generales, los importes personalizados de una cotización continúan siendo propios de esa cotización y no se escriben en el catálogo.
 
+## Servicios adicionales configurables
+
+Los servicios adicionales se almacenan en `config/precios_app/customServices`. Se admiten hasta 50 entradas; cada una tiene un identificador estable, nombre, ubicación (`general` o `tesis`), modalidad (`fixed` o `unit`), precio base no negativo, etiqueta de cantidad, estado activo y hasta ocho campos configurables de tipo texto, número o lista. Cada lista admite entre una y 20 opciones con identificador y nombre; puede marcarse para que la opción seleccionada defina el precio. Solo un campo de lista por servicio puede definir el precio. Las opciones con precio reemplazan el precio base y, en modalidad `unit`, se multiplican por la cantidad. Los servicios existentes sin ubicación, etiqueta o campos se interpretan como servicios de Servicios Generales, con la etiqueta «Cantidad» y sin campos adicionales.
+
+Solo los servicios activos se muestran en la calculadora indicada. Los servicios por unidad multiplican el precio por una cantidad entera positiva; los de precio fijo se cotizan una vez. Los campos obligatorios y las opciones de precio se validan antes de calcular. La etiqueta de la opción seleccionada se incluye en el detalle de la cotización; en Servicios Generales, sus identificadores se conservan para recalcular cantidades sin perder el precio elegido. Los valores introducidos para una cotización se guardan en su detalle, no en el catálogo global. Las ubicaciones y campos personalizados se reflejan en la cotización de Tesis, incluida su tabla/PDF. Los borradores de Servicios Generales pueden recalcularse si cambia el catálogo; las cotizaciones históricas guardadas no se recalculan.
+
 ## Reglas de Realtime Database
 
 El archivo de referencia del repositorio es `tesis/database.rules.json`. Según confirmó el responsable del proyecto, las reglas necesarias para los precios ya se publicaron en Realtime Database. Este despliegue de la aplicación no publica ni modifica reglas de Firebase.
