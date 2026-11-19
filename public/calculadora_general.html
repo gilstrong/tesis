@@ -440,7 +440,14 @@
             <span>Calculadora de Hojas</span>
           </button>
           <button type="button" onclick="lomo_abrirModal()" class="sg-tool-btn" title="Estimador de Lomo de Tesis y Libros">
-            <span class="sg-tool-icon"><i class="ti ti-ruler" aria-hidden="true"></i></span>
+            <span class="sg-tool-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"></path>
+                <path d="m14.5 12.5 2-2"></path>
+                <path d="m11.5 9.5 2-2"></path>
+                <path d="m8.5 6.5 2-2"></path>
+              </svg>
+            </span>
             <span>Estimador de Lomo</span>
           </button>
         </div>
@@ -793,7 +800,7 @@
               <label for="cantidadPaginas" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                 <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span> Cantidad de páginas
               </label>
-              <input type="number" id="cantidadPaginas" min="1" value="1" placeholder="Ej: 50" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
+              <input type="number" id="cantidadPaginas" min="1" placeholder="Ej: 50" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
               <small class="text-xs text-gray-400 mt-1 ml-1">El precio se ajusta según la cantidad</small>
             </div>
           </div>
@@ -845,7 +852,7 @@
               <label for="paginasEncuadernado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                 <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-chart-bar" aria-hidden="true"></i></span> Cantidad de páginas
               </label>
-              <input type="number" id="paginasEncuadernado" min="1" max="1000" value="100" placeholder="Ej: 100" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
+              <input type="number" id="paginasEncuadernado" min="1" max="1000" placeholder="Ej: 100" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
               <small class="text-xs text-gray-400 mt-1 ml-1">Máximo 1000 páginas</small>
             </div>
 
@@ -854,7 +861,7 @@
               <label for="cantidadEncuadernado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                 <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span> Cantidad de encuadernados
               </label>
-              <input type="number" id="cantidadEncuadernado" min="1" value="1" placeholder="Ej: 3" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
+              <input type="number" id="cantidadEncuadernado" min="1" placeholder="Ej: 3" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
             </div>
           </div>
 
@@ -934,7 +941,7 @@
               <label for="cantidadEmpastado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                 <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span> Cantidad
               </label>
-              <input type="number" id="cantidadEmpastado" min="1" value="1" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
+              <input type="number" id="cantidadEmpastado" min="1" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
             </div>
           </div>
 
@@ -1048,7 +1055,7 @@
             <label for="cantidadPloteo" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
               <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span> Cantidad
             </label>
-            <input type="number" id="cantidadPloteo" min="1" value="1" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
+            <input type="number" id="cantidadPloteo" min="1" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
           </div>
 
           <!-- Precio calculado en tiempo real -->
@@ -1127,7 +1134,7 @@
           <!-- Cantidad de piezas (si lleva corte) -->
           <div id="seccionPiezas" class="mt-5 p-4 bg-yellow-50 rounded-xl border border-yellow-100" style="display: none;">
             <label for="cantidadPiezas" class="block text-sm font-bold text-yellow-800 mb-2"><i class="ti ti-list-numbers" aria-hidden="true"></i> Cantidad de piezas por hoja</label>
-            <input type="number" id="cantidadPiezas" min="1" value="2" placeholder="Ej: 4 tarjetas por hoja" class="w-full px-4 py-3 rounded-xl bg-white border border-yellow-200 text-gray-700 focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/10 transition-all duration-200 outline-none font-medium" />
+            <input type="number" id="cantidadPiezas" min="1" placeholder="Ej: 4 tarjetas por hoja" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-white border border-yellow-200 text-gray-700 focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/10 transition-all duration-200 outline-none font-medium" />
             <small class="text-xs text-yellow-600 mt-1 block">¿Cuántas piezas se cortan de cada hoja?</small>
           </div>
 
@@ -1136,7 +1143,7 @@
             <label for="cantidadPlastificado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
               <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-file-text" aria-hidden="true"></i></span> Cantidad de hojas
             </label>
-            <input type="number" id="cantidadPlastificado" min="1" value="1" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
+            <input type="number" id="cantidadPlastificado" min="1" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
           </div>
 
           <!-- Precio calculado en tiempo real -->
@@ -1195,7 +1202,7 @@
                 <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span>
                 Cantidad de páginas B/N
               </label>
-              <input type="number" id="libroPaginasBN" min="0" value="0" placeholder="Ej: 99" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
+              <input type="number" id="libroPaginasBN" min="0" placeholder="Ej: 99" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
               <small class="text-xs text-gray-400 mt-1 ml-1">Deja en 0 si no hay páginas B/N</small>
             </div>
           </div>
@@ -1211,7 +1218,7 @@
                 <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span>
                 Cantidad de páginas a Color
               </label>
-              <input type="number" id="libroPaginasColor" min="0" value="0" placeholder="Ej: 1 (portada)" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
+              <input type="number" id="libroPaginasColor" min="0" placeholder="Ej: 1 (portada)" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
               <small class="text-xs text-gray-400 mt-1 ml-1">Deja en 0 si no hay páginas a color</small>
             </div>
           </div>
@@ -1227,7 +1234,7 @@
                 <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span>
                 Cantidad de páginas Full Color
               </label>
-              <input type="number" id="libroPaginasFullColor" min="0" value="0" placeholder="Ej: 0" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
+              <input type="number" id="libroPaginasFullColor" min="0" placeholder="Ej: 0" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
               <small class="text-xs text-gray-400 mt-1 ml-1">Deja en 0 si no hay páginas full color</small>
             </div>
           </div>
@@ -1274,7 +1281,7 @@
                 <label for="libroJuegos" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                   <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-book-2" aria-hidden="true"></i></span> Número de copias/juegos
                 </label>
-                <input type="number" id="libroJuegos" min="1" value="1" placeholder="¿Cuántos libros iguales?" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
+                <input type="number" id="libroJuegos" min="1" placeholder="¿Cuántos libros iguales?" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
                 <small class="text-xs text-gray-400 mt-1 ml-1">Todos los costos se multiplicarán por este número</small>
               </div>
             </div>
@@ -1314,7 +1321,7 @@
                 <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span>
                 Cantidad de páginas del documento
               </label>
-              <input type="number" id="bookletPaginas" min="2" value="4" placeholder="Ej: 140" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
+              <input type="number" id="bookletPaginas" min="2" placeholder="Ej: 140" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
               <small class="text-xs text-gray-400 mt-1 ml-1">Si el número es impar, se redondea hacia arriba automáticamente</small>
             </div>
 
@@ -1369,7 +1376,7 @@
                 <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-book-2" aria-hidden="true"></i></span>
                 Cantidad de ejemplares
               </label>
-              <input type="number" id="bookletEjemplares" min="1" value="1" placeholder="Ej: 5" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
+              <input type="number" id="bookletEjemplares" min="1" placeholder="Ej: 5" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
               <small class="text-xs text-gray-400 mt-1 ml-1">El costo por ejemplar se multiplicará por este número</small>
             </div>
 
@@ -1400,9 +1407,11 @@
             Servicio Personalizado
           </h3>
 
+          <div id="configuredServiceFields" class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5" style="display: none;" aria-live="polite"></div>
+
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <!-- Descripción -->
-            <div class="group md:col-span-2">
+            <div class="group md:col-span-2" id="personalDescriptionGroup">
               <label for="descPersonalizado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                 <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-notes" aria-hidden="true"></i></span> Descripción del servicio
               </label>
@@ -1410,15 +1419,15 @@
             </div>
 
             <!-- Cantidad -->
-            <div class="group">
+            <div class="group" id="personalQuantityGroup">
               <label for="cantPersonalizado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span> Cantidad
+                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span> <span id="personalizedQuantityLabel">Cantidad</span>
               </label>
-              <input type="number" id="cantPersonalizado" min="1" value="1" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
+              <input type="number" id="cantPersonalizado" min="1" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
             </div>
 
             <!-- Precio Unitario -->
-            <div class="group">
+            <div class="group" id="personalPriceGroup">
               <label for="precioPersonalizado" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                 <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-currency-dollar" aria-hidden="true"></i></span> Precio Unitario (RD$)
               </label>
@@ -1651,10 +1660,11 @@
             <label class="text-sm font-bold text-gray-600 dark:text-gray-300">Filtrar por Mes:</label>
             <input type="month" id="filtroMesFacturas" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
           </div>
-          <div class="flex items-center gap-2 border-l border-gray-300 dark:border-gray-600 pl-4">
-            <input type="checkbox" id="checkOcultarAnuladas" class="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500 cursor-pointer">
-            <label for="checkOcultarAnuladas" class="text-sm font-bold text-gray-600 dark:text-gray-300 cursor-pointer select-none">Ocultar Anuladas</label>
-          </div>
+          <label class="sg-switch border-l border-gray-300 dark:border-gray-600 pl-4 text-sm font-bold text-gray-600 dark:text-gray-300">
+            <input type="checkbox" role="switch" id="checkOcultarAnuladas">
+            <span class="sg-switch-track" aria-hidden="true"><span class="sg-switch-thumb"></span></span>
+            <span class="sg-switch-label">Ocultar Anuladas</span>
+          </label>
         </div>
         <div class="flex gap-2">
           <button id="btnBackupFacturas" class="px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-lg font-bold text-sm flex items-center gap-2 shadow-sm transition-all" title="Descargar copia de seguridad completa">
@@ -1870,13 +1880,13 @@
           </div>
           <div>
             <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Copias</label>
-            <input type="number" id="calcHojasCopias" min="1" value="1" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-center font-bold" oninput="calcularHojas()">
+            <input type="number" id="calcHojasCopias" min="1" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-center font-bold" oninput="calcularHojas()">
           </div>
         </div>
 
         <div>
           <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Cantidad de páginas (del original)</label>
-          <input type="number" id="calcHojasPaginas" min="1" value="0" placeholder="Ej: 100" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-center font-bold text-lg" oninput="calcularHojas()">
+          <input type="number" id="calcHojasPaginas" min="1" placeholder="Ej: 100" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-center font-bold text-lg" oninput="calcularHojas()">
         </div>
 
         <div class="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-5">
@@ -2008,9 +2018,10 @@
                 <input type="number" step="0.01" min="0" id="pdfqMasterCostoTerm" placeholder="—"
                   class="text-xs w-20 px-1.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-right">
               </div>
-              <label class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 cursor-pointer whitespace-nowrap">
-                <input type="checkbox" id="pdfqMasterRespetarManual" checked class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500">
-                No pisar los que ya edité a mano <i class="ti ti-pencil" aria-hidden="true"></i>
+              <label class="sg-switch text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                <input type="checkbox" role="switch" id="pdfqMasterRespetarManual" checked>
+                <span class="sg-switch-track" aria-hidden="true"><span class="sg-switch-thumb"></span></span>
+                <span class="sg-switch-label">No pisar los que ya edité a mano <i class="ti ti-pencil" aria-hidden="true"></i></span>
               </label>
               <button onclick="pdfq_aplicarPrecioATodos()"
                 class="ml-auto text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600 px-3 py-1.5 rounded-lg shadow-sm transition-colors whitespace-nowrap">
@@ -2371,7 +2382,7 @@
         : '';
 
       // Clase compartida para inputs de páginas
-      var cls = 'text-xs w-16 px-1.5 py-1 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-center';
+      var cls = 'sg-quantity-input text-xs w-16 px-1.5 py-1 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-center';
 
       var trControles = '<tr class="bg-green-50/40 dark:bg-green-900/10">' +
         '<td colspan="7" class="px-3 pb-3 pt-0">' +
@@ -3497,7 +3508,7 @@
               type="number"
               id="lomoInputPaginas"
               min="1" placeholder="Ej: 185" aria-label="Cantidad de páginas del libro"
-              class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200 outline-none font-medium dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200 outline-none font-medium dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             />
             <small class="text-xs text-gray-400 mt-1 ml-1">Impresión dúplex · Bond 20</small>
           </div>

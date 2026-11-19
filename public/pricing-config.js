@@ -148,8 +148,16 @@
         fallbackPorPie: 100
       }
     },
-    booklet: { bondBN: 2.5, bondColor: 15, cartonite: 150 }
+    booklet: { bondBN: 2.5, bondColor: 15, cartonite: 150 },
+    customServices: {}
   };
+
+  const CUSTOM_SERVICE_PLACEMENTS = ['general', 'tesis'];
+  const CUSTOM_SERVICE_FIELD_TYPES = ['text', 'number', 'select'];
+  const MAX_CUSTOM_SERVICE_FIELDS = 8;
+  const MAX_CUSTOM_SERVICE_OPTIONS = 20;
+  const MAX_CUSTOM_SERVICES = 50;
+  const RESERVED_CUSTOM_IDENTIFIERS = new Set(['__proto__', 'constructor', 'prototype']);
 
   function clone(value) {
     return JSON.parse(JSON.stringify(value));
@@ -172,10 +180,14 @@
       const source = remoteValue && typeof remoteValue === 'object' && !Array.isArray(remoteValue)
         ? remoteValue
         : {};
+      const result = Object.keys(source).reduce((copy, key) => {
+        if (!Object.prototype.hasOwnProperty.call(defaultValue, key)) copy[key] = clone(source[key]);
+        return copy;
+      }, {});
       return Object.keys(defaultValue).reduce((result, key) => {
         result[key] = mergeDefaults(defaultValue[key], source[key]);
         return result;
-      }, {});
+      }, result);
     }
     return defaultValue;
   }
@@ -228,14 +240,159 @@
   function validate(catalog) {
     const errors = [];
     collectValidationErrors(catalog, DEFAULTS, 'precios', errors);
+    const services = catalog?.customServices;
+    if (!services || typeof services !== 'object' || Array.isArray(services)) {
+      errors.push('Servicios: el catálogo de servicios debe ser un objeto.');
+    } else {
+      if (Object.keys(services).length > MAX_CUSTOM_SERVICES) {
+        errors.push(`Servicios: el catálogo admite hasta ${MAX_CUSTOM_SERVICES} servicios adicionales.`);
+      }
+      Object.entries(services).forEach(([id, service]) => {
+        const label = `Servicio ${id}`;
+        if (!/^[a-zA-Z0-9_-]{1,60}$/.test(id) || RESERVED_CUSTOM_IDENTIFIERS.has(id)) {
+          errors.push('Servicios: identificador no válido.');
+        }
+        if (!service || typeof service !== 'object' || Array.isArray(service)) {
+          errors.push(`${label}: configuración no válida.`);
+          return;
+        }
+        if (typeof service.name !== 'string' || !service.name.trim() || service.name.length > 60) {
+          errors.push(`${label}: agrega un nombre de hasta 60 caracteres.`);
+        }
+        if (!CUSTOM_SERVICE_PLACEMENTS.includes(service.placement)) {
+          errors.push(`${label}: ubicación no válida.`);
+        }
+        if (!['fixed', 'unit'].includes(service.pricingMode)) {
+          errors.push(`${label}: tipo de precio no válido.`);
+        }
+        if (typeof service.price !== 'number' || !Number.isFinite(service.price) || service.price < 0) {
+          errors.push(`${label}: el precio debe ser un número finito no negativo.`);
+        }
+        if (typeof service.quantityLabel !== 'string' || !service.quantityLabel.trim() || service.quantityLabel.length > 40) {
+          errors.push(`${label}: la etiqueta de cantidad es obligatoria y admite hasta 40 caracteres.`);
+        }
+        if (typeof service.active !== 'boolean') {
+          errors.push(`${label}: estado activo no válido.`);
+        }
+        if (!Array.isArray(service.fields) || service.fields.length > MAX_CUSTOM_SERVICE_FIELDS) {
+          errors.push(`${label}: configura hasta ${MAX_CUSTOM_SERVICE_FIELDS} campos.`);
+          return;
+        }
+        const priceFields = service.fields.filter(field => field?.type === 'select' && field.priceAffectsTotal);
+        if (priceFields.length > 1) {
+          errors.push(`${label}: solo un campo de opciones puede definir el precio.`);
+        }
+        const fieldIds = new Set();
+        service.fields.forEach((field, index) => {
+          const fieldLabel = `${label}, campo ${index + 1}`;
+          if (!field || typeof field !== 'object' || Array.isArray(field)) {
+            errors.push(`${fieldLabel}: configuración no válida.`);
+            return;
+          }
+          if (!/^[a-zA-Z0-9_-]{1,40}$/.test(field.id)
+            || RESERVED_CUSTOM_IDENTIFIERS.has(field.id)
+            || fieldIds.has(field.id)) {
+            errors.push(`${fieldLabel}: identificador no válido o repetido.`);
+          }
+          fieldIds.add(field.id);
+          if (typeof field.label !== 'string' || !field.label.trim() || field.label.length > 60) {
+            errors.push(`${fieldLabel}: el nombre es obligatorio y admite hasta 60 caracteres.`);
+          }
+          if (!CUSTOM_SERVICE_FIELD_TYPES.includes(field.type)) {
+            errors.push(`${fieldLabel}: tipo de campo no permitido.`);
+          }
+          if (typeof field.required !== 'boolean') {
+            errors.push(`${fieldLabel}: indica si el campo es obligatorio.`);
+          }
+          if (field.type === 'select') {
+            if (typeof field.priceAffectsTotal !== 'boolean') {
+              errors.push(`${fieldLabel}: indica si sus opciones definen el precio.`);
+            }
+            if (field.priceAffectsTotal && !field.required) {
+              errors.push(`${fieldLabel}: la opción que define el precio debe ser obligatoria.`);
+            }
+            if (!Array.isArray(field.options)
+              || field.options.length < 1
+              || field.options.length > MAX_CUSTOM_SERVICE_OPTIONS) {
+              errors.push(`${fieldLabel}: configura entre 1 y ${MAX_CUSTOM_SERVICE_OPTIONS} opciones.`);
+              return;
+            }
+            const optionIds = new Set();
+            field.options.forEach((option, optionIndex) => {
+              const optionLabel = `${fieldLabel}, opción ${optionIndex + 1}`;
+              if (!option || typeof option !== 'object' || Array.isArray(option)) {
+                errors.push(`${optionLabel}: configuración no válida.`);
+                return;
+              }
+              if (!/^[a-zA-Z0-9_-]{1,40}$/.test(option.id)
+                || RESERVED_CUSTOM_IDENTIFIERS.has(option.id)
+                || optionIds.has(option.id)) {
+                errors.push(`${optionLabel}: identificador no válido o repetido.`);
+              }
+              optionIds.add(option.id);
+              if (typeof option.label !== 'string' || !option.label.trim() || option.label.length > 60) {
+                errors.push(`${optionLabel}: el nombre es obligatorio y admite hasta 60 caracteres.`);
+              }
+              const hasPrice = option.price !== undefined && option.price !== null;
+              if ((field.priceAffectsTotal && !hasPrice)
+                || (hasPrice && (typeof option.price !== 'number' || !Number.isFinite(option.price) || option.price < 0))) {
+                errors.push(`${optionLabel}: el precio debe ser un número finito no negativo.`);
+              }
+            });
+          }
+        });
+      });
+    }
     if (!catalog?.tesis?.servicios || catalog.tesis.servicios.redondeoMultiplo <= 0) {
       errors.push('precios.tesis.servicios.redondeoMultiplo: debe ser mayor que cero.');
     }
     return errors;
   }
 
+  function calculateCustomServicePrice(service, quantity, selections = {}) {
+    if (!service || !['fixed', 'unit'].includes(service.pricingMode)) {
+      throw new Error('El tipo de precio del servicio no es válido.');
+    }
+    const count = service.pricingMode === 'fixed' ? 1 : Number(quantity);
+    if (!Number.isSafeInteger(count) || count < 1) {
+      throw new Error('La cantidad debe ser un entero positivo.');
+    }
+    let unitPrice = service.price;
+    const priceField = Array.isArray(service.fields)
+      ? service.fields.find(field => field?.type === 'select' && field.priceAffectsTotal)
+      : null;
+    if (priceField) {
+      const optionId = selections && typeof selections === 'object' ? selections[priceField.id] : undefined;
+      const option = Array.isArray(priceField.options)
+        ? priceField.options.find(item => item?.id === optionId)
+        : null;
+      if (!option) {
+        throw new Error(`Selecciona una opción válida para ${priceField.label}.`);
+      }
+      unitPrice = option.price;
+    }
+    if (typeof unitPrice !== 'number' || !Number.isFinite(unitPrice) || unitPrice < 0) {
+      throw new Error('El precio del servicio no es válido.');
+    }
+    const total = service.pricingMode === 'fixed' ? unitPrice : unitPrice * count;
+    if (!Number.isFinite(total)) throw new Error('El total del servicio excede el valor permitido.');
+    return { quantity: count, unitPrice, total };
+  }
+
   function buildCatalog(remote, legacyBooklet) {
     const catalog = mergeDefaults(DEFAULTS, remote);
+    if (remote && Object.prototype.hasOwnProperty.call(remote, 'customServices')
+      && (!remote.customServices || typeof remote.customServices !== 'object' || Array.isArray(remote.customServices))) {
+      catalog.customServices = clone(remote.customServices);
+    }
+    if (catalog.customServices && typeof catalog.customServices === 'object' && !Array.isArray(catalog.customServices)) {
+      Object.values(catalog.customServices).forEach(service => {
+        if (!service || typeof service !== 'object' || Array.isArray(service)) return;
+        if (!Object.prototype.hasOwnProperty.call(service, 'placement')) service.placement = 'general';
+        if (!Object.prototype.hasOwnProperty.call(service, 'quantityLabel')) service.quantityLabel = 'Cantidad';
+        if (!Object.prototype.hasOwnProperty.call(service, 'fields')) service.fields = [];
+      });
+    }
     if (legacyBooklet && typeof legacyBooklet === 'object') {
       ['bondBN', 'bondColor', 'cartonite'].forEach(key => {
         const centralValue = remote?.booklet?.[key];
@@ -249,7 +406,13 @@
   }
 
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { DEFAULTS, buildCatalog, validate };
+    module.exports = {
+      DEFAULTS,
+      buildCatalog,
+      validate,
+      calculateCustomServicePrice,
+      maxCustomServiceOptions: MAX_CUSTOM_SERVICE_OPTIONS
+    };
     return;
   }
 
@@ -353,6 +516,8 @@
   const api = {
     defaults: clone(DEFAULTS),
     validate,
+    calculateCustomServicePrice,
+    maxCustomServiceOptions: MAX_CUSTOM_SERVICE_OPTIONS,
     get() {
       return clone(catalog);
     },

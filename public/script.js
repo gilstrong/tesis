@@ -217,6 +217,528 @@ const auth = firebase.auth();
 const ACTIVAR_SEGURIDAD = true; // Control de seguridad
 let cotizacionHistoricaCargada = false;
 
+const THESIS_SELECT_PRESETS = {
+  tamano: {
+    icon: 'ti-ruler',
+    tone: 'blue',
+    placeholder: 'Elige el formato de tu tesis',
+    options: {
+      carta: { title: 'Carta', description: '8½ × 11 pulgadas · formato estándar', icon: 'ti-file-text' },
+      legal: { title: 'Legal', description: '8½ × 14 pulgadas · formato extendido', icon: 'ti-file-description' },
+      tabloide: { title: 'Tabloide', description: '11 × 17 pulgadas · papel satinado', icon: 'ti-layout-dashboard' }
+    }
+  },
+  papel: {
+    icon: 'ti-files',
+    tone: 'purple',
+    placeholder: 'Elige el acabado del papel',
+    options: {
+      bond: { description: 'Acabado mate para impresión cotidiana', icon: 'ti-file-text' },
+      hilo: { description: 'Textura distintiva para una presentación formal', icon: 'ti-files' },
+      satinado: { description: 'Superficie lisa con mayor intensidad de color', icon: 'ti-sun' }
+    }
+  },
+  tipoEmpastado: {
+    icon: 'ti-book',
+    tone: 'amber',
+    placeholder: 'Elige cómo presentar los tomos',
+    options: {
+      tapa_dura: { description: 'Cubierta rígida · presentación clásica', icon: 'ti-book-2' },
+      vinil: { description: 'Cubierta flexible · acabado plastificado', icon: 'ti-book' },
+      espiral: { description: 'Encuadernado flexible y fácil de consultar', icon: 'ti-paperclip' }
+    }
+  },
+  colorTapa: {
+    icon: 'ti-palette',
+    tone: 'rose',
+    placeholder: 'Elige el color de la cubierta',
+    options: {
+      beige: { description: 'Beige', tone: 'amber', swatch: '#d6c3a1' },
+      morado: { description: 'Morado', tone: 'purple', swatch: '#8b5cf6' },
+      azul_marino: { description: 'Azul marino', tone: 'blue', swatch: '#1e3a8a' },
+      azul_cielo: { description: 'Azul cielo', tone: 'cyan', swatch: '#38bdf8' },
+      rojo: { description: 'Rojo', tone: 'rose', swatch: '#e11d48' },
+      verde_botella: { description: 'Verde botella', tone: 'green', swatch: '#166534' },
+      amarillo_medicina: { description: 'Amarillo medicina', tone: 'amber', swatch: '#eab308' },
+      blanco: { description: 'Blanco', tone: 'slate', swatch: '#f8fafc' }
+    }
+  },
+  lomo: {
+    icon: 'ti-ruler',
+    tone: 'cyan',
+    placeholder: 'Indica si el tomo lleva lomo',
+    options: {
+      no: { description: 'Sin costo adicional de lomo', icon: 'ti-file-x', tone: 'slate' },
+      si: { description: 'Añadir lomo a cada tomo', icon: 'ti-circle-check', tone: 'green' }
+    }
+  },
+  llevaCd: {
+    icon: 'ti-disc',
+    tone: 'purple',
+    placeholder: 'Indica si incluirás CD',
+    options: {
+      no: { description: 'Sin CD en esta cotización', icon: 'ti-file-x', tone: 'slate' },
+      si: { description: 'Añadir CD y especificar la cantidad', icon: 'ti-disc', tone: 'blue' }
+    }
+  }
+};
+
+function crearIconoOpcion(option, tone) {
+  const iconBox = document.createElement('span');
+  iconBox.className = `sg-option-icon-box sg-thesis-tone-${tone}`;
+  if (option.swatch) {
+    const swatch = document.createElement('span');
+    swatch.className = 'sg-thesis-swatch';
+    swatch.style.setProperty('--sg-thesis-swatch-color', option.swatch);
+    iconBox.append(swatch);
+  } else {
+    const icon = document.createElement('i');
+    icon.className = `ti ${option.icon || 'ti-check'}`;
+    icon.setAttribute('aria-hidden', 'true');
+    iconBox.append(icon);
+  }
+  return iconBox;
+}
+
+function sincronizarSelectorTesis(wrapper) {
+  const select = wrapper.querySelector('select');
+  const trigger = wrapper.querySelector('.sg-trigger');
+  const triggerIcon = wrapper.querySelector('.sg-trigger-icon-box');
+  const triggerTitle = wrapper.querySelector('.sg-trigger-title');
+  const triggerDescription = wrapper.querySelector('.sg-trigger-desc');
+  const options = Array.from(wrapper.querySelectorAll('.sg-option'));
+  const selected = options.find(option => option.dataset.value === select.value);
+
+  trigger.disabled = select.disabled;
+  trigger.setAttribute('aria-disabled', String(select.disabled));
+  trigger.setAttribute('aria-required', String(select.required));
+  if (wrapper.classList.contains('sg-invalid')) {
+    trigger.setAttribute('aria-invalid', 'true');
+  } else {
+    trigger.removeAttribute('aria-invalid');
+  }
+  if (selected) {
+    options.forEach(option => option.setAttribute('aria-selected', String(option === selected)));
+    triggerTitle.textContent = selected.querySelector('.sg-option-title').textContent;
+    triggerDescription.textContent = selected.querySelector('.sg-option-desc').textContent;
+    const optionIcon = selected.querySelector('.sg-option-icon-box');
+    triggerIcon.className = `sg-trigger-icon-box ${Array.from(optionIcon.classList).find(name => name.startsWith('sg-thesis-tone-')) || ''}`;
+    triggerIcon.replaceChildren(...Array.from(optionIcon.childNodes).map(node => node.cloneNode(true)));
+  } else {
+    options.forEach(option => option.setAttribute('aria-selected', 'false'));
+    triggerTitle.textContent = wrapper.dataset.placeholder;
+    triggerDescription.textContent = 'Selecciona una opción para continuar';
+    triggerIcon.className = `sg-trigger-icon-box sg-thesis-tone-${wrapper.dataset.tone}`;
+    const icon = document.createElement('i');
+    icon.className = `ti ${wrapper.dataset.icon}`;
+    icon.setAttribute('aria-hidden', 'true');
+    triggerIcon.replaceChildren(icon);
+  }
+}
+
+function inicializarSelectorTesis(select, config = {}) {
+  if (!select || select.dataset.thesisPicker === 'true' || select.classList.contains('sg-native-select')) return;
+  const preset = config.preset || THESIS_SELECT_PRESETS[select.id];
+  if (!preset && !select.matches('[data-thesis-service-field]')) return;
+
+  const label = Array.from(select.closest('.form-group, fieldset')?.querySelectorAll('label') || [])
+    .find(item => item.htmlFor === select.id);
+  const labelText = label?.textContent.trim().replace(/\s+/g, ' ') || select.dataset.thesisServiceFieldLabel || 'Selecciona una opción';
+  const id = `tesis-select-${select.id}`;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'sg-select-wrapper sg-thesis-select';
+  wrapper.dataset.placeholder = preset?.placeholder || `Selecciona ${labelText.toLocaleLowerCase()}`;
+  wrapper.dataset.icon = preset?.icon || 'ti-list-details';
+  wrapper.dataset.tone = preset?.tone || 'cyan';
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'sg-trigger';
+  trigger.id = `${id}-trigger`;
+  trigger.setAttribute('role', 'combobox');
+  trigger.setAttribute('aria-expanded', 'false');
+  trigger.setAttribute('aria-haspopup', 'listbox');
+  trigger.setAttribute('aria-controls', `${id}-options`);
+  if (label) {
+    if (!label.id) label.id = `${id}-label`;
+    trigger.setAttribute('aria-labelledby', label.id);
+  } else {
+    trigger.setAttribute('aria-label', labelText);
+  }
+  if (select.getAttribute('aria-describedby')) {
+    trigger.setAttribute('aria-describedby', select.getAttribute('aria-describedby'));
+  }
+
+  const left = document.createElement('span');
+  left.className = 'sg-trigger-left';
+  const triggerIcon = document.createElement('span');
+  triggerIcon.className = `sg-trigger-icon-box sg-thesis-tone-${wrapper.dataset.tone}`;
+  const defaultIcon = document.createElement('i');
+  defaultIcon.className = `ti ${wrapper.dataset.icon}`;
+  defaultIcon.setAttribute('aria-hidden', 'true');
+  triggerIcon.append(defaultIcon);
+  const text = document.createElement('span');
+  text.className = 'sg-trigger-text';
+  const title = document.createElement('span');
+  title.className = 'sg-trigger-title';
+  const description = document.createElement('span');
+  description.className = 'sg-trigger-desc';
+  text.append(title, description);
+  left.append(triggerIcon, text);
+  const arrow = document.createElement('span');
+  arrow.className = 'sg-arrow';
+  arrow.setAttribute('aria-hidden', 'true');
+  arrow.innerHTML = '<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>';
+  trigger.append(left, arrow);
+
+  const dropdown = document.createElement('div');
+  dropdown.className = 'sg-dropdown';
+  dropdown.setAttribute('aria-hidden', 'true');
+  const list = document.createElement('ul');
+  list.className = 'sg-options-list';
+  list.id = `${id}-options`;
+  list.setAttribute('role', 'listbox');
+  const choices = Array.from(select.options).filter(option => !option.disabled);
+  choices.forEach((nativeOption, index) => {
+    const optionConfig = preset?.options?.[nativeOption.value] || {};
+    const option = document.createElement('li');
+    option.className = 'sg-option';
+    option.id = `${id}-option-${index}`;
+    option.setAttribute('role', 'option');
+    option.setAttribute('aria-selected', 'false');
+    option.dataset.value = nativeOption.value;
+    option.style.setProperty('--sg-thesis-option-delay', `${Math.min(index, 7) * 18}ms`);
+
+    const tone = optionConfig.tone || preset?.tone || 'cyan';
+    const icon = crearIconoOpcion({
+      icon: optionConfig.icon || preset?.icon,
+      swatch: optionConfig.swatch
+    }, tone);
+    const info = document.createElement('span');
+    info.className = 'sg-option-info';
+    const optionTitle = document.createElement('span');
+    optionTitle.className = 'sg-option-title';
+    optionTitle.textContent = optionConfig.title || nativeOption.textContent.trim();
+    const optionDescription = document.createElement('span');
+    optionDescription.className = 'sg-option-desc';
+    optionDescription.textContent = optionConfig.description || nativeOption.dataset.description || `Opción para ${labelText.toLocaleLowerCase()}`;
+    const check = document.createElement('span');
+    check.className = 'sg-check-icon';
+    check.setAttribute('aria-hidden', 'true');
+    const checkIcon = document.createElement('i');
+    checkIcon.className = 'ti ti-check';
+    check.append(checkIcon);
+    info.append(optionTitle, optionDescription);
+    option.append(icon, info, check);
+    list.append(option);
+  });
+  dropdown.append(list);
+
+  const errorMessage = document.createElement('span');
+  errorMessage.className = 'sg-thesis-error';
+  errorMessage.id = `${id}-error`;
+  errorMessage.setAttribute('role', 'alert');
+  errorMessage.hidden = true;
+
+  select.parentNode.insertBefore(wrapper, select);
+  wrapper.append(select, trigger, dropdown, errorMessage);
+  select.classList.add('sg-native-select');
+  select.tabIndex = -1;
+  select.setAttribute('aria-hidden', 'true');
+  select.dataset.thesisPicker = 'true';
+  select.dataset.thesisPickerTrigger = trigger.id;
+
+  const describedBy = select.getAttribute('aria-describedby');
+  const showError = () => {
+    errorMessage.textContent = select.validationMessage || 'Selecciona una opción para continuar.';
+    errorMessage.hidden = false;
+    wrapper.classList.add('sg-invalid');
+    trigger.setAttribute('aria-invalid', 'true');
+    trigger.setAttribute('aria-describedby', [describedBy, errorMessage.id].filter(Boolean).join(' '));
+    trigger.focus();
+  };
+  const clearError = () => {
+    wrapper.classList.remove('sg-invalid');
+    errorMessage.textContent = '';
+    errorMessage.hidden = true;
+    trigger.removeAttribute('aria-invalid');
+    if (describedBy) trigger.setAttribute('aria-describedby', describedBy);
+    else trigger.removeAttribute('aria-describedby');
+  };
+
+  let highlightedIndex = -1;
+  const getOptions = () => Array.from(list.querySelectorAll('.sg-option'));
+  const clearHighlight = () => {
+    getOptions().forEach(option => option.classList.remove('sg-focused'));
+    trigger.removeAttribute('aria-activedescendant');
+    highlightedIndex = -1;
+  };
+  const highlight = index => {
+    const options = getOptions();
+    if (!options.length) return;
+    highlightedIndex = (index + options.length) % options.length;
+    options.forEach((option, optionIndex) => option.classList.toggle('sg-focused', optionIndex === highlightedIndex));
+    trigger.setAttribute('aria-activedescendant', options[highlightedIndex].id);
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    options[highlightedIndex].scrollIntoView({ block: 'nearest', behavior });
+  };
+  const close = (returnFocus = false) => {
+    wrapper.classList.remove('sg-open');
+    trigger.setAttribute('aria-expanded', 'false');
+    dropdown.setAttribute('aria-hidden', 'true');
+    clearHighlight();
+    if (returnFocus) trigger.focus();
+  };
+  const open = () => {
+    if (select.disabled || !getOptions().length) return;
+    wrapper.classList.add('sg-open');
+    trigger.setAttribute('aria-expanded', 'true');
+    dropdown.setAttribute('aria-hidden', 'false');
+    const selectedIndex = getOptions().findIndex(option => option.dataset.value === select.value);
+    highlight(selectedIndex >= 0 ? selectedIndex : 0);
+  };
+  const choose = option => {
+    if (!option || select.disabled) return;
+    select.value = option.dataset.value;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    close(true);
+  };
+
+  trigger.addEventListener('click', event => {
+    event.stopPropagation();
+    if (wrapper.classList.contains('sg-open')) close();
+    else open();
+  });
+  trigger.addEventListener('keydown', event => {
+    const isOpen = wrapper.classList.contains('sg-open');
+    if (!isOpen && ['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(event.key)) {
+      event.preventDefault();
+      open();
+      return;
+    }
+    if (!isOpen) return;
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      highlight(highlightedIndex + 1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      highlight(highlightedIndex - 1);
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      highlight(0);
+    } else if (event.key === 'End') {
+      event.preventDefault();
+      highlight(getOptions().length - 1);
+    } else if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      choose(getOptions()[highlightedIndex]);
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      close(true);
+    } else if (event.key === 'Tab') {
+      close();
+    }
+  });
+  list.addEventListener('click', event => {
+    const option = event.target.closest('.sg-option');
+    if (option) choose(option);
+  });
+  label?.addEventListener('click', event => {
+    event.preventDefault();
+    trigger.focus();
+  });
+  select.addEventListener('invalid', event => {
+    event.preventDefault();
+    showError();
+  });
+  select.addEventListener('change', () => {
+    select.setCustomValidity('');
+    if (select.validity.valid) clearError();
+    sincronizarSelectorTesis(wrapper);
+  });
+  document.addEventListener('click', event => {
+    if (!wrapper.contains(event.target)) close();
+  });
+  sincronizarSelectorTesis(wrapper);
+}
+
+function inicializarSelectoresTesis(root = document.getElementById('formCotizacion')) {
+  root?.querySelectorAll('select').forEach(select => inicializarSelectorTesis(select));
+}
+
+function actualizarSelectoresTesis(root = document.getElementById('formCotizacion')) {
+  root?.querySelectorAll('.sg-thesis-select').forEach(sincronizarSelectorTesis);
+}
+
+function renderServiciosConfiguradosTesis(catalog) {
+  const section = document.getElementById('tesisConfiguredServices');
+  const list = document.getElementById('tesisConfiguredServicesList');
+  if (!section || !list) return;
+
+  const previous = new Map(Array.from(list.querySelectorAll('[data-thesis-service]')).map(card => [
+    card.dataset.thesisService,
+    {
+      checked: card.querySelector('[data-thesis-service-enabled]')?.checked || false,
+      quantity: card.querySelector('[data-thesis-service-quantity]')?.value || '1',
+      fields: Object.fromEntries(Array.from(card.querySelectorAll('[data-thesis-service-field]'))
+        .map(input => [input.dataset.thesisServiceField, input.value]))
+    }
+  ]));
+  const services = Object.entries(catalog.customServices || {})
+    .filter(([, service]) => service?.active && service.placement === 'tesis');
+
+  list.replaceChildren();
+  services.forEach(([id, service]) => {
+    const saved = previous.get(id) || {};
+    const fieldset = document.createElement('fieldset');
+    fieldset.className = 'form-section';
+    fieldset.dataset.thesisService = id;
+    const legend = document.createElement('legend');
+    legend.className = 'text-lg font-bold';
+    legend.textContent = service.name;
+    fieldset.append(legend);
+
+    const toggleLabel = document.createElement('label');
+    toggleLabel.className = 'sg-switch form-group';
+    const toggle = document.createElement('input');
+    toggle.type = 'checkbox';
+    toggle.setAttribute('role', 'switch');
+    toggle.dataset.thesisServiceEnabled = '';
+    toggle.checked = Boolean(saved.checked);
+    const track = document.createElement('span');
+    track.className = 'sg-switch-track';
+    track.setAttribute('aria-hidden', 'true');
+    const thumb = document.createElement('span');
+    thumb.className = 'sg-switch-thumb';
+    track.append(thumb);
+    const toggleText = document.createElement('span');
+    toggleText.className = 'sg-switch-label';
+    toggleText.textContent = `Agregar ${service.name}`;
+    toggleLabel.append(toggle, track, toggleText);
+    fieldset.append(toggleLabel);
+
+    if (service.pricingMode === 'unit') {
+      const group = document.createElement('div');
+      group.className = 'form-group';
+      const label = document.createElement('label');
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.className = 'sg-quantity-input';
+      input.min = '1';
+      input.step = '1';
+      input.required = true;
+      input.value = saved.quantity || '';
+      input.dataset.thesisServiceQuantity = '';
+      label.textContent = service.quantityLabel || 'Cantidad';
+      label.htmlFor = `tesis-service-${id}-quantity`;
+      input.id = label.htmlFor;
+      group.append(label, input);
+      fieldset.append(group);
+    }
+
+    (service.fields || []).forEach(field => {
+      const group = document.createElement('div');
+      group.className = 'form-group';
+      const label = document.createElement('label');
+      const input = field.type === 'select'
+        ? document.createElement('select')
+        : document.createElement('input');
+      input.required = field.required;
+      input.dataset.thesisServiceField = field.id;
+      input.dataset.thesisServiceFieldLabel = field.label;
+      input.id = `tesis-service-${id}-${field.id}`;
+      if (field.type === 'select') {
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = `Selecciona ${field.label.toLocaleLowerCase()}`;
+        placeholder.disabled = field.required;
+        placeholder.selected = true;
+        input.append(placeholder);
+        (field.options || []).forEach(option => {
+          const optionElement = document.createElement('option');
+          optionElement.value = option.id;
+          optionElement.textContent = option.label;
+          if (field.priceAffectsTotal && Number.isFinite(option.price)) {
+            const unit = service.pricingMode === 'unit' ? 'por unidad' : 'por servicio';
+            optionElement.dataset.description = `RD$${option.price.toFixed(2)} ${unit}`;
+          } else {
+            optionElement.dataset.description = `Opción para ${field.label.toLocaleLowerCase()}`;
+          }
+          input.append(optionElement);
+        });
+        input.value = saved.fields?.[field.id] || '';
+      } else if (field.type === 'number') {
+        input.type = 'number';
+        input.min = '0';
+        input.step = 'any';
+      } else {
+        input.type = 'text';
+        input.maxLength = 300;
+      }
+      if (field.type !== 'select') input.value = saved.fields?.[field.id] || '';
+      label.htmlFor = input.id;
+      label.textContent = field.label;
+      group.append(label, input);
+      fieldset.append(group);
+    });
+
+    list.append(fieldset);
+  });
+  inicializarSelectoresTesis(list);
+  section.style.display = services.length ? '' : 'none';
+}
+
+function recopilarServiciosConfiguradosTesis() {
+  const catalog = window.ServigacoPricing.get();
+  const services = [];
+  document.querySelectorAll('#tesisConfiguredServicesList [data-thesis-service]').forEach(card => {
+    if (!card.querySelector('[data-thesis-service-enabled]')?.checked) return;
+    const id = card.dataset.thesisService;
+    const service = catalog.customServices?.[id];
+    if (!service?.active || service.placement !== 'tesis') return;
+
+    const quantityInput = card.querySelector('[data-thesis-service-quantity]');
+    if (quantityInput && !quantityInput.reportValidity()) {
+      throw new Error(`Indica una cantidad válida para ${service.name}.`);
+    }
+    const quantity = quantityInput ? Number(quantityInput.value) : 1;
+    const fields = [];
+    const selections = {};
+    for (const input of card.querySelectorAll('[data-thesis-service-field]')) {
+      if (input.required && !input.value.trim()) input.setCustomValidity('Completa este campo.');
+      else input.setCustomValidity('');
+      if (!input.reportValidity()) {
+        throw new Error(`Completa el campo "${input.dataset.thesisServiceFieldLabel}" de ${service.name}.`);
+      }
+      let value = input.value.trim();
+      if (input.tagName === 'SELECT') {
+        if (value) selections[input.dataset.thesisServiceField] = value;
+        value = input.selectedOptions[0]?.textContent?.trim() || '';
+      } else if (input.type === 'number' && value !== '') {
+        value = Number(value);
+        if (!Number.isFinite(value) || value < 0) {
+          throw new Error(`El campo "${input.dataset.thesisServiceFieldLabel}" debe ser un número no negativo.`);
+        }
+      }
+      if (value !== '') fields.push({ label: input.dataset.thesisServiceFieldLabel, value: String(value) });
+    }
+
+    const price = window.ServigacoPricing.calculateCustomServicePrice(service, quantity, selections);
+    const details = [];
+    if (service.pricingMode === 'unit') details.push(`${service.quantityLabel || 'Cantidad'}: ${price.quantity}`);
+    details.push(...fields.map(field => `${field.label}: ${field.value}`));
+    services.push({
+      id,
+      name: service.name,
+      description: details.join(' · ') || service.name,
+      quantity: price.quantity,
+      unitPrice: price.unitPrice,
+      total: price.total
+    });
+  });
+  return services;
+}
+
 function aplicarCatalogoPreciosTesis(catalog) {
   const prices = catalog.tesis;
   PRECIOS = {
@@ -243,6 +765,7 @@ function aplicarCatalogoPreciosTesis(catalog) {
     VINIL: prices.entrega.vinil
   };
 
+  renderServiciosConfiguradosTesis(catalog);
   actualizarTablaPreciosTesis();
   if (ultimaCotizacion && datosUltimaCotizacion && !cotizacionHistoricaCargada) {
     calcular({ soloVista: true });
@@ -317,6 +840,7 @@ function actualizarVista() {
       }
     }
   }
+  actualizarSelectoresTesis();
 }
 
 
@@ -346,6 +870,7 @@ function configurarModoCarta() {
 function toggleSeccionCD() {
   const mostrar = elementos.llevaCd.value === 'si';
   elementos.cdSection.style.display = mostrar ? 'block' : 'none';
+  actualizarSelectoresTesis();
 }
 
 /**
@@ -543,6 +1068,7 @@ function calcularServiciosAdicionales(tomos) {
 async function calcular({ soloVista = false } = {}) {
   try {
 
+    const serviciosConfigurados = recopilarServiciosConfiguradosTesis();
     if (!soloVista) cotizacionHistoricaCargada = false;
     const idCotizacion = soloVista && datosUltimaCotizacion
       ? datosUltimaCotizacion.idCotizacion
@@ -565,7 +1091,8 @@ async function calcular({ soloVista = false } = {}) {
     const { lomoVal, cdVal, lomo, cd, cantidadCd } = calcularServiciosAdicionales(tomos);
     
     // Total
-    const total = impresion * tomos + empastado + lomoVal + cdVal;
+    const total = impresion * tomos + empastado + lomoVal + cdVal
+      + serviciosConfigurados.reduce((sum, service) => sum + service.total, 0);
     const totalRedondeado = redondearA5(total);
     
     // Guardar datos completos para la generación de PDF
@@ -584,6 +1111,7 @@ async function calcular({ soloVista = false } = {}) {
       cdVal,
       cd,
       cantidadCd,
+      serviciosConfigurados,
       totalRedondeado,
       idCotizacion,
       fecha
@@ -600,6 +1128,9 @@ datosParaGuardar = {
   total: totalRedondeado.toFixed(2),
   detalle: `📚 ${tomos} tomos - RD$${totalRedondeado.toFixed(2)}\n📄 ${nombreColor(elementos.tamano.value)} / ${nombreColor(elementos.papel.value)}\n📕 ${nombreColor(elementos.tipoEmpastado.value)}`
 };
+if (serviciosConfigurados.length) {
+  datosParaGuardar.detalle += `\n${serviciosConfigurados.map(service => `➕ ${service.name} - RD$${service.total.toFixed(2)}`).join('\n')}`;
+}
 ultimaCotizacion = generarHTMLCotizacion(datosUltimaCotizacion);
 
 
@@ -698,6 +1229,7 @@ function generarEncabezado(idCotizacion, fecha) {
 function generarTablaDetalle(datos) {
   const filaLomo = datos.lomo ? generarFilaLomo(datos.tomos, datos.lomoVal) : '';
   const filaCD = (datos.cd && datos.cantidadCd) ? generarFilaCD(datos.cantidadCd, datos.cdVal) : '';
+  const filasServicios = (datos.serviciosConfigurados || []).map(generarFilaServicioConfigurado).join('');
 
   return `
     <div style="overflow-x: auto; width: 100%; margin-bottom: 1rem; border-radius: 0.5rem; border: 1px solid var(--border-light);">
@@ -716,9 +1248,32 @@ function generarTablaDetalle(datos) {
           ${generarFilaEmpastado(datos)}
           ${filaLomo}
           ${filaCD}
+          ${filasServicios}
         </tbody>
       </table>
     </div>
+  `;
+}
+
+function escaparHTML(valor) {
+  return String(valor ?? '').replace(/[&<>"']/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[character]);
+}
+
+function generarFilaServicioConfigurado(service) {
+  return `
+    <tr>
+      <td><strong>${escaparHTML(service.name)}</strong></td>
+      <td>${escaparHTML(service.description)}</td>
+      <td class="center">${service.quantity}</td>
+      <td class="right">RD$${formatearMonto(service.unitPrice)}</td>
+      <td class="right">RD$${formatearMonto(service.total)}</td>
+    </tr>
   `;
 }
 
@@ -1102,9 +1657,9 @@ function reiniciar() {
     if (campo) campo.value = '';
   });
 
-  // Restablecer tomos a 1
+  // Mantener la cantidad de tomos vacía hasta que se introduzca.
   const tomos = document.getElementById('tomos');
-  if (tomos) tomos.value = 1;
+  if (tomos) tomos.value = '';
 
   // Restablecer selectores
   elementos.tamano.value = 'carta';
@@ -1152,6 +1707,7 @@ function inicializar() {
   
   // Cargar datos guardados (si existen)
   cargarTesisLocalStorage();
+  inicializarSelectoresTesis();
   
   // Configurar eventos principales
   [elementos.tamano, elementos.papel, elementos.tipoEmpastado].forEach(el => {
@@ -1790,7 +2346,7 @@ function actualizarIconoAuth(user) {
     btn.innerHTML = `<span class="mr-1 text-lg">${window.servigacoIcon('logout')}</span><span class="font-bold">Salir (${nombre})</span>`;
     btn.className = "flex items-center text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm px-3 py-2 mr-2 transition-all shadow-md";
   } else {
-    btn.innerHTML = `<span id="iconAuth">${window.servigacoIcon('lock-open')}</span>`;
+    btn.innerHTML = `<span id="iconAuth">${window.servigacoIcon('lock')}</span>`;
     btn.className = "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all";
   }
 }

@@ -24,7 +24,7 @@
 
 </head>
 
-<body>
+<body class="tesis-page">
   <main class="container">
     
     <!-- ========================================
@@ -44,7 +44,7 @@
       <!-- Título principal -->
       <header class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Calculadora de Tesis</h1>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center justify-center gap-2">
           <button type="button" id="btnDashboard" class="py-2 px-5 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-500 to-indigo-700 hover:from-indigo-400 hover:to-indigo-600 shadow-md shadow-indigo-500/20 transform transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 text-sm">
             <span class="text-lg"><i class="ti ti-chart-bar" aria-hidden="true"></i></span> Dashboard
           </button>
@@ -64,10 +64,11 @@
         
         <!-- Precio Especial ITLA -->
         <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label for="itlaCheckbox" class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-900/20 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 transition-colors">
-            <input type="checkbox" id="itlaCheckbox" name="itlaCheckbox" class="w-5 h-5 text-indigo-600 rounded border-indigo-300 focus:ring-indigo-500 cursor-pointer">
+          <label for="itlaCheckbox" class="sg-switch cursor-pointer p-3 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-900/20 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 transition-colors">
+            <input type="checkbox" role="switch" id="itlaCheckbox" name="itlaCheckbox">
+            <span class="sg-switch-track" aria-hidden="true"><span class="sg-switch-thumb"></span></span>
             <span class="label-icon m-0" style="margin-bottom: 0;"><i class="ti ti-school" aria-hidden="true"></i></span>
-            <span class="font-bold text-indigo-900 dark:text-indigo-200">UNIVERIDAD ITLA</span>
+            <span class="sg-switch-label font-bold text-indigo-900 dark:text-indigo-200">UNIVERIDAD ITLA</span>
           </label>
         </div>
 
@@ -114,8 +115,9 @@
               type="number" 
               id="bn" 
               name="bn"
+              class="sg-quantity-input"
               min="0" 
-              value="0" placeholder="Ej: 50" aria-label="Cantidad de páginas en blanco y negro"
+              placeholder="Ej: 50" aria-label="Cantidad de páginas en blanco y negro"
             />
           </div>
 
@@ -128,8 +130,9 @@
               type="number" 
               id="color" 
               name="color"
+              class="sg-quantity-input"
               min="0" 
-              value="0" placeholder="Ej: 10" aria-label="Cantidad de páginas a color"
+              placeholder="Ej: 10" aria-label="Cantidad de páginas a color"
             />
           </div>
         </div>
@@ -145,8 +148,9 @@
               type="number" 
               id="paginas" 
               name="paginas"
+              class="sg-quantity-input"
               min="1" 
-              value="1" placeholder="Ej: 100" aria-label="Total de páginas"
+              placeholder="Ej: 100" aria-label="Total de páginas"
             />
           </div>
         </div>
@@ -161,7 +165,7 @@
             type="number" 
             id="tomos" 
             name="tomos"
-            value="1" 
+            class="sg-quantity-input"
             min="1" 
             max="10"
             required aria-label="Número de tomos a empastar"
@@ -236,12 +240,19 @@
               type="number" 
               id="cantidadCd" 
               name="cantidadCd"
+              class="sg-quantity-input"
               min="1" 
               max="10"
-              value="1" aria-label="Número de CDs a incluir"
+              aria-label="Número de CDs a incluir"
             />
           </div>
         </div>
+
+        <section id="tesisConfiguredServices" aria-label="Servicios adicionales configurados" style="display: none; margin-bottom: 1.5rem;">
+          <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3">Servicios adicionales</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Selecciona los servicios que se incluirán en esta cotización.</p>
+          <div id="tesisConfiguredServicesList" class="space-y-4"></div>
+        </section>
 
         <!-- Grupo de botones -->
         <div class="button-group">

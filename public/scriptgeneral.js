@@ -61,6 +61,143 @@ let preciosEmpastado = {
 };
 let preciosPlastificado = window.ServigacoPricing.get().general.plastificado;
 let preciosPloteo = window.ServigacoPricing.get().general.ploteo;
+let servicioConfiguradoActual = null;
+
+function renderServiciosConfigurados(catalog = window.ServigacoPricing.get()) {
+  const select = document.getElementById('tipoServicio');
+  const list = document.getElementById('sgDropdownList');
+  if (!select || !list) return;
+  const selectedValue = select.value;
+  const availableServices = new Set();
+  select.querySelectorAll('option[data-configured-service]').forEach(option => option.remove());
+  list.querySelectorAll('[data-configured-service]').forEach(option => option.remove());
+  Object.entries(catalog.customServices || {}).forEach(([id, service]) => {
+    if (!service?.active || service.placement !== 'general') return;
+    const value = `servicio-${id}`;
+    availableServices.add(value);
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = service.name;
+    option.dataset.configuredService = 'true';
+    select.append(option);
+
+    const item = document.createElement('li');
+    item.className = 'sg-option';
+    item.setAttribute('role', 'option');
+    item.setAttribute('aria-selected', 'false');
+    item.dataset.value = value;
+    item.dataset.configuredService = 'true';
+    const icon = document.createElement('div');
+    icon.className = 'sg-option-icon-box sg-icon-cyan';
+    icon.innerHTML = '<i class="ti ti-tool" aria-hidden="true"></i>';
+    const info = document.createElement('div');
+    info.className = 'sg-option-info';
+    const title = document.createElement('span');
+    title.className = 'sg-option-title';
+    title.textContent = service.name;
+    const description = document.createElement('span');
+    description.className = 'sg-option-desc';
+    description.textContent = service.pricingMode === 'fixed' ? 'Servicio adicional · precio fijo' : `Servicio adicional · ${service.quantityLabel || 'Cantidad'}`;
+    const check = document.createElement('span');
+    check.className = 'sg-check-icon';
+    check.setAttribute('aria-hidden', 'true');
+    check.textContent = '✓';
+    info.append(title, description);
+    item.append(icon, info, check);
+    list.append(item);
+  });
+  if (selectedValue.startsWith('servicio-')) {
+    select.value = availableServices.has(selectedValue) ? selectedValue : '';
+    select.dispatchEvent(new Event('change'));
+  }
+}
+
+function renderCamposServicioConfigurado(service) {
+  const container = document.getElementById('configuredServiceFields');
+  if (!container) return;
+  container.replaceChildren();
+
+  const fields = service.fields || [];
+  container.style.display = fields.length ? 'grid' : 'none';
+  fields.forEach(field => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'group';
+    const id = `configured-${service.id}-${field.id}`;
+    const label = document.createElement('label');
+    label.className = 'block text-sm font-bold text-gray-700 mb-2';
+    label.htmlFor = id;
+    label.textContent = field.label;
+    const input = field.type === 'select'
+      ? document.createElement('select')
+      : document.createElement('input');
+    input.id = id;
+    input.className = 'w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium';
+    input.dataset.configuredField = field.id;
+    input.dataset.configuredFieldLabel = field.label;
+    input.required = field.required;
+    if (field.type === 'select') {
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = `Selecciona ${field.label.toLocaleLowerCase()}`;
+      placeholder.disabled = field.required;
+      placeholder.selected = true;
+      input.append(placeholder);
+      (field.options || []).forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option.id;
+        optionElement.textContent = option.label;
+        input.append(optionElement);
+      });
+    } else if (field.type === 'number') {
+      input.type = 'number';
+      input.min = '0';
+      input.step = 'any';
+    } else if (field.type === 'text') {
+      input.maxLength = 300;
+    }
+    wrapper.append(label, input);
+    container.append(wrapper);
+  });
+}
+
+function limpiarFormularioPersonalizado(limpiarValores = false) {
+  servicioConfiguradoActual = null;
+  const form = document.getElementById('formPersonalizado');
+  const heading = form?.querySelector('h3');
+  if (heading) heading.innerHTML = '<span class="text-2xl"><i class="ti ti-tools" aria-hidden="true"></i></span> Servicio Personalizado';
+  const description = document.getElementById('descPersonalizado');
+  const quantity = document.getElementById('cantPersonalizado');
+  const price = document.getElementById('precioPersonalizado');
+  const quantityGroup = document.getElementById('personalQuantityGroup');
+  const descriptionGroup = document.getElementById('personalDescriptionGroup');
+  const priceGroup = document.getElementById('personalPriceGroup');
+  if (description) {
+    description.readOnly = false;
+    if (limpiarValores) description.value = '';
+  }
+  if (quantity) {
+    quantity.disabled = false;
+    quantity.required = false;
+    quantity.setCustomValidity('');
+    if (limpiarValores) quantity.value = '';
+  }
+  if (price) {
+    price.readOnly = false;
+    if (limpiarValores) price.value = '';
+  }
+  if (descriptionGroup) descriptionGroup.style.display = '';
+  if (quantityGroup) quantityGroup.style.display = '';
+  if (priceGroup) priceGroup.style.display = '';
+  const quantityLabel = document.getElementById('personalizedQuantityLabel');
+  if (quantityLabel) quantityLabel.textContent = 'Cantidad';
+  const fields = document.getElementById('configuredServiceFields');
+  if (fields) {
+    fields.replaceChildren();
+    fields.style.display = 'none';
+  }
+  const summary = document.getElementById('resumenPersonalizado');
+  if (summary) summary.style.display = 'none';
+}
 
 function aplicarCatalogoPreciosGeneral(catalog) {
   const prices = catalog.general;
@@ -76,6 +213,7 @@ function aplicarCatalogoPreciosGeneral(catalog) {
   preciosPlastificado = prices.plastificado;
   preciosPloteo = prices.ploteo;
   preciosBooklet = catalog.booklet;
+  renderServiciosConfigurados(catalog);
 
   if (typeof inicializarPreciosBooklet === 'function') {
     actualizarEtiquetasPreciosBooklet();
@@ -272,6 +410,19 @@ function recalcularCotizacionConCatalogo() {
       const unitario = data.precioManual > 0 ? item.precioUnitario : preciosPlastificado[data.tamano] || 0;
       item.precioUnitario = unitario;
       item.precio = unitario * item.cantidad;
+    } else if (data.tipo === 'servicio-configurado') {
+      const service = window.ServigacoPricing.get().customServices?.[data.id];
+      if (!service) return;
+      try {
+        const price = window.ServigacoPricing.calculateCustomServicePrice(service, item.cantidad, data.selections);
+        data.pricingMode = service.pricingMode;
+        item.nombre = service.name;
+        item.cantidad = price.quantity;
+        item.precioUnitario = price.unitPrice;
+        item.precio = price.total;
+      } catch (error) {
+        console.error('[Servicios] No se pudo recalcular el servicio configurado:', error);
+      }
     }
   });
   actualizarCotizacion();
@@ -336,6 +487,29 @@ function cambiarCantidad(index, delta) {
   if (nuevaCantidad < 1) return;
 
   const datosPrecio = item.datosPrecio;
+  if (datosPrecio?.tipo === 'servicio-configurado') {
+    const service = window.ServigacoPricing.get().customServices?.[datosPrecio.id];
+    if (service?.pricingMode === 'fixed') return;
+    if (!service) {
+      if (datosPrecio.pricingMode !== 'unit') return;
+      item.cantidad = nuevaCantidad;
+      item.precio = item.precioUnitario * nuevaCantidad;
+      actualizarCotizacion();
+      return;
+    }
+    try {
+      const price = window.ServigacoPricing.calculateCustomServicePrice(service, nuevaCantidad, datosPrecio.selections);
+      item.cantidad = price.quantity;
+      item.precioUnitario = price.unitPrice;
+      item.precio = price.total;
+      datosPrecio.pricingMode = service.pricingMode;
+    } catch (error) {
+      mostrarNotificacion(error.message, 'error');
+      return;
+    }
+    actualizarCotizacion();
+    return;
+  }
   if (datosPrecio?.tipo === 'impresion') {
     const precio = datosPrecio.precioManual > 0
       ? datosPrecio.precioManual * nuevaCantidad
@@ -506,13 +680,13 @@ function actualizarCotizacion() {
   if (cuerpoTabla) {
     cuerpoTabla.innerHTML = cotizacion.map((item, i) => `
       <tr class="bg-white dark:bg-gray-900 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors duration-150 group border-b border-gray-50 dark:border-gray-700 last:border-none">
-        <td class="px-6 py-4 text-gray-800 dark:text-gray-100 font-medium break-words">${item.nombre}</td>
-        <td class="px-6 py-4 text-gray-600 dark:text-gray-300 text-sm break-words">${item.descripcion}</td>
+        <td class="px-6 py-4 text-gray-800 dark:text-gray-100 font-medium break-words">${escapeHtml(item.nombre)}</td>
+        <td class="px-6 py-4 text-gray-600 dark:text-gray-300 text-sm break-words whitespace-pre-line">${escapeHtml(item.descripcion)}</td>
         <td class="px-6 py-4 text-center text-gray-700 dark:text-gray-200 font-medium bg-gray-50/50 dark:bg-gray-700/50">
           <div class="flex items-center justify-center gap-2">
-            <button onclick="cambiarCantidad(${i}, -1)" class="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-600 font-bold flex items-center justify-center text-xs transition-colors" type="button">−</button>
+            <button onclick="cambiarCantidad(${i}, -1)" class="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-600 font-bold flex items-center justify-center text-xs transition-colors" type="button" aria-label="Reducir cantidad" ${item.datosPrecio?.tipo === 'servicio-configurado' && item.datosPrecio.pricingMode === 'fixed' ? 'disabled' : ''}>−</button>
             <span>${item.cantidad || 1}</span>
-            <button onclick="cambiarCantidad(${i}, 1)" class="w-6 h-6 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 font-bold flex items-center justify-center text-xs transition-colors" type="button">+</button>
+            <button onclick="cambiarCantidad(${i}, 1)" class="w-6 h-6 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 font-bold flex items-center justify-center text-xs transition-colors" type="button" aria-label="Aumentar cantidad" ${item.datosPrecio?.tipo === 'servicio-configurado' && item.datosPrecio.pricingMode === 'fixed' ? 'disabled' : ''}>+</button>
           </div>
         </td>
         <td class="px-6 py-4 text-right text-gray-600 dark:text-gray-300 font-medium">RD$${(item.precioUnitario || item.precio).toFixed(2)}</td>
@@ -530,6 +704,16 @@ function actualizarCotizacion() {
 // ============================================
 // ➕ AGREGAR SERVICIOS
 // ============================================
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[character]);
+}
 
 function agregarImpresion() {
   const cant = parseInt(document.getElementById('cantidadPaginas')?.value);
@@ -851,6 +1035,75 @@ function agregarPlastificado() {
 }
 
 function agregarPersonalizado() {
+  const configured = servicioConfiguradoActual;
+  if (configured) {
+    const quantity = document.getElementById('cantPersonalizado');
+    if (quantity && !quantity.reportValidity()) return;
+    const fieldInputs = Array.from(document.querySelectorAll('#configuredServiceFields [data-configured-field]'));
+    for (const input of fieldInputs) {
+      if (input.required && !input.value.trim()) {
+        input.setCustomValidity('Completa este campo.');
+      } else {
+        input.setCustomValidity('');
+      }
+      if (!input.reportValidity()) return;
+    }
+
+    const fields = [];
+    const selections = {};
+    for (const input of fieldInputs) {
+      let value = input.value.trim();
+      if (input.tagName === 'SELECT') {
+        if (value) selections[input.dataset.configuredField] = value;
+        value = input.selectedOptions[0]?.textContent?.trim() || '';
+      } else if (input.type === 'number' && value !== '') {
+        value = Number(value);
+        if (!Number.isFinite(value) || value < 0) {
+          mostrarNotificacion(`El campo "${input.dataset.configuredFieldLabel}" debe ser un número no negativo.`, 'error');
+          input.focus();
+          return;
+        }
+      }
+      if (value !== '') {
+        fields.push({ label: input.dataset.configuredFieldLabel, value: String(value) });
+      }
+    }
+
+    try {
+      const price = window.ServigacoPricing.calculateCustomServicePrice(configured, Number(quantity?.value || 1), selections);
+      const descriptionParts = [];
+      if (configured.pricingMode === 'unit') {
+        descriptionParts.push(`${configured.quantityLabel}: ${price.quantity}`);
+      }
+      descriptionParts.push(...fields.map(field => `${field.label}: ${field.value}`));
+      agregarACotizacion({
+        nombre: configured.name,
+        descripcion: descriptionParts.join(' · ') || configured.name,
+        cantidad: price.quantity,
+        precioUnitario: price.unitPrice,
+        precio: price.total,
+        datosPrecio: {
+          tipo: 'servicio-configurado',
+          id: configured.id,
+          pricingMode: configured.pricingMode,
+          selections,
+          fields
+        }
+      });
+    } catch (error) {
+      mostrarNotificacion(error.message, 'error');
+      return;
+    }
+
+    limpiarFormularioPersonalizado(true);
+    const select = document.getElementById('tipoServicio');
+    if (select) {
+      select.value = '';
+      select.dispatchEvent(new Event('change'));
+    }
+    return;
+  }
+
   const desc = document.getElementById('descPersonalizado')?.value;
   const cant = parseInt(document.getElementById('cantPersonalizado')?.value || 1);
   const precioUnit = parseFloat(document.getElementById('precioPersonalizado')?.value || 0);
@@ -859,16 +1112,13 @@ function agregarPersonalizado() {
   if (!cant || cant <= 0) { mostrarNotificacion('Cantidad inválida', 'error'); return; }
   if (precioUnit <= 0) { mostrarNotificacion('Ingrese el precio unitario', 'error'); return; }
 
-  const total = cant * precioUnit;
-
   agregarACotizacion({
     nombre: 'Servicio Personalizado',
     descripcion: desc,
     cantidad: cant,
     precioUnitario: precioUnit,
-    precio: total
+    precio: cant * precioUnit
   });
-  
   limpiarFormulario('formPersonalizado');
 }
 
@@ -985,32 +1235,6 @@ function marcarPaginaActiva() {
   else if (pag === 'calculadora_general.html') document.getElementById('navGeneral')?.classList.add('active');
 }
 
-function configurarMenuMovil() {
-  const toggle = document.querySelector('.nav-toggle');
-  const links = document.querySelector('.nav-links');
-  if (!toggle || !links) return;
-
-  toggle.addEventListener('click', () => {
-    const exp = toggle.getAttribute('aria-expanded') === 'true';
-    toggle.setAttribute('aria-expanded', !exp);
-    links.classList.toggle('active');
-  });
-
-  document.querySelectorAll('.nav-link').forEach(l => {
-    l.addEventListener('click', () => {
-      toggle.setAttribute('aria-expanded', 'false');
-      links.classList.remove('active');
-    });
-  });
-
-  document.addEventListener('click', e => {
-    if (!e.target.closest('.main-nav')) {
-      toggle.setAttribute('aria-expanded', 'false');
-      links.classList.remove('active');
-    }
-  });
-}
-
 // ============================================
 // 🎯 EVENT LISTENERS
 // ============================================
@@ -1021,6 +1245,39 @@ function inicializarEventListeners() {
     tipoSrv.addEventListener('change', e => {
       const val = e.target.value;
       document.querySelectorAll('.form-servicio').forEach(f => f.style.display = 'none');
+      const esConfigurado = val.startsWith('servicio-');
+      limpiarFormularioPersonalizado(Boolean(servicioConfiguradoActual) || esConfigurado);
+      if (esConfigurado) {
+        const id = val.slice('servicio-'.length);
+        const service = window.ServigacoPricing.get().customServices?.[id];
+        if (service?.active && service.placement === 'general') {
+          servicioConfiguradoActual = { id, ...service };
+          const form = document.getElementById('formPersonalizado');
+          const quantity = document.getElementById('cantPersonalizado');
+          const price = document.getElementById('precioPersonalizado');
+          const descriptionGroup = document.getElementById('personalDescriptionGroup');
+          const quantityGroup = document.getElementById('personalQuantityGroup');
+          const priceGroup = document.getElementById('personalPriceGroup');
+          if (form) form.style.display = 'block';
+          const heading = form?.querySelector('h3');
+          if (heading) heading.textContent = service.name;
+          if (descriptionGroup) descriptionGroup.style.display = 'none';
+          if (priceGroup) priceGroup.style.display = 'none';
+          if (quantityGroup) quantityGroup.style.display = service.pricingMode === 'fixed' ? 'none' : '';
+          const quantityLabel = document.getElementById('personalizedQuantityLabel');
+          if (quantityLabel) quantityLabel.textContent = service.quantityLabel || 'Cantidad';
+          if (quantity) {
+            quantity.value = '';
+            quantity.disabled = service.pricingMode === 'fixed';
+            quantity.required = service.pricingMode === 'unit';
+            quantity.min = '1';
+          }
+          if (price) price.readOnly = true;
+          renderCamposServicioConfigurado(servicioConfiguradoActual);
+          calcularPrecioPersonalizadoTiempoReal();
+        }
+        return;
+      }
       if (val === 'lomo') {
         window.lomo_abrirModal?.();
         tipoSrv.value = '';
@@ -1428,6 +1685,32 @@ function calcularPrecioPlastificadoTiempoReal() {
 }
 
 function calcularPrecioPersonalizadoTiempoReal() {
+  if (servicioConfiguradoActual) {
+    const quantity = document.getElementById('cantPersonalizado')?.value || '1';
+    const quantityInput = document.getElementById('cantPersonalizado');
+    const div = document.getElementById('resumenPersonalizado');
+    const totalSpan = document.getElementById('totalPersonalizado');
+    const priceField = servicioConfiguradoActual.fields?.find(field => field.type === 'select' && field.priceAffectsTotal);
+    const priceSelect = priceField
+      ? document.querySelector(`#configuredServiceFields [data-configured-field="${priceField.id}"]`)
+      : null;
+    const selections = Object.fromEntries(Array.from(document.querySelectorAll('#configuredServiceFields [data-configured-field]'))
+      .filter(input => input.tagName === 'SELECT' && input.value)
+      .map(input => [input.dataset.configuredField, input.value]));
+    quantityInput?.setCustomValidity('');
+    priceSelect?.setCustomValidity('');
+    try {
+      const price = window.ServigacoPricing.calculateCustomServicePrice(servicioConfiguradoActual, Number(quantity), selections);
+      if (div) div.style.display = 'block';
+      if (totalSpan) totalSpan.textContent = `RD$${price.total.toFixed(2)}`;
+    } catch (error) {
+      if (priceSelect && !priceSelect.value) priceSelect.setCustomValidity(error.message);
+      else quantityInput?.setCustomValidity(error.message);
+      if (div) div.style.display = 'none';
+    }
+    return;
+  }
+
   const cant = parseInt(document.getElementById('cantPersonalizado')?.value || 0);
   const precio = parseFloat(document.getElementById('precioPersonalizado')?.value || 0);
   const div = document.getElementById('resumenPersonalizado');
@@ -1505,6 +1788,12 @@ function inicializarPrecioTiempoReal() {
       elemento.addEventListener('change', calcularPrecioPersonalizadoTiempoReal);
     }
   });
+
+  const camposConfigurados = document.getElementById('configuredServiceFields');
+  if (camposConfigurados) {
+    camposConfigurados.addEventListener('input', calcularPrecioPersonalizadoTiempoReal);
+    camposConfigurados.addEventListener('change', calcularPrecioPersonalizadoTiempoReal);
+  }
 }
 
 // ============================================
@@ -3516,7 +3805,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   marcarPaginaActiva();
-  configurarMenuMovil();
   inicializarEventListeners();
   inicializarSeguridad(); // ← Iniciar listener de Auth
   inicializarPrecioTiempoReal(); // ← Agregado
@@ -4138,7 +4426,7 @@ function inicializarCustomSelect(config = {}) {
   const optionsList = document.getElementById('sgDropdownList');
   if (!nativeSelect || !wrapper || !trigger || !dropdown || !optionsList) return;
 
-  const options = Array.from(optionsList.querySelectorAll('.sg-option'));
+  const getOptions = () => Array.from(optionsList.querySelectorAll('.sg-option'));
   const noResults = document.getElementById('sgNoResults');
   let highlightedIndex = -1;
 
@@ -4171,13 +4459,13 @@ function inicializarCustomSelect(config = {}) {
   }
 
   function getVisibleOptions() {
-    return options.filter(op => !op.classList.contains('sg-hidden'));
+    return getOptions().filter(op => !op.classList.contains('sg-hidden'));
   }
 
   function filtrarOpciones(termino) {
     const term = termino.toLowerCase().trim();
     let coincidencias = 0;
-    options.forEach(option => {
+    getOptions().forEach(option => {
       const title = option.querySelector('.sg-option-title').textContent.toLowerCase();
       const desc = option.querySelector('.sg-option-desc').textContent.toLowerCase();
       if (title.includes(term) || desc.includes(term)) {
@@ -4200,7 +4488,7 @@ function inicializarCustomSelect(config = {}) {
     const desc = optionEl.querySelector('.sg-option-desc').textContent;
     const iconBox = optionEl.querySelector('.sg-option-icon-box');
 
-    options.forEach(op => op.setAttribute('aria-selected', 'false'));
+    getOptions().forEach(op => op.setAttribute('aria-selected', 'false'));
     optionEl.setAttribute('aria-selected', 'true');
 
     triggerTitle.textContent = title;
@@ -4220,7 +4508,7 @@ function inicializarCustomSelect(config = {}) {
   }
 
   function clearHighlights() {
-    options.forEach(op => op.classList.remove('sg-focused'));
+    getOptions().forEach(op => op.classList.remove('sg-focused'));
     highlightedIndex = -1;
   }
 
@@ -4290,6 +4578,7 @@ function inicializarCustomSelect(config = {}) {
   });
 
   nativeSelect.addEventListener('change', () => {
+    const options = getOptions();
     const matchingOption = options.find(op => op.getAttribute('data-value') === nativeSelect.value);
     if (matchingOption) {
       options.forEach(op => op.setAttribute('aria-selected', 'false'));

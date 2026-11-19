@@ -3,44 +3,42 @@
 class ServiGacoNav extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
-      <nav class="main-nav" role="navigation" aria-label="Navegación principal">
-        <div class="nav-container">
+      <nav class="main-nav sg-tabbar-nav" aria-label="Navegación principal">
+        <div class="nav-container sg-nav-container">
           <!-- Logo -->
-          <div class="nav-brand">
-            <img src="/logo.webp" alt="Logo ServiGaco" class="nav-logo" width="384" height="297" />
+          <div class="nav-brand sg-nav-brand">
+            <img src="/logo.webp" alt="Logo ServiGaco" class="nav-logo sg-nav-logo" width="384" height="297" />
           </div>
 
           <!-- Links de navegación -->
-          <ul class="nav-links">
-            <li class="nav-item">
-              <a href="index.html" class="nav-link" id="navTesis">
-                <span class="nav-icon"><i class="ti ti-school" aria-hidden="true"></i></span>
-                <span class="nav-text">Calculadora de Tesis</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="calculadora_general.html" class="nav-link" id="navGeneral">
-                <span class="nav-icon"><i class="ti ti-briefcase" aria-hidden="true"></i></span>
-                <span class="nav-text">Servicios Generales</span>
-              </a>
-            </li>
-            <li class="nav-item hidden" id="navItemAnalytics">
-              <a href="analitica-visitantes.html" class="nav-link" id="navAnalytics">
-                <span class="nav-icon"><i class="ti ti-world" aria-hidden="true"></i></span>
-                <span class="nav-text">Visitantes</span>
-              </a>
-            </li>
-          </ul>
+          <div class="sg-nav-stage">
+            <ul class="sg-tabbar-list" aria-label="Calculadoras disponibles">
+              <li class="sg-tabbar-item sg-tabbar-item--tesis">
+                <a href="index.html" class="nav-link sg-tabbar-link" id="navTesis">
+                  <i class="ti ti-school sg-tabbar-icon" aria-hidden="true"></i>
+                  <span class="sg-tabbar-label">Calculadora de Tesis</span>
+                </a>
+              </li>
+              <li class="sg-tabbar-item sg-tabbar-item--general">
+                <a href="calculadora_general.html" class="nav-link sg-tabbar-link" id="navGeneral">
+                  <i class="ti ti-calculator sg-tabbar-icon" aria-hidden="true"></i>
+                  <span class="sg-tabbar-label">Servicios Generales</span>
+                </a>
+              </li>
+              <li class="sg-tabbar-follow" aria-hidden="true"></li>
+            </ul>
+          </div>
 
-          <div class="nav-actions">
+          <div class="nav-actions sg-nav-actions">
             <!-- Botón Login/Logout (Seguridad) -->
             <button id="btnAuthNav" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all" title="Acceso Empleados" aria-label="Acceso de empleados">
-              <span id="iconAuth"><i class="ti ti-lock-open" aria-hidden="true"></i></span>
+              <span id="iconAuth"><i class="ti ti-lock" aria-hidden="true"></i></span>
             </button>
 
             <!-- Botón Configuración -->
-            <button id="btnSettings" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all" title="Configuración" aria-label="Configuración">
+            <button id="btnSettings" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 mr-1 transition-all sg-nav-settings" title="Configuración" aria-label="Configuración">
               <i class="ti ti-settings text-lg" aria-hidden="true"></i>
+              <span class="sg-nav-settings-label">Configuración</span>
             </button>
 
             <!-- Botón Dark Mode -->
@@ -49,10 +47,6 @@ class ServiGacoNav extends HTMLElement {
               <i id="theme-toggle-light-icon" class="ti ti-sun text-xl hidden" aria-hidden="true"></i>
             </button>
 
-            <!-- Botón móvil (hamburguesa) -->
-            <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
-              <span class="hamburger"></span>
-            </button>
           </div>
         </div>
       </nav>
@@ -61,63 +55,143 @@ class ServiGacoNav extends HTMLElement {
     this.inicializarLogica();
   }
 
+  disconnectedCallback() {
+    this._sgTabIndicatorResizeObserver?.disconnect();
+    this._sgTabIndicatorResizeObserver = null;
+    if (this._sgNavigationTimer) {
+      window.clearTimeout(this._sgNavigationTimer);
+      this._sgNavigationTimer = null;
+    }
+    if (this._sgTabIndicatorResizeHandler) {
+      window.removeEventListener('resize', this._sgTabIndicatorResizeHandler);
+      this._sgTabIndicatorResizeHandler = null;
+    }
+  }
+
   inicializarLogica() {
+    this._sgNavigationTimer = null;
     // 1. Marcar página activa
     const paginaActual = window.location.pathname.split('/').pop() || 'index.html';
     const linkTesis = this.querySelector('#navTesis');
     const linkGeneral = this.querySelector('#navGeneral');
-    const linkAnalytics = this.querySelector('#navAnalytics');
-    const navItemAnalytics = this.querySelector('#navItemAnalytics');
+    const sgTabbarMarkCurrentPage = (link, page) => {
+      if (!link) return;
+      const tabbar = link.closest('.sg-tabbar-nav');
+      if (tabbar) tabbar.dataset.sgCurrentPage = page;
+      link.classList.add('active');
+      link.closest('.sg-tabbar-item')?.classList.add('active');
+      link.setAttribute('aria-current', 'page');
+    };
 
     if (paginaActual === 'index.html' || paginaActual === '') {
-      linkTesis?.classList.add('active');
+      sgTabbarMarkCurrentPage(linkTesis, 'tesis');
     } else if (paginaActual === 'calculadora_general.html') {
-      linkGeneral?.classList.add('active');
-    } else if (paginaActual.includes('analitica-visitantes') || paginaActual.includes('analytics')) {
-      linkAnalytics?.classList.add('active');
+      sgTabbarMarkCurrentPage(linkGeneral, 'general');
     }
 
-    // Mostrar sección de visitantes SOLO a administradores autenticados
-    if (navItemAnalytics) {
-      const checkAuth = () => {
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-          firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-              navItemAnalytics.classList.remove('hidden');
-            } else {
-              navItemAnalytics.classList.add('hidden');
-            }
-          });
-        }
+    const nav = this.querySelector('.sg-tabbar-nav');
+    const navLinks = nav?.querySelector('.sg-tabbar-list');
+    if (nav && navLinks) {
+      const getIndicatorLink = () =>
+        nav.querySelector('.sg-tabbar-link.is-transitioning') ||
+        nav.querySelector('.sg-tabbar-link[aria-current="page"]');
+      const updateTabIndicator = (link) => {
+        if (!(link instanceof HTMLElement)) return;
+
+        const listRect = navLinks.getBoundingClientRect();
+        const linkRect = link.getBoundingClientRect();
+        if (!listRect.width || !linkRect.width || !linkRect.height) return;
+
+        navLinks.style.setProperty(
+          '--sg-tabbar-indicator-x',
+          `${linkRect.left - listRect.left + linkRect.width / 2 - 40}px`
+        );
       };
-      if (typeof firebase !== 'undefined' && firebase.auth) {
-        checkAuth();
+
+      updateTabIndicator(getIndicatorLink());
+      if (typeof ResizeObserver === 'function') {
+        const tabIndicatorResizeObserver = new ResizeObserver(() => {
+          updateTabIndicator(getIndicatorLink());
+        });
+        tabIndicatorResizeObserver.observe(navLinks);
+        nav.querySelectorAll('.sg-tabbar-item').forEach((item) => {
+          tabIndicatorResizeObserver.observe(item);
+          const link = item.querySelector('.sg-tabbar-link');
+          if (link) tabIndicatorResizeObserver.observe(link);
+        });
+        const stage = nav.querySelector('.sg-nav-stage');
+        if (stage) tabIndicatorResizeObserver.observe(stage);
+        this._sgTabIndicatorResizeObserver = tabIndicatorResizeObserver;
       } else {
-        setTimeout(checkAuth, 500);
+        this._sgTabIndicatorResizeHandler = () => updateTabIndicator(getIndicatorLink());
+        window.addEventListener('resize', this._sgTabIndicatorResizeHandler);
       }
-    }
 
-    // 2. Lógica Menú Móvil
-    const navToggle = this.querySelector('.nav-toggle');
-    const navLinks = this.querySelector('.nav-links');
-    
-    if (navToggle && navLinks) {
-      navToggle.addEventListener('click', () => {
-        const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
-        navToggle.setAttribute('aria-expanded', !isExpanded);
-        navLinks.classList.toggle('active');
-      });
-      
-      // Cerrar al hacer click fuera
-      document.addEventListener('click', (e) => {
-        if (!this.contains(e.target)) {
-          navToggle.setAttribute('aria-expanded', 'false');
-          navLinks.classList.remove('active');
+      navLinks.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        const link = target.closest('a.sg-tabbar-link');
+        if (
+          !(link instanceof HTMLAnchorElement) ||
+          !navLinks.contains(link) ||
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey ||
+          link.hasAttribute('download')
+        ) {
+          return;
         }
+
+        const targetWindow = link.getAttribute('target');
+        if (targetWindow && targetWindow.toLowerCase() !== '_self') return;
+
+        const destination = new URL(link.href, window.location.href);
+        if (destination.origin !== window.location.origin) return;
+
+        event.preventDefault();
+        if (this._sgNavigationTimer !== null) window.clearTimeout(this._sgNavigationTimer);
+
+        nav.querySelectorAll('.sg-tabbar-link.is-transitioning').forEach((activeLink) => {
+          activeLink.classList.remove('is-transitioning');
+        });
+        nav.querySelectorAll('.sg-tabbar-item.active, .sg-tabbar-link.active').forEach((activeElement) => {
+          activeElement.classList.remove('active');
+        });
+        nav.querySelectorAll('.sg-tabbar-link[aria-current="page"]').forEach((currentLink) => {
+          currentLink.removeAttribute('aria-current');
+        });
+        link.classList.add('is-transitioning');
+        link.classList.add('active');
+        link.closest('.sg-tabbar-item')?.classList.add('active');
+        link.setAttribute('aria-current', 'page');
+        nav.dataset.sgCurrentPage = link.id === 'navGeneral' ? 'general' : 'tesis';
+        updateTabIndicator(link);
+
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const configuredDuration = Number.parseFloat(
+          window.getComputedStyle(nav).getPropertyValue('--sg-tabbar-duration')
+        );
+        const transitionDuration = prefersReducedMotion
+          ? 0
+          : Number.isFinite(configuredDuration) ? configuredDuration : 320;
+        const isCurrentLocation = destination.href === window.location.href;
+        this._sgNavigationTimer = window.setTimeout(() => {
+          if (!isCurrentLocation) {
+            window.location.assign(destination.href);
+            return;
+          }
+
+          link.classList.remove('is-transitioning');
+          this._sgNavigationTimer = null;
+        }, transitionDuration);
       });
     }
 
-    // 3. Lógica Dark Mode
+    // 2. Lógica Dark Mode
     const themeToggleBtn = this.querySelector('#theme-toggle');
     const darkIcon = this.querySelector('#theme-toggle-dark-icon');
     const lightIcon = this.querySelector('#theme-toggle-light-icon');
@@ -672,6 +746,11 @@ const SETTINGS_SECTIONS = [
                 { path: ['booklet', 'cartonite'], label: 'Portada en cartonite', unit: 'RD$ / portada' }
             ]
         }]
+    },
+    {
+        id: 'services',
+        label: 'Servicios',
+        groups: []
     }
 ];
 
@@ -703,6 +782,7 @@ class ServigacoSettings extends HTMLElement {
         this.isAdmin = false;
         this.status = { ready: false, message: 'Cargando precios compartidos…' };
         this.saving = false;
+        this.returnFocusTo = null;
     }
 
     connectedCallback() {
@@ -723,6 +803,7 @@ class ServigacoSettings extends HTMLElement {
         this.renderFields(window.ServigacoPricing.get());
         this.updateStatus();
         this.refreshPermission();
+        this.returnFocusTo = document.activeElement;
         this.querySelector('#settings-overlay').classList.remove('hidden');
         this.querySelector('#settings-modal').classList.remove('hidden');
         document.body.style.overflow = 'hidden';
@@ -730,9 +811,12 @@ class ServigacoSettings extends HTMLElement {
     }
 
     close() {
+        if (this.saving) return;
         this.querySelector('#settings-overlay').classList.add('hidden');
         this.querySelector('#settings-modal').classList.add('hidden');
         document.body.style.overflow = '';
+        this.returnFocusTo?.focus();
+        this.returnFocusTo = null;
     }
 
     render() {
@@ -752,6 +836,7 @@ class ServigacoSettings extends HTMLElement {
             .settings-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 12px 22px 0; border-bottom: 1px solid var(--border-light); }
             .settings-tab { flex: 0 0 auto; padding: 9px 13px; border: 0; border-bottom: 2px solid transparent; color: var(--text-secondary); background: transparent; font: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; }
             .settings-tab[aria-selected="true"] { color: var(--primary-blue); border-color: var(--primary-blue); }
+            .settings-tab:disabled { cursor: not-allowed; opacity: .7; }
             .settings-content { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 18px 22px; scrollbar-color: #94a3b8 transparent; }
             .settings-section[hidden] { display: none; }
             .settings-group { margin: 0 0 22px; }
@@ -769,18 +854,27 @@ class ServigacoSettings extends HTMLElement {
             .settings-range-row label { display: block; margin-bottom: 3px; color: var(--text-secondary); font-size: .72rem; }
             .settings-range-row .settings-input-wrap { min-height: 38px; }
             .settings-range-row .settings-control { padding: 7px 0; font-size: .88rem; }
+            .settings-custom-field-row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr) minmax(0, 1fr) auto; align-items: end; gap: 8px; margin-top: 8px; }
+            .settings-custom-options { grid-column: 1 / -1; margin: 8px 0 0; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; }
+            .settings-custom-option-row { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto; align-items: end; gap: 8px; margin-top: 8px; }
+            .settings-custom-option-row .settings-input-wrap { min-height: 38px; }
+            .settings-custom-option-row .settings-control { padding: 7px 0; font-size: .88rem; }
             .settings-note { margin: 0; color: var(--text-secondary); font-size: .8rem; }
             .settings-footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 22px; border-top: 1px solid var(--border-light); }
             .settings-permission { color: var(--text-secondary); font-size: .8rem; }
             #save-settings { flex: 0 0 auto; min-height: 42px; padding: 0 18px; border: 0; border-radius: 8px; color: #fff; background: var(--primary-blue); font: inherit; font-weight: 800; cursor: pointer; }
             #save-settings:hover:not(:disabled) { filter: brightness(.94); }
-            #save-settings:disabled { cursor: not-allowed; opacity: .55; }
+            #save-settings:disabled { cursor: not-allowed; color: var(--text-secondary); background: var(--bg-tertiary); border: 1px solid var(--border-light); opacity: 1; }
             @media (max-width: 620px) {
                 #settings-modal { inset: 2vh 50% auto auto; width: calc(100vw - 18px); max-height: 96vh; border-radius: 12px; }
                 .settings-header, .settings-content { padding-right: 14px; padding-left: 14px; }
                 .settings-status, .settings-tabs, .settings-footer { padding-right: 14px; padding-left: 14px; }
+                .settings-tabs { flex-wrap: wrap; overflow-x: visible; }
                 .settings-fields { grid-template-columns: minmax(0, 1fr); }
                 .settings-range-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+                .settings-custom-field-row { grid-template-columns: minmax(0, 1fr); }
+                .settings-custom-options { grid-column: auto; }
+                .settings-custom-option-row { grid-template-columns: minmax(0, 1fr); }
                 .settings-range { grid-column: auto; }
                 .settings-footer { align-items: stretch; flex-direction: column; }
                 #save-settings { width: 100%; }
@@ -811,12 +905,20 @@ class ServigacoSettings extends HTMLElement {
     renderTabs() {
         this.renderCatalog = window.ServigacoPricing.get();
         this.querySelector('.settings-tabs').innerHTML = SETTINGS_SECTIONS.map(section => `
-            <button type="button" class="settings-tab" role="tab" data-section="${section.id}" aria-selected="${section.id === this.activeSection}">
+            <button type="button" class="settings-tab" id="settings-tab-${section.id}" role="tab" data-section="${section.id}" aria-controls="settings-panel-${section.id}" aria-selected="${section.id === this.activeSection}" tabindex="${section.id === this.activeSection ? '0' : '-1'}">
                 ${section.label}
             </button>
         `).join('');
         this.querySelector('.settings-content').innerHTML = SETTINGS_SECTIONS.map(section => `
-            <div class="settings-section" role="tabpanel" data-panel="${section.id}" ${section.id === this.activeSection ? '' : 'hidden'}>
+            <div class="settings-section" id="settings-panel-${section.id}" role="tabpanel" aria-labelledby="settings-tab-${section.id}" tabindex="0" data-panel="${section.id}" ${section.id === this.activeSection ? '' : 'hidden'}>
+                ${section.id === 'services' ? `
+                    <section class="settings-group">
+                        <h3>Servicios adicionales</h3>
+                        <p class="settings-note">Elige en qué calculadora aparece cada servicio y configura los datos que se pedirán al cotizarlo.</p>
+                        <div id="custom-services-list"></div>
+                        <button type="button" class="settings-tab" id="add-custom-service" ${Object.keys(this.renderCatalog.customServices || {}).length >= 50 ? 'disabled' : ''}><i class="ti ti-plus" aria-hidden="true"></i> Agregar servicio</button>
+                    </section>
+                ` : ''}
                 ${section.groups.map((group, groupIndex) => `
                     <section class="settings-group">
                         <h3>${group.title}</h3>
@@ -827,6 +929,80 @@ class ServigacoSettings extends HTMLElement {
                 `).join('')}
             </div>
         `).join('');
+        this.renderCustomServices();
+    }
+
+    renderCustomServices() {
+        const list = this.querySelector('#custom-services-list');
+        if (!list) return;
+        const services = this.renderCatalog?.customServices || {};
+        const entries = Object.entries(services);
+        const maxOptions = window.ServigacoPricing.maxCustomServiceOptions;
+        const renderField = (serviceId, service, field) => {
+            const fieldId = escapeSettingsHtml(field.id);
+            const fieldType = ['text', 'number', 'select'].includes(field.type) ? field.type : 'text';
+            const priceAffectsTotal = field.priceAffectsTotal !== false;
+            const options = Array.isArray(field.options) && field.options.length
+                ? field.options
+                : [{ id: 'opcion-1', label: 'Opción 1', price: '' }];
+            return `
+                <div class="settings-custom-field-row" data-custom-detail="${fieldId}">
+                    <div class="settings-field"><label for="service-${escapeSettingsHtml(serviceId)}-field-${fieldId}">Etiqueta</label><div class="settings-input-wrap"><input id="service-${escapeSettingsHtml(serviceId)}-field-${fieldId}" class="settings-control" data-custom-field="field-label" type="text" maxlength="60" required value="${escapeSettingsHtml(field.label || '')}"></div></div>
+                    <div class="settings-field"><label for="service-${escapeSettingsHtml(serviceId)}-type-${fieldId}">Tipo de dato</label><div class="settings-input-wrap"><select id="service-${escapeSettingsHtml(serviceId)}-type-${fieldId}" class="settings-control" data-custom-field="field-type">
+                        <option value="text" ${fieldType === 'text' ? 'selected' : ''}>Texto</option>
+                        <option value="number" ${fieldType === 'number' ? 'selected' : ''}>Número</option>
+                        <option value="select" ${fieldType === 'select' ? 'selected' : ''}>Lista de opciones</option>
+                    </select></div></div>
+                    <div class="settings-field">
+                        <label>Validación</label>
+                        <label class="sg-switch settings-note"><input type="checkbox" role="switch" data-custom-field="field-required" ${fieldType === 'select' && priceAffectsTotal ? 'checked disabled' : (field.required ? 'checked' : '')}><span class="sg-switch-track" aria-hidden="true"><span class="sg-switch-thumb"></span></span><span class="sg-switch-label">Obligatorio</span></label>
+                        ${fieldType === 'select' ? `
+                            <label class="sg-switch settings-note"><input type="checkbox" role="switch" data-custom-field="field-price-affects" ${priceAffectsTotal ? 'checked' : ''}><span class="sg-switch-track" aria-hidden="true"><span class="sg-switch-thumb"></span></span><span class="sg-switch-label">Cada opción define el precio</span></label>
+                        ` : ''}
+                    </div>
+                    <button type="button" class="settings-tab" data-remove-custom-detail="${fieldId}" aria-label="Eliminar campo ${escapeSettingsHtml(field.label || '')}">Eliminar campo</button>
+                    ${fieldType === 'select' ? `
+                        <div class="settings-custom-options">
+                            <p class="settings-note">${priceAffectsTotal
+                                ? 'Seleccionar una opción reemplaza el precio base; en modalidad por unidad se multiplica por la cantidad.'
+                                : 'Las opciones describen el servicio y no cambian el precio base.'}</p>
+                            <div class="settings-custom-option-list">
+                                ${options.map((option, optionIndex) => `
+                                    <div class="settings-custom-option-row" data-custom-option="${escapeSettingsHtml(option.id || `opcion-${optionIndex + 1}`)}">
+                                        <div class="settings-field"><label for="service-${escapeSettingsHtml(serviceId)}-${fieldId}-option-${escapeSettingsHtml(option.id || optionIndex)}-label">Nombre de opción</label><div class="settings-input-wrap"><input id="service-${escapeSettingsHtml(serviceId)}-${fieldId}-option-${escapeSettingsHtml(option.id || optionIndex)}-label" class="settings-control" data-custom-option-field="label" type="text" maxlength="60" required value="${escapeSettingsHtml(option.label || '')}"></div></div>
+                                        <div class="settings-field"><label for="service-${escapeSettingsHtml(serviceId)}-${fieldId}-option-${escapeSettingsHtml(option.id || optionIndex)}-price">Precio por ${escapeSettingsHtml(service.pricingMode === 'unit' ? 'unidad' : 'servicio')} (RD$)</label><div class="settings-input-wrap"><input id="service-${escapeSettingsHtml(serviceId)}-${fieldId}-option-${escapeSettingsHtml(option.id || optionIndex)}-price" class="settings-control" data-custom-option-field="price" type="number" min="0" step="0.01" ${priceAffectsTotal ? 'required' : ''} value="${escapeSettingsHtml(option.price ?? '')}"><span class="settings-unit">RD$</span></div></div>
+                                        <button type="button" class="settings-tab" data-remove-custom-option="${escapeSettingsHtml(option.id || `opcion-${optionIndex + 1}`)}" aria-label="Eliminar opción ${escapeSettingsHtml(option.label || '')}">Quitar</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button type="button" class="settings-tab" data-add-custom-option="${fieldId}" ${options.length >= maxOptions ? 'disabled' : ''}><i class="ti ti-plus" aria-hidden="true"></i> Agregar opción</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        };
+        list.innerHTML = entries.length ? entries.map(([id, service]) => `
+            <fieldset class="settings-range" data-custom-service="${escapeSettingsHtml(id)}" style="margin:12px 0">
+                <legend class="settings-range-title">${escapeSettingsHtml(service.name || 'Servicio nuevo')}</legend>
+                <div class="settings-fields">
+                    <div class="settings-field"><label for="service-${escapeSettingsHtml(id)}-name">Nombre del servicio</label><div class="settings-input-wrap"><input id="service-${escapeSettingsHtml(id)}-name" class="settings-control" data-custom-field="name" type="text" maxlength="60" required value="${escapeSettingsHtml(service.name || '')}"></div></div>
+                    <div class="settings-field"><label for="service-${escapeSettingsHtml(id)}-placement">Aparece en</label><div class="settings-input-wrap"><select id="service-${escapeSettingsHtml(id)}-placement" class="settings-control" data-custom-field="placement">
+                        <option value="general" ${service.placement === 'general' ? 'selected' : ''}>Servicios Generales</option>
+                        <option value="tesis" ${service.placement === 'tesis' ? 'selected' : ''}>Calculadora de Tesis</option>
+                    </select></div></div>
+                    <div class="settings-field"><label for="service-${escapeSettingsHtml(id)}-pricing">Cómo se cobra</label><div class="settings-input-wrap"><select id="service-${escapeSettingsHtml(id)}-pricing" class="settings-control" data-custom-field="pricingMode"><option value="fixed" ${service.pricingMode === 'fixed' ? 'selected' : ''}>Precio fijo</option><option value="unit" ${service.pricingMode === 'unit' ? 'selected' : ''}>Por unidad</option></select></div></div>
+                    <div class="settings-field"><label for="service-${escapeSettingsHtml(id)}-price">Precio base (RD$)</label><div class="settings-input-wrap"><input id="service-${escapeSettingsHtml(id)}-price" class="settings-control" data-custom-field="price" type="number" min="0" step="0.01" required value="${escapeSettingsHtml(service.price ?? 0)}"><span class="settings-unit">RD$</span></div></div>
+                    <div class="settings-field"><label for="service-${escapeSettingsHtml(id)}-quantity-label">Etiqueta de cantidad</label><div class="settings-input-wrap"><input id="service-${escapeSettingsHtml(id)}-quantity-label" class="settings-control" data-custom-field="quantityLabel" type="text" maxlength="40" required value="${escapeSettingsHtml(service.quantityLabel || 'Cantidad')}"></div></div>
+                </div>
+                <label class="sg-switch settings-note" style="margin-top:10px"><input type="checkbox" role="switch" data-custom-field="active" ${service.active ? 'checked' : ''}><span class="sg-switch-track" aria-hidden="true"><span class="sg-switch-thumb"></span></span><span class="sg-switch-label">Disponible en la calculadora</span></label>
+                <div class="settings-group" style="margin-top:14px">
+                    <h4 class="settings-range-title">Datos que se pedirán al cotizar</h4>
+                    ${(Array.isArray(service.fields) ? service.fields : []).map(field => renderField(id, service, field)).join('')}
+                    <button type="button" class="settings-tab" data-add-custom-detail="${escapeSettingsHtml(id)}">Agregar campo</button>
+                </div>
+                <button type="button" class="settings-tab" data-remove-custom-service="${escapeSettingsHtml(id)}" aria-label="Eliminar ${escapeSettingsHtml(service.name || 'servicio')}">Eliminar servicio</button>
+            </fieldset>
+        `).join('') : '<p class="settings-note" style="margin:14px 0">Todavía no hay servicios adicionales. Agrégalos aquí y aparecerán en el selector de la calculadora.</p>';
     }
 
     renderField(field, idPrefix) {
@@ -875,6 +1051,55 @@ class ServigacoSettings extends HTMLElement {
             const value = getSettingsValue(catalog, path);
             input.value = value === null ? '' : String(value);
         });
+        this.renderCustomServices();
+    }
+
+    readCustomServiceFields(card) {
+        return Array.from(card.querySelectorAll('[data-custom-detail]')).map(field => {
+            const type = field.querySelector('[data-custom-field="field-type"]').value;
+            const priceAffectsInput = field.querySelector('[data-custom-field="field-price-affects"]');
+            const priceAffectsTotal = type === 'select' && (priceAffectsInput ? priceAffectsInput.checked : true);
+            const required = priceAffectsTotal
+                || field.querySelector('[data-custom-field="field-required"]').checked;
+            const result = {
+                id: field.dataset.customDetail,
+                label: field.querySelector('[data-custom-field="field-label"]').value,
+                type,
+                required
+            };
+            if (type === 'select') {
+                const optionRows = Array.from(field.querySelectorAll('[data-custom-option]'));
+                result.priceAffectsTotal = priceAffectsTotal;
+                result.options = (optionRows.length ? optionRows : [null]).map((row, index) => {
+                    const id = row?.dataset.customOption || `opcion-${index + 1}`;
+                    const label = row?.querySelector('[data-custom-option-field="label"]')?.value || '';
+                    const rawPrice = row?.querySelector('[data-custom-option-field="price"]')?.value.trim() || '';
+                    const option = { id, label };
+                    if (rawPrice !== '') option.price = Number(rawPrice);
+                    else if (priceAffectsTotal) option.price = null;
+                    return option;
+                });
+            }
+            return result;
+        });
+    }
+
+    syncCustomServicesFromDOM() {
+        const services = {};
+        this.querySelectorAll('[data-custom-service]').forEach(card => {
+            const readValue = name => card.querySelector(`[data-custom-field="${name}"]`);
+            const priceInput = readValue('price');
+            services[card.dataset.customService] = {
+                name: readValue('name').value,
+                placement: readValue('placement').value,
+                pricingMode: readValue('pricingMode').value,
+                price: Number(priceInput.value) || 0,
+                quantityLabel: readValue('quantityLabel').value,
+                active: readValue('active').checked,
+                fields: this.readCustomServiceFields(card)
+            };
+        });
+        this.renderCatalog.customServices = services;
     }
 
     setupEvents() {
@@ -885,24 +1110,234 @@ class ServigacoSettings extends HTMLElement {
             const tab = event.target.closest('[data-section]');
             if (!tab) return;
             this.activeSection = tab.dataset.section;
-            this.querySelectorAll('.settings-tab').forEach(button => {
+            this.querySelectorAll('.settings-tabs [role="tab"]').forEach(button => {
                 button.setAttribute('aria-selected', String(button === tab));
+                button.tabIndex = button === tab ? 0 : -1;
             });
             this.querySelectorAll('.settings-section').forEach(panel => {
                 panel.hidden = panel.dataset.panel !== this.activeSection;
             });
         });
+        this.querySelector('.settings-tabs').addEventListener('keydown', event => {
+            const tabs = Array.from(this.querySelectorAll('.settings-tabs [role="tab"]'));
+            const currentIndex = tabs.indexOf(event.target.closest('[role="tab"]'));
+            if (currentIndex < 0) return;
+            let nextIndex = currentIndex;
+            if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
+            else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+            else if (event.key === 'Home') nextIndex = 0;
+            else if (event.key === 'End') nextIndex = tabs.length - 1;
+            else return;
+            event.preventDefault();
+            tabs[nextIndex].focus();
+            tabs[nextIndex].click();
+        });
         this.querySelector('.settings-content').addEventListener('input', event => {
-            if (!event.target.matches('[data-price-input]')) return;
+            if (!event.target.matches('[data-price-input], [data-custom-field], [data-custom-option-field]')) return;
+            if (event.target.dataset.customField === 'name') {
+                const card = event.target.closest('[data-custom-service]');
+                const legend = card?.querySelector('legend');
+                if (legend) legend.textContent = event.target.value.trim() || 'Servicio nuevo';
+            }
+            if (event.target.matches('[data-custom-field], [data-custom-option-field]')) this.syncCustomServicesFromDOM();
             this.dirty = true;
             this.updateStatus();
             this.updateControls();
         });
-        this.addEventListener('keydown', event => {
-            if (event.key === 'Escape' && !this.querySelector('#settings-modal').classList.contains('hidden')) {
-                this.close();
+        this.querySelector('.settings-content').addEventListener('change', event => {
+            if (!event.target.matches('[data-custom-field], [data-custom-option-field]')) return;
+            const rerender = event.target.matches('[data-custom-field="field-type"], [data-custom-field="field-price-affects"], [data-custom-field="pricingMode"]');
+            const serviceId = event.target.closest('[data-custom-service]')?.dataset.customService;
+            const fieldId = event.target.closest('[data-custom-detail]')?.dataset.customDetail;
+            const focusOption = event.target.matches('[data-custom-field="field-type"]') && event.target.value === 'select';
+            this.syncCustomServicesFromDOM();
+            this.dirty = true;
+            this.updateStatus();
+            if (rerender) this.renderCustomServices();
+            this.updateControls();
+            if (rerender && serviceId && fieldId) {
+                const fieldSelector = `[data-custom-service="${serviceId}"] [data-custom-detail="${fieldId}"]`;
+                const focusTarget = focusOption
+                    ? this.querySelector(`${fieldSelector} [data-custom-option-field="label"]`)
+                    : this.querySelector(`${fieldSelector} [data-custom-field="${event.target.dataset.customField}"]`);
+                focusTarget?.focus();
             }
         });
+        this.querySelector('.settings-content').addEventListener('click', event => {
+            if (event.target.closest('#add-custom-service')) {
+                if (!this.canEdit()) return;
+                this.syncCustomServicesFromDOM();
+                const services = this.renderCatalog.customServices || (this.renderCatalog.customServices = {});
+                if (Object.keys(services).length >= 50) {
+                    this.showError('El catálogo admite hasta 50 servicios adicionales.');
+                    return;
+                }
+                const id = `servicio-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+                services[id] = {
+                    name: '',
+                    placement: 'general',
+                    pricingMode: 'unit',
+                    price: 0,
+                    quantityLabel: 'Cantidad',
+                    active: true,
+                    fields: [{ id: 'detalle', label: 'Descripción', type: 'text', required: true }]
+                };
+                this.dirty = true;
+                this.renderCustomServices();
+                this.updateStatus();
+                this.updateControls();
+                this.querySelector(`[data-custom-service="${id}"] [data-custom-field="name"]`)?.focus();
+                return;
+            }
+            const addOption = event.target.closest('[data-add-custom-option]');
+            if (addOption) {
+                if (!this.canEdit()) return;
+                const fieldRow = addOption.closest('[data-custom-detail]');
+                const card = addOption.closest('[data-custom-service]');
+                if (!fieldRow || !card) return;
+                this.syncCustomServicesFromDOM();
+                const serviceId = card.dataset.customService;
+                const fieldId = fieldRow.dataset.customDetail;
+                const service = this.renderCatalog.customServices?.[serviceId];
+                const field = service?.fields.find(item => item.id === fieldId);
+                if (!field) return;
+                if (field.options.length >= window.ServigacoPricing.maxCustomServiceOptions) {
+                    this.showError(`Cada lista admite hasta ${window.ServigacoPricing.maxCustomServiceOptions} opciones.`);
+                    return;
+                }
+                const optionId = `opcion-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`;
+                field.options.push({ id: optionId, label: 'Opción nueva' });
+                this.dirty = true;
+                this.renderCustomServices();
+                this.updateStatus();
+                this.updateControls();
+                this.querySelector(`[data-custom-service="${serviceId}"] [data-custom-detail="${fieldId}"] [data-custom-option="${optionId}"] [data-custom-option-field="label"]`)?.focus();
+                return;
+            }
+            const removeOption = event.target.closest('[data-remove-custom-option]');
+            if (removeOption) {
+                if (!this.canEdit()) return;
+                const optionRow = removeOption.closest('[data-custom-option]');
+                const fieldRow = removeOption.closest('[data-custom-detail]');
+                const card = removeOption.closest('[data-custom-service]');
+                if (!optionRow || !fieldRow || !card) return;
+                const optionRows = Array.from(fieldRow.querySelectorAll('[data-custom-option]'));
+                const optionIndex = optionRows.indexOf(optionRow);
+                this.syncCustomServicesFromDOM();
+                const serviceId = card.dataset.customService;
+                const fieldId = fieldRow.dataset.customDetail;
+                const service = this.renderCatalog.customServices?.[serviceId];
+                const field = service?.fields.find(item => item.id === fieldId);
+                if (!field) return;
+                if (field.options.length <= 1) {
+                    this.showError('Cada lista debe conservar al menos una opción.');
+                    return;
+                }
+                field.options.splice(optionIndex, 1);
+                const focusOptionId = field.options[Math.min(optionIndex, field.options.length - 1)]?.id;
+                this.dirty = true;
+                this.renderCustomServices();
+                this.updateStatus();
+                this.updateControls();
+                if (focusOptionId) {
+                    this.querySelector(`[data-custom-service="${serviceId}"] [data-custom-detail="${fieldId}"] [data-custom-option="${focusOptionId}"] [data-custom-option-field="label"]`)?.focus();
+                }
+                return;
+            }
+            const addDetail = event.target.closest('[data-add-custom-detail]');
+            if (addDetail) {
+                if (!this.canEdit()) return;
+                this.syncCustomServicesFromDOM();
+                const id = addDetail.dataset.addCustomDetail;
+                const service = this.renderCatalog.customServices?.[id];
+                if (!service) return;
+                service.fields = Array.isArray(service.fields) ? service.fields : [];
+                if (service.fields.length >= 8) {
+                    this.showError('Cada servicio admite hasta 8 campos.');
+                    return;
+                }
+                const fieldId = `dato-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`;
+                service.fields.push({ id: fieldId, label: 'Dato nuevo', type: 'text', required: false });
+                this.dirty = true;
+                this.renderCustomServices();
+                this.updateStatus();
+                this.updateControls();
+                this.querySelector(`[data-custom-service="${id}"] [data-custom-detail="${fieldId}"] [data-custom-field="field-label"]`)?.focus();
+                return;
+            }
+            const removeDetail = event.target.closest('[data-remove-custom-detail]');
+            if (removeDetail) {
+                if (!this.canEdit()) return;
+                const row = removeDetail.closest('[data-custom-detail]');
+                const card = row?.closest('[data-custom-service]');
+                const rows = Array.from(card?.querySelectorAll('[data-custom-detail]') || []);
+                const rowIndex = rows.indexOf(row);
+                const focusTarget = rows[rowIndex + 1]?.querySelector('[data-custom-field="field-label"]')
+                    || rows[rowIndex - 1]?.querySelector('[data-custom-field="field-label"]')
+                    || card?.querySelector('[data-add-custom-detail]');
+                row?.remove();
+                this.syncCustomServicesFromDOM();
+                this.dirty = true;
+                this.updateStatus();
+                this.updateControls();
+                focusTarget?.focus();
+                return;
+            }
+            const remove = event.target.closest('[data-remove-custom-service]');
+            if (remove) {
+                if (!this.canEdit()) return;
+                const card = remove.closest('[data-custom-service]');
+                const cards = Array.from(this.querySelectorAll('[data-custom-service]'));
+                const cardIndex = cards.indexOf(card);
+                const nextId = cards[cardIndex + 1]?.dataset.customService;
+                const previousId = cards[cardIndex - 1]?.dataset.customService;
+                card?.remove();
+                this.syncCustomServicesFromDOM();
+                this.renderCustomServices();
+                this.dirty = true;
+                this.updateStatus();
+                this.updateControls();
+                const focusTarget = nextId
+                    ? this.querySelector(`[data-custom-service="${nextId}"] [data-custom-field="name"]`)
+                    : previousId
+                        ? this.querySelector(`[data-custom-service="${previousId}"] [data-custom-field="name"]`)
+                        : this.querySelector('#add-custom-service');
+                focusTarget?.focus();
+            }
+        });
+        this.addEventListener('keydown', event => {
+            if (this.querySelector('#settings-modal').classList.contains('hidden')) return;
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                this.close();
+                return;
+            }
+            if (event.key === 'Tab') {
+                const focusable = Array.from(this.querySelectorAll('#settings-modal button:not([disabled]), #settings-modal input:not([disabled]), #settings-modal select:not([disabled]), #settings-modal [tabindex="0"]'))
+                    .filter(element => element.getClientRects().length > 0);
+                if (!focusable.length) return;
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+                if (event.shiftKey && (document.activeElement === first || !this.querySelector('#settings-modal').contains(document.activeElement))) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey && (document.activeElement === last || !this.querySelector('#settings-modal').contains(document.activeElement))) {
+                    event.preventDefault();
+                    first.focus();
+                }
+            }
+        });
+    }
+
+    canEdit() {
+        return this.isAdmin && this.status.ready && !this.conflict && !this.saving;
+    }
+
+    showError(message) {
+        const status = this.querySelector('#settings-status');
+        if (!status) return;
+        status.textContent = message;
+        status.dataset.error = 'true';
     }
 
     handleCatalogChange(catalog, status) {
@@ -940,7 +1375,9 @@ class ServigacoSettings extends HTMLElement {
         if (!status) return;
         const message = this.conflict
             ? 'El catálogo cambió en otro dispositivo. Cierra y vuelve a abrir para revisar los valores nuevos.'
-            : this.status.message;
+            : this.dirty
+                ? 'Hay cambios sin guardar. Guarda para sincronizarlos.'
+                : this.status.message;
         status.textContent = message;
         status.dataset.error = String(this.conflict || !this.status.ready);
         const permission = this.querySelector('#settings-permission');
@@ -952,10 +1389,32 @@ class ServigacoSettings extends HTMLElement {
     }
 
     updateControls() {
-        const canEdit = this.isAdmin && this.status.ready && !this.conflict && !this.saving;
+        const canEdit = this.canEdit();
         this.querySelectorAll('[data-price-input]').forEach(input => {
             input.disabled = !canEdit;
         });
+        this.querySelectorAll('[data-custom-field], [data-custom-option-field], #add-custom-service, [data-remove-custom-service], [data-add-custom-detail], [data-remove-custom-detail], [data-add-custom-option], [data-remove-custom-option]').forEach(control => {
+            control.disabled = !canEdit;
+        });
+        this.querySelectorAll('[data-custom-service]').forEach(card => {
+            const addField = card.querySelector('[data-add-custom-detail]');
+            if (addField) addField.disabled = !canEdit || card.querySelectorAll('[data-custom-detail]').length >= 8;
+            card.querySelectorAll('[data-custom-detail]').forEach(field => {
+                const optionCount = field.querySelectorAll('[data-custom-option]').length;
+                const addOption = field.querySelector('[data-add-custom-option]');
+                if (addOption) addOption.disabled = !canEdit || optionCount >= window.ServigacoPricing.maxCustomServiceOptions;
+                const required = field.querySelector('[data-custom-field="field-required"]');
+                const priceAffectsTotal = field.querySelector('[data-custom-field="field-price-affects"]')?.checked;
+                if (required) required.disabled = !canEdit || priceAffectsTotal;
+                field.querySelectorAll('[data-remove-custom-option]').forEach(button => {
+                    button.disabled = !canEdit || optionCount <= 1;
+                });
+            });
+        });
+        const addService = this.querySelector('#add-custom-service');
+        if (addService) addService.disabled = !canEdit || this.querySelectorAll('[data-custom-service]').length >= 50;
+        const closeButton = this.querySelector('#close-settings');
+        if (closeButton) closeButton.disabled = this.saving;
         const saveButton = this.querySelector('#save-settings');
         if (saveButton) {
             saveButton.disabled = !canEdit;
@@ -966,8 +1425,9 @@ class ServigacoSettings extends HTMLElement {
     }
 
     async save() {
-        if (!window.ServigacoPricing) return;
+        if (!window.ServigacoPricing || !this.canEdit()) return;
         const draft = window.ServigacoPricing.get();
+        let saved = false;
         try {
             this.querySelectorAll('[data-price-input]').forEach(input => {
                 if (!input.reportValidity()) throw new Error('Completa todos los campos requeridos con valores válidos.');
@@ -983,6 +1443,41 @@ class ServigacoSettings extends HTMLElement {
                     setSettingsValue(draft, path, number);
                 }
             });
+            const customServices = {};
+            this.querySelectorAll('[data-custom-service]').forEach(card => {
+                const id = card.dataset.customService;
+                const nameInput = card.querySelector('[data-custom-field="name"]');
+                const priceInput = card.querySelector('[data-custom-field="price"]');
+                if (!nameInput.reportValidity() || !priceInput.reportValidity()) {
+                    throw new Error('Completa el nombre y el precio de cada servicio.');
+                }
+                const quantityLabel = card.querySelector('[data-custom-field="quantityLabel"]');
+                const fieldLabelInputs = Array.from(card.querySelectorAll('[data-custom-field="field-label"]'));
+                if (!quantityLabel.reportValidity() || fieldLabelInputs.some(input => !input.reportValidity())) {
+                    throw new Error('Completa las etiquetas de cantidad y de cada campo.');
+                }
+                const optionLabelInputs = Array.from(card.querySelectorAll('[data-custom-option-field="label"]'));
+                const optionPriceInputs = Array.from(card.querySelectorAll('[data-custom-option-field="price"]'));
+                if (optionLabelInputs.some(input => !input.reportValidity())
+                    || optionPriceInputs.some(input => !input.reportValidity())) {
+                    throw new Error('Completa el nombre y el precio requerido de cada opción.');
+                }
+                const fields = this.readCustomServiceFields(card).map(field => ({
+                    ...field,
+                    label: field.label.trim(),
+                    options: field.options?.map(option => ({ ...option, label: option.label.trim() }))
+                }));
+                customServices[id] = {
+                    name: nameInput.value.trim(),
+                    placement: card.querySelector('[data-custom-field="placement"]').value,
+                    pricingMode: card.querySelector('[data-custom-field="pricingMode"]').value,
+                    price: Number(priceInput.value),
+                    quantityLabel: quantityLabel.value.trim(),
+                    fields,
+                    active: card.querySelector('[data-custom-field="active"]').checked
+                };
+            });
+            draft.customServices = customServices;
             const errors = window.ServigacoPricing.validate(draft);
             if (errors.length) throw new Error(errors[0]);
             this.saving = true;
@@ -990,20 +1485,291 @@ class ServigacoSettings extends HTMLElement {
             await window.ServigacoPricing.save(draft);
             this.dirty = false;
             this.conflict = false;
+            saved = true;
+            this.updateStatus();
             if (typeof window.mostrarNotificacion === 'function') {
                 window.mostrarNotificacion('Precios guardados y sincronizados con Firebase.', 'success');
             }
-            this.close();
         } catch (error) {
             console.error('[Configuración] Error guardando precios:', error);
-            this.querySelector('#settings-status').textContent = error.message || 'No se pudieron guardar los precios.';
-            this.querySelector('#settings-status').dataset.error = 'true';
+            this.showError(error.message || 'No se pudieron guardar los precios.');
         } finally {
             this.saving = false;
             this.updateControls();
+            if (saved) this.close();
         }
     }
 }
 
 customElements.define('servigaco-settings', ServigacoSettings);
 document.body.insertAdjacentHTML('beforeend', '<servigaco-settings></servigaco-settings>');
+
+function initLiquidGlassButtons() {
+    const isTesisPage = document.body.classList.contains('tesis-page');
+
+    if (!document.getElementById('lg-glass-button-styles')) {
+        const style = document.createElement('style');
+        style.id = 'lg-glass-button-styles';
+        style.textContent = `
+            button.lg-glass-control:not(.lg-cta-btn) {
+                position: relative;
+                isolation: isolate;
+                -webkit-backdrop-filter: blur(10px) saturate(1.2);
+                backdrop-filter: blur(10px) saturate(1.2);
+                box-shadow:
+                    inset 0 1.5px 0 rgba(255,255,255,.72),
+                    inset 1px 0 0 rgba(255,255,255,.34),
+                    inset -1px 0 0 rgba(255,255,255,.26),
+                    inset 0 -1px 0 rgba(255,255,255,.24),
+                    0 4px 11px rgba(22,30,50,.14);
+                transition-duration: .18s;
+            }
+            button.lg-glass-control:not(.lg-cta-btn)::after {
+                content: "";
+                position: absolute;
+                z-index: -1;
+                inset: 1px;
+                border-radius: inherit;
+                background: linear-gradient(142deg, rgba(255,255,255,.26), rgba(255,255,255,.08) 34%, transparent 58%, rgba(255,255,255,.08));
+                box-shadow: inset 0 1px 1px rgba(255,255,255,.58), inset 0 -1px 1px rgba(255,255,255,.2);
+                pointer-events: none;
+            }
+            @media (hover: hover) and (pointer: fine) {
+                button.lg-glass-control:not(:disabled):not(.lg-cta-btn):hover {
+                    filter: brightness(1.055);
+                    box-shadow:
+                        inset 0 1.5px 0 rgba(255,255,255,.9),
+                        inset 1px 0 0 rgba(255,255,255,.48),
+                        inset -1px 0 0 rgba(255,255,255,.38),
+                        inset 0 -1px 0 rgba(255,255,255,.3),
+                        0 7px 16px rgba(22,30,50,.19);
+                }
+            }
+            button.lg-glass-control:not(:disabled):not(.lg-cta-btn):active {
+                filter: brightness(.97);
+            }
+            button.lg-glass-control:focus-visible {
+                outline: 3px solid rgba(77,112,230,.72);
+                outline-offset: 2px;
+            }
+            @media (prefers-reduced-motion: reduce) {
+                button.lg-glass-control { transition-duration: .01ms !important; }
+            }
+            .lg-cta-btn {
+                --lg-cta-radius: 18px;
+                position: relative;
+                isolation: isolate;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 16px;
+                width: 100%;
+                min-height: 68px;
+                padding: 11px 20px;
+                overflow: hidden;
+                border: 1px solid rgba(255,255,255,.82);
+                border-radius: var(--lg-cta-radius);
+                color: #323744;
+                background:
+                    radial-gradient(125% 150% at 8% -35%, rgba(255,255,255,.98), transparent 58%),
+                    linear-gradient(135deg, rgba(255,255,255,.80), rgba(235,239,250,.45) 52%, rgba(255,255,255,.64));
+                box-shadow:
+                    0 12px 28px rgba(44,54,83,.16),
+                    0 2px 5px rgba(38,48,76,.10),
+                    inset 0 1.5px 0 rgba(255,255,255,.98),
+                    inset 1px 0 0 rgba(255,255,255,.65),
+                    inset -1px 0 0 rgba(255,255,255,.52),
+                    inset 0 -1px 0 rgba(255,255,255,.72);
+                -webkit-backdrop-filter: blur(20px) saturate(1.7);
+                backdrop-filter: blur(20px) saturate(1.7);
+                font: 700 1.15rem/1.2 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                cursor: pointer;
+                user-select: none;
+                -webkit-tap-highlight-color: transparent;
+                transition: transform .24s cubic-bezier(.2,.8,.2,1), box-shadow .24s ease, background .24s ease;
+            }
+            .lg-cta-btn::before {
+                content: "";
+                position: absolute;
+                z-index: -1;
+                inset: 5px;
+                border: 1px solid rgba(255,255,255,.64);
+                border-radius: calc(var(--lg-cta-radius) - 5px);
+                box-shadow: inset 0 1px 2px rgba(255,255,255,.75), inset 0 -1px 2px rgba(255,255,255,.35);
+                pointer-events: none;
+            }
+            .lg-cta-btn::after {
+                content: "";
+                position: absolute;
+                z-index: 0;
+                inset: -45% -25%;
+                border-radius: 50%;
+                background: linear-gradient(112deg, transparent 32%, rgba(255,255,255,.54) 48%, rgba(255,255,255,.08) 55%, transparent 68%);
+                opacity: .76;
+                transform: translateX(-42%) rotate(-7deg);
+                transition: transform .55s cubic-bezier(.2,.8,.2,1), opacity .3s ease;
+                pointer-events: none;
+            }
+            .lg-cta-btn .lg-cta-label,
+            .lg-cta-btn .lg-cta-icon { position: relative; z-index: 1; }
+            .lg-cta-btn .lg-cta-icon {
+                display: grid;
+                flex: 0 0 40px;
+                width: 40px;
+                height: 40px;
+                place-items: center;
+                border: 1px solid rgba(255,255,255,.22);
+                border-radius: 50%;
+                color: #f7f8fc;
+                background: linear-gradient(145deg, #4c5262, #292e3b);
+                box-shadow: 0 4px 12px rgba(35,40,55,.25), inset 0 1px 0 rgba(255,255,255,.22);
+                transition: transform .24s cubic-bezier(.2,.8,.2,1), box-shadow .24s ease;
+            }
+            .lg-cta-btn .lg-cta-icon svg { display: block; width: 15px; height: 15px; fill: currentColor; }
+            .lg-cta-btn:focus-visible { outline: 3px solid rgba(77,112,230,.8); outline-offset: 3px; }
+            .lg-cta-btn:disabled { cursor: wait; opacity: .68; transform: none; }
+            @media (hover: hover) and (pointer: fine) {
+                .lg-cta-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(44,54,83,.19), 0 3px 7px rgba(38,48,76,.10), inset 0 1.5px 0 rgba(255,255,255,.98), inset 0 -1px 0 rgba(255,255,255,.72); }
+                .lg-cta-btn:hover:not(:disabled)::after { transform: translateX(14%) rotate(-7deg); opacity: .94; }
+                .lg-cta-btn:hover:not(:disabled) .lg-cta-icon { transform: scale(1.08); box-shadow: 0 6px 15px rgba(35,40,55,.3), inset 0 1px 0 rgba(255,255,255,.25); }
+            }
+            .lg-cta-btn:active:not(:disabled) { transform: scale(.975); }
+            .lg-cta-btn:active:not(:disabled) .lg-cta-icon { transform: scale(.94); }
+            @media (max-width: 480px) {
+                .lg-cta-btn { min-height: 58px; gap: 12px; padding: 9px 15px; border-radius: 16px; font-size: 1.03rem; }
+                .lg-cta-btn .lg-cta-icon { flex-basis: 36px; width: 36px; height: 36px; }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .lg-cta-btn, .lg-cta-btn::after, .lg-cta-btn .lg-cta-icon { transition: none; }
+            }
+            /* Acabado de la referencia Liquid Glass en todos los botones */
+            button.lg-glass-control {
+                --lg-glass-trim: 15%;
+                position: relative;
+                isolation: isolate;
+                border: 1px double rgba(51,51,51,.14) !important;
+                border-radius: 9999px !important;
+                color: #3e3e3e !important;
+                background: rgba(255,255,255,.12) !important;
+                box-shadow:
+                    inset 2px -2px 1px -1px rgba(255,255,255,.96),
+                    inset -2px 2px 1px -1px rgba(255,255,255,.96),
+                    inset 6px -6px 1px -6px rgba(255,255,255,.72),
+                    inset -6px 6px 1px -6px rgba(255,255,255,.72),
+                    inset 0 0 2px rgba(0,0,0,.36),
+                    0 4px 8px rgba(25,30,45,.20) !important;
+                -webkit-backdrop-filter: blur(8px) saturate(1.35) !important;
+                backdrop-filter: blur(8px) saturate(1.35) !important;
+                -webkit-tap-highlight-color: transparent;
+            }
+            button.lg-glass-control::before {
+                content: "";
+                position: absolute;
+                z-index: 1;
+                top: 35%;
+                left: 50%;
+                width: calc(100% - 16px);
+                height: calc(100% - 16px);
+                transform: translateX(-50%);
+                border: 1px solid rgba(0,0,0,.36);
+                border-radius: inherit;
+                filter: blur(5px);
+                pointer-events: none;
+            }
+            button.lg-glass-control::after {
+                content: "";
+                position: absolute;
+                z-index: 2;
+                inset: 0;
+                border: 1px solid rgba(255,255,255,.34);
+                border-radius: inherit;
+                background: linear-gradient(45deg,
+                    rgba(255,255,255,.72) 0%,
+                    transparent var(--lg-glass-trim),
+                    transparent calc(100% - var(--lg-glass-trim)),
+                    rgba(255,255,255,.72) 100%);
+                filter: blur(3px);
+                pointer-events: none;
+            }
+            button.lg-glass-control > *:not(.notif-dot) {
+                position: relative;
+                z-index: 3;
+            }
+            button.lg-glass-control > .notif-dot { z-index: 4; }
+            html.dark button.lg-glass-control {
+                border-color: rgba(255,255,255,.36) !important;
+                color: #f4f5f7 !important;
+                background: rgba(37,42,54,.42) !important;
+                box-shadow:
+                    inset 2px -2px 1px -1px rgba(255,255,255,.42),
+                    inset -2px 2px 1px -1px rgba(255,255,255,.42),
+                    inset 0 0 2px rgba(0,0,0,.45),
+                    0 4px 8px rgba(0,0,0,.34) !important;
+            }
+            html.dark button.lg-glass-control::before { border-color: rgba(255,255,255,.24); }
+            @media (hover: hover) and (pointer: fine) {
+                button.lg-glass-control:hover:not(:disabled) {
+                    filter: brightness(1.04);
+                    transform: translateY(-1px);
+                }
+            }
+            button.lg-glass-control:active:not(:disabled) { transform: scale(.97); }
+            @media (max-width: 480px) {
+                button.lg-glass-control { -webkit-backdrop-filter: blur(5px) saturate(1.25) !important; backdrop-filter: blur(5px) saturate(1.25) !important; }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                button.lg-glass-control { transition: none !important; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    const applyGlassClass = (root) => {
+        root.querySelectorAll('button:not(.lg-glass-control)').forEach((button) => button.classList.add('lg-glass-control'));
+    };
+
+    applyGlassClass(document);
+
+    const calculateButton = document.getElementById('btnCalcular');
+    if (isTesisPage && calculateButton && calculateButton.dataset.liquidGlassApplied !== 'true') {
+        calculateButton.classList.add('lg-cta-btn');
+        calculateButton.setAttribute('aria-label', 'Calcular Total');
+        calculateButton.innerHTML = `
+            <span class="lg-cta-label">Calcular Total</span>
+            <span class="lg-cta-icon" aria-hidden="true">
+                <svg viewBox="0 0 1024 1024" focusable="false">
+                    <path d="M779.18 473.23 322.35 16.41a54.83 54.83 0 0 0-77.53 77.53l418.05 418.06-418.05 418.06a54.83 54.83 0 0 0 77.53 77.53l456.83-456.82c21.41-21.42 21.41-56.13 0-77.54Z"></path>
+                </svg>
+            </span>`;
+        calculateButton.dataset.liquidGlassApplied = 'true';
+    }
+
+    if (!document.body.dataset.liquidGlassObserver) {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.target instanceof HTMLButtonElement) {
+                    if (!mutation.target.classList.contains('lg-glass-control')) {
+                        mutation.target.classList.add('lg-glass-control');
+                    }
+                    return;
+                }
+
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType !== Node.ELEMENT_NODE) return;
+                    if (node.matches?.('button') && !node.classList.contains('lg-glass-control')) {
+                        node.classList.add('lg-glass-control');
+                    }
+                    applyGlassClass(node);
+                });
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+        document.body.dataset.liquidGlassObserver = 'true';
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLiquidGlassButtons, { once: true });
+} else {
+    initLiquidGlassButtons();
+}
