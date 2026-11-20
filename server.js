@@ -1,3 +1,15 @@
+// Prevenir que cosmiconfig falle con EPERM al buscar package.json en rutas superiores en Windows
+const fs = require('fs');
+const _origReadFileSync = fs.readFileSync;
+fs.readFileSync = function(p, opts) {
+  if (typeof p === 'string' && p.toLowerCase().includes('servigaco\\package.json') && !p.toLowerCase().includes('tesis-main')) {
+    const err = new Error('ENOENT: no such file or directory');
+    err.code = 'ENOENT';
+    throw err;
+  }
+  return _origReadFileSync.apply(this, arguments);
+};
+
 require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
