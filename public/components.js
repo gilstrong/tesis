@@ -58,6 +58,12 @@ class ServiGacoNav extends HTMLElement {
   disconnectedCallback() {
     this._sgTabIndicatorResizeObserver?.disconnect();
     this._sgTabIndicatorResizeObserver = null;
+    this._sgAtmosphereObserver?.disconnect();
+    this._sgAtmosphereObserver = null;
+    if (this._sgAtmosphereVisibilityHandler) {
+      document.removeEventListener('visibilitychange', this._sgAtmosphereVisibilityHandler);
+      this._sgAtmosphereVisibilityHandler = null;
+    }
     if (this._sgNavigationTimer) {
       window.clearTimeout(this._sgNavigationTimer);
       this._sgNavigationTimer = null;
@@ -91,6 +97,7 @@ class ServiGacoNav extends HTMLElement {
 
     const nav = this.querySelector('.sg-tabbar-nav');
     const navLinks = nav?.querySelector('.sg-tabbar-list');
+    const atmosphereStage = nav?.querySelector('.sg-nav-stage');
     if (nav && navLinks) {
       const getIndicatorLink = () =>
         nav.querySelector('.sg-tabbar-link.is-transitioning') ||
@@ -109,6 +116,7 @@ class ServiGacoNav extends HTMLElement {
       };
 
       updateTabIndicator(getIndicatorLink());
+
       if (typeof ResizeObserver === 'function') {
         const tabIndicatorResizeObserver = new ResizeObserver(() => {
           updateTabIndicator(getIndicatorLink());
@@ -119,8 +127,7 @@ class ServiGacoNav extends HTMLElement {
           const link = item.querySelector('.sg-tabbar-link');
           if (link) tabIndicatorResizeObserver.observe(link);
         });
-        const stage = nav.querySelector('.sg-nav-stage');
-        if (stage) tabIndicatorResizeObserver.observe(stage);
+        if (atmosphereStage) tabIndicatorResizeObserver.observe(atmosphereStage);
         this._sgTabIndicatorResizeObserver = tabIndicatorResizeObserver;
       } else {
         this._sgTabIndicatorResizeHandler = () => updateTabIndicator(getIndicatorLink());
@@ -152,6 +159,19 @@ class ServiGacoNav extends HTMLElement {
         const destination = new URL(link.href, window.location.href);
         if (destination.origin !== window.location.origin) return;
 
+        const isCurrentLocation = destination.href === window.location.href;
+        if (isCurrentLocation) {
+          event.preventDefault();
+          return;
+        }
+
+        // Si el navegador soporta Cross-Document View Transitions (@view-transition),
+        // permitimos la navegación nativa para que capture el snapshot y anime la transición
+        // de forma instantánea sin retrasos artificiales de temporizador.
+        if ('onpagereveal' in window || (document.startViewTransition && window.navigation)) {
+          return;
+        }
+
         event.preventDefault();
         if (this._sgNavigationTimer !== null) window.clearTimeout(this._sgNavigationTimer);
 
@@ -177,16 +197,9 @@ class ServiGacoNav extends HTMLElement {
         );
         const transitionDuration = prefersReducedMotion
           ? 0
-          : Number.isFinite(configuredDuration) ? configuredDuration : 320;
-        const isCurrentLocation = destination.href === window.location.href;
+          : Number.isFinite(configuredDuration) ? configuredDuration : 240;
         this._sgNavigationTimer = window.setTimeout(() => {
-          if (!isCurrentLocation) {
-            window.location.assign(destination.href);
-            return;
-          }
-
-          link.classList.remove('is-transitioning');
-          this._sgNavigationTimer = null;
+          window.location.assign(destination.href);
         }, transitionDuration);
       });
     }
@@ -241,6 +254,32 @@ class ServiGacoNav extends HTMLElement {
 }
 
 customElements.define('servigaco-nav', ServiGacoNav);
+
+// Manejo seguro de promesas de View Transitions para evitar "AbortError: Transition was skipped"
+window.addEventListener('unhandledrejection', (event) => {
+  if (
+    event.reason?.name === 'AbortError' ||
+    (typeof event.reason?.message === 'string' && event.reason.message.includes('Transition was skipped'))
+  ) {
+    event.preventDefault();
+  }
+});
+if ('onpagereveal' in window) {
+  window.addEventListener('pagereveal', (event) => {
+    if (event.viewTransition) {
+      event.viewTransition.ready?.catch(() => {});
+      event.viewTransition.finished?.catch(() => {});
+    }
+  });
+}
+if ('onpageswap' in window) {
+  window.addEventListener('pageswap', (event) => {
+    if (event.viewTransition) {
+      event.viewTransition.ready?.catch(() => {});
+      event.viewTransition.finished?.catch(() => {});
+    }
+  });
+}
 
 class ServiGacoFooter extends HTMLElement {
   connectedCallback() {
@@ -646,7 +685,8 @@ const SETTINGS_SECTIONS = [
                         rojo: 'Rojo',
                         verde_botella: 'Verde botella',
                         amarillo_medicina: 'Amarillo medicina',
-                        blanco: 'Blanco'
+                        blanco: 'Blanco',
+                        negro: 'Negro'
                     }).map(([color, label]) => ({
                         path: ['tesis', 'tapaDura', 'colores', color],
                         label: `Tapa dura ${label}`,
@@ -1730,19 +1770,7 @@ function initLiquidGlassButtons() {
 
     applyGlassClass(document);
 
-    const calculateButton = document.getElementById('btnCalcular');
-    if (isTesisPage && calculateButton && calculateButton.dataset.liquidGlassApplied !== 'true') {
-        calculateButton.classList.add('lg-cta-btn');
-        calculateButton.setAttribute('aria-label', 'Calcular Total');
-        calculateButton.innerHTML = `
-            <span class="lg-cta-label">Calcular Total</span>
-            <span class="lg-cta-icon" aria-hidden="true">
-                <svg viewBox="0 0 1024 1024" focusable="false">
-                    <path d="M779.18 473.23 322.35 16.41a54.83 54.83 0 0 0-77.53 77.53l418.05 418.06-418.05 418.06a54.83 54.83 0 0 0 77.53 77.53l456.83-456.82c21.41-21.42 21.41-56.13 0-77.54Z"></path>
-                </svg>
-            </span>`;
-        calculateButton.dataset.liquidGlassApplied = 'true';
-    }
+    // Botón calcular se mantiene con el mismo estilo y alineación que el resto de botones de acción
 
     if (!document.body.dataset.liquidGlassObserver) {
         const observer = new MutationObserver((mutations) => {

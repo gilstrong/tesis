@@ -1281,8 +1281,39 @@ button.sec:not(:disabled):not([aria-disabled="true"]):hover {
   animation: fadeIn 0.3s ease;
 }
 
-/* Label con iconos */
-.label-icon,
+/* Label con iconos (TÍTULOS DEL FORMULARIO) */
+.label-icon {
+  margin-right: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+  color: var(--primary-color, #2563eb);
+  flex-shrink: 0 !important;
+}
+
+.label-icon i {
+  font-size: 1.55rem !important; /* Iconos de títulos de formulario agrandados y destacados */
+  line-height: 1 !important;
+  vertical-align: middle !important;
+}
+
+.label-icon svg {
+  width: 26px !important; /* Iconos SVG de títulos ampliados a 26px */
+  height: 26px !important;
+  vertical-align: middle !important;
+}
+
+.form-group > label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+  color: var(--text-secondary);
+}
+
 .btn-icon,
 .tiempo-icon,
 .tabla-icon,
@@ -1290,6 +1321,11 @@ button.sec:not(:disabled):not([aria-disabled="true"]):hover {
 .info-icon {
   margin-right: var(--spacing-xs);
   display: inline-block;
+}
+
+.tabla-icon i {
+  font-size: 1.4rem !important;
+  vertical-align: middle !important;
 }
 
 /* Logo container */
@@ -1958,24 +1994,100 @@ servigaco-nav {
   }
 }
 
+/* ==========================================================================
+   CROSS-DOCUMENT VIEW TRANSITIONS (SPA-like navigation between pages)
+   ========================================================================== */
+@view-transition {
+  navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}
+
+::view-transition-group(servigaco-navbar) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 50;
+}
+
+::view-transition-old(root) {
+  animation: 180ms ease-out both sgov-fade-out;
+}
+
+::view-transition-new(root) {
+  animation: 220ms ease-out both sgov-fade-in;
+}
+
+@keyframes sgov-fade-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-4px); }
+}
+
+@keyframes sgov-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 .main-nav {
   animation: navSlideIn 0.4s ease-out;
 }
 
 /* tab-style1 geometry, scoped to the ServiGaco navigation */
 .main-nav.sg-tabbar-nav {
+  position: relative;
   overflow: visible;
-  border-radius: 0 0 1rem 1rem;
+  border-radius: 0 0 1.5rem 1.5rem;
   background: transparent;
   box-shadow: none;
   animation: none;
+  z-index: 40;
+  view-transition-name: servigaco-navbar;
+}
+
+/* 🌌 Halo difuminado ambiental que conecta los colores del nav con el fondo de la página */
+.main-nav.sg-tabbar-nav::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(900px, 98vw);
+  height: 240px;
+  background: radial-gradient(
+    ellipse 75% 65% at 50% 35%,
+    var(--sg-tabbar-panel-ambient) 0%,
+    transparent 72%
+  );
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.9;
+  transition: background var(--sg-tabbar-duration) var(--sg-tabbar-easing),
+              opacity var(--sg-tabbar-duration) var(--sg-tabbar-easing);
+}
+
+.dark .main-nav.sg-tabbar-nav::before,
+[data-theme="dark"] .main-nav.sg-tabbar-nav::before {
+  opacity: 0.75;
 }
 
 .sg-tabbar-nav {
   --sg-tabbar-panel: #c0d8ec;
+  --sg-tabbar-panel-ambient: rgba(147, 197, 253, 0.55);
   --sg-tabbar-base: #f9f8fa;
   --sg-tabbar-active: #0077b6;
-  --sg-tabbar-muted: #5f6b76;
+  --sg-tabbar-muted: #374151;
   --sg-tabbar-focus: #0f2747;
   --sg-tabbar-indicator-color: var(--sg-tabbar-panel);
   --sg-tabbar-duration: 320ms;
@@ -1984,6 +2096,7 @@ servigaco-nav {
 
 .sg-tabbar-nav[data-sg-current-page="general"] {
   --sg-tabbar-panel: #d36e5a;
+  --sg-tabbar-panel-ambient: rgba(248, 113, 113, 0.45);
   --sg-tabbar-active: #690c0c;
 }
 
@@ -1991,6 +2104,7 @@ servigaco-nav {
 [data-theme="dark"] .sg-tabbar-nav {
   --sg-tabbar-base: #111e33;
   --sg-tabbar-panel: #173254;
+  --sg-tabbar-panel-ambient: rgba(30, 58, 138, 0.5);
   --sg-tabbar-active: #7dd3fc;
   --sg-tabbar-muted: #cbd5e1;
   --sg-tabbar-focus: #f8fafc;
@@ -1999,6 +2113,7 @@ servigaco-nav {
 .dark .sg-tabbar-nav[data-sg-current-page="general"],
 [data-theme="dark"] .sg-tabbar-nav[data-sg-current-page="general"] {
   --sg-tabbar-panel: #4a2d31;
+  --sg-tabbar-panel-ambient: rgba(153, 27, 27, 0.45);
   --sg-tabbar-active: #ffb4a1;
 }
 
@@ -2008,7 +2123,7 @@ servigaco-nav {
     "brand actions"
     "links links";
   grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: auto 120px;
+  grid-template-rows: auto 132px;
   align-items: center;
   gap: 8px 16px;
   padding: 12px 20px;
@@ -2033,13 +2148,32 @@ servigaco-nav {
   grid-area: links;
   justify-self: center;
   width: min(640px, 100%);
-  height: 120px;
+  height: 132px;
   overflow: hidden;
-  border-bottom-right-radius: 1rem;
-  border-bottom-left-radius: 1rem;
-  background-color: var(--sg-tabbar-panel);
-  box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
-  transition: background-color var(--sg-tabbar-duration) var(--sg-tabbar-easing);
+  isolation: isolate;
+  border-radius: 0 0 1.25rem 1.25rem;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+  /* Sólido en toda el área de la esfera y el riel (0-75%) para que la curva inferior sea perfecta, y difuminado hacia transparente en el tope (75-100%) */
+  background: linear-gradient(
+    to top,
+    var(--sg-tabbar-panel) 0%,
+    var(--sg-tabbar-panel) 75%,
+    color-mix(in srgb, var(--sg-tabbar-panel) 70%, transparent) 86%,
+    color-mix(in srgb, var(--sg-tabbar-panel) 25%, transparent) 94%,
+    transparent 100%
+  );
+  /* Sombra suave difuminada del color del módulo en vez de sombra gris dura de 'caja pegada' */
+  box-shadow: 0 16px 38px -10px var(--sg-tabbar-panel-ambient);
+  transition: background var(--sg-tabbar-duration) var(--sg-tabbar-easing),
+              box-shadow var(--sg-tabbar-duration) var(--sg-tabbar-easing);
+}
+
+.dark .sg-tabbar-nav .sg-nav-stage,
+[data-theme="dark"] .sg-tabbar-nav .sg-nav-stage {
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 38px -10px rgba(0, 0, 0, 0.6), 0 0 25px -5px var(--sg-tabbar-panel-ambient);
 }
 
 .sg-tabbar-nav .sg-tabbar-list,
@@ -2130,6 +2264,11 @@ servigaco-nav {
   z-index: 2;
   display: block;
   color: inherit;
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1), color 200ms ease;
+}
+
+.sg-tabbar-nav .sg-tabbar-item:not(.active) .sg-tabbar-label {
+  transform: translateY(14px);
 }
 
 .sg-tabbar-nav .sg-tabbar-icon {
@@ -2189,10 +2328,63 @@ servigaco-nav {
 .sg-tabbar-nav .sg-tabbar-item.active .sg-tabbar-label {
   position: absolute;
   right: 0;
-  bottom: -18px;
+  bottom: -24px;
   left: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   PROTUBERANCIA DE LA ESFERA DEL NAV (HOVER EN TAB INACTIVO)
+   ========================================================================== */
+
+/* Esfera limpia del mismo color de base que se asoma suavemente sin pellizco */
+.sg-tabbar-nav .sg-tabbar-item:not(.active) .sg-tabbar-link::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--sg-tabbar-base);
+  border: none !important;
+  box-shadow: none !important;
+  content: "";
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transform: translate(-50%, 0) scale(0.8);
+  transform-origin: center bottom;
+  transition:
+    transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 240ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* Al acercar el puntero: la esfera se asoma suavemente desde el riel inferior */
+  .sg-tabbar-nav .sg-tabbar-item:not(.active):hover .sg-tabbar-link::before,
+  .sg-tabbar-nav .sg-tabbar-item:not(.active) .sg-tabbar-link:focus-visible::before {
+    opacity: 1;
+    transform: translate(-50%, -18px) scale(1);
+  }
+
+  /* El botón y el texto permanecen firmes en su lugar */
+  .sg-tabbar-nav .sg-tabbar-item:not(.active):hover .sg-tabbar-label,
+  .sg-tabbar-nav .sg-tabbar-item:not(.active) .sg-tabbar-link:focus-visible .sg-tabbar-label {
+    transform: translateY(14px);
+  }
+
+  /* No se muestra icono ni ningún elemento añadido */
+  .sg-tabbar-nav .sg-tabbar-item:not(.active):hover .sg-tabbar-icon,
+  .sg-tabbar-nav .sg-tabbar-item:not(.active) .sg-tabbar-link:focus-visible .sg-tabbar-icon {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sg-tabbar-nav .sg-tabbar-item:not(.active) .sg-tabbar-link::before {
+    display: none !important;
+  }
 }
 
 .sg-tabbar-nav .sg-tabbar-follow {
@@ -2227,7 +2419,8 @@ servigaco-nav {
   border-top: 11px solid var(--sg-tabbar-panel);
   background-color: var(--sg-tabbar-base);
   box-sizing: border-box;
-  content: " ";
+  content: "";
+  pointer-events: none;
   transition: border-color 200ms ease;
 }
 
@@ -2266,14 +2459,14 @@ servigaco-nav {
       "brand actions"
       "links links";
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: auto 104px;
+    grid-template-rows: auto 116px;
     gap: 8px 12px;
     padding: 10px 14px;
   }
 
   .sg-tabbar-nav .sg-nav-stage {
     width: min(640px, 100%);
-    height: 104px;
+    height: 116px;
   }
 }
 
@@ -2290,13 +2483,13 @@ servigaco-nav {
 
 @media (max-width: 480px) {
   .sg-tabbar-nav .sg-nav-container {
-    grid-template-rows: auto 98px;
+    grid-template-rows: auto 110px;
     gap: 6px 12px;
     padding: 8px 10px;
   }
 
   .sg-tabbar-nav .sg-nav-stage {
-    height: 98px;
+    height: 110px;
   }
 
   .sg-tabbar-nav .sg-tabbar-follow {
@@ -2371,6 +2564,7 @@ servigaco-nav {
   .sg-tabbar-nav .sg-tabbar-follow::after {
     transition: border-color 140ms linear;
   }
+
 }
 
 @media (forced-colors: active) {
@@ -3164,7 +3358,7 @@ li.sg-option[aria-selected="true"] .sg-check-icon {
 }
 
 .sg-thesis-select .sg-options-list {
-  max-height: 330px !important;
+  max-height: min(490px, 65vh) !important;
 }
 
 .sg-thesis-select li.sg-option {
@@ -3251,6 +3445,443 @@ html.dark .sg-thesis-select .sg-thesis-error { color: #fca5a5; }
 
   .sg-thesis-select.sg-open li.sg-option {
     animation: none;
+  }
+}
+
+/* ==========================================================================
+   ANIMACIONES GLOBALES DEL FORMULARIO DE TESIS (ICONOS Y SELECTORES)
+   ========================================================================== */
+
+/* 1. Regla / Tamaño de papel */
+.sg-anim-ruler {
+  display: inline-block !important;
+  transform-origin: center center;
+  animation: sg-ruler-tilt 2.8s ease-in-out infinite;
+}
+
+@keyframes sg-ruler-tilt {
+  0%, 100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  30% {
+    transform: rotate(-14deg) translateY(-2px);
+  }
+  65% {
+    transform: rotate(8deg) translateY(-1px);
+  }
+}
+
+/* 2. Papel Carta (flotación / ondeado) */
+.sg-anim-paper-float {
+  display: inline-block !important;
+  transform-origin: center center;
+  animation: sg-paper-float 2.6s ease-in-out infinite;
+}
+
+@keyframes sg-paper-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.08);
+  }
+}
+
+/* 3. Papel Legal (estiramiento y presencia vertical) */
+.sg-anim-paper-tall {
+  display: inline-block !important;
+  transform-origin: center bottom;
+  animation: sg-paper-tall 2.8s ease-in-out infinite;
+}
+
+@keyframes sg-paper-tall {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.18) translateY(-2px);
+  }
+}
+
+/* 4. Tabloide (expansión y pulso 2D de gran formato) */
+.sg-anim-grid-pulse {
+  display: inline-block !important;
+  transform-origin: center center;
+  animation: sg-grid-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes sg-grid-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.16);
+  }
+}
+
+/* 5. Tipo de papel general / Hojas en abanico */
+.sg-anim-sheets-fan {
+  display: inline-block !important;
+  transform-origin: center center;
+  animation: sg-sheets-fan 3s ease-in-out infinite;
+}
+
+@keyframes sg-sheets-fan {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  30% {
+    transform: rotate(-10deg) scale(1.08);
+  }
+  70% {
+    transform: rotate(8deg) scale(1.08);
+  }
+}
+
+/* 6. Papel Bond (acabado mate / pulsación nítida) */
+.sg-anim-bond-press {
+  display: inline-block !important;
+  transform-origin: center bottom;
+  animation: sg-bond-press 2.6s ease-in-out infinite;
+}
+
+@keyframes sg-bond-press {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-2px) rotate(5deg);
+  }
+}
+
+/* 7. Papel Hilo (textura artesanal con ondeado suave) */
+.sg-anim-thread-wave {
+  display: inline-block !important;
+  transform-origin: center center;
+  animation: sg-thread-wave 2.8s ease-in-out infinite;
+}
+
+@keyframes sg-thread-wave {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.1) rotate(-6deg);
+  }
+  75% {
+    transform: scale(1.1) rotate(6deg);
+  }
+}
+
+/* 8. Papel Satinado (brillo satinado radiante) */
+.sg-anim-sun-glow {
+  display: inline-block !important;
+  transform-origin: center center;
+  animation: sg-sun-glow 2.6s ease-in-out infinite;
+}
+
+@keyframes sg-sun-glow {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+    filter: drop-shadow(0 0 1px rgba(234, 179, 8, 0.4));
+  }
+  50% {
+    transform: rotate(35deg) scale(1.2);
+    filter: drop-shadow(0 0 6px rgba(234, 179, 8, 0.8));
+  }
+}
+
+/* 9. Tipo de empastado general / Libro en movimiento */
+.sg-anim-book-open {
+  display: inline-block !important;
+  transform-origin: center bottom;
+  animation: sg-book-open 3s ease-in-out infinite;
+}
+
+@keyframes sg-book-open {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  30% {
+    transform: rotate(-10deg) scale(1.1);
+  }
+  70% {
+    transform: rotate(8deg) scale(1.08);
+  }
+}
+
+/* 10. Tapa dura (tapa rígida, balanceo premium) */
+.sg-anim-hardcover {
+  display: inline-block !important;
+  transform-origin: center bottom;
+  animation: sg-hardcover-tilt 2.6s ease-in-out infinite;
+}
+
+@keyframes sg-hardcover-tilt {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  30% {
+    transform: translateY(-3px) rotate(-8deg) scale(1.12);
+  }
+  70% {
+    transform: translateY(-3px) rotate(8deg) scale(1.12);
+  }
+}
+
+/* 11. Vinil (cubierta plástica flexible con curvado elástico) */
+.sg-anim-vinyl-flex {
+  display: inline-block !important;
+  transform-origin: center bottom;
+  animation: sg-vinyl-flex 2.8s ease-in-out infinite;
+}
+
+@keyframes sg-vinyl-flex {
+  0%, 100% {
+    transform: skewX(0deg) scale(1);
+  }
+  30% {
+    transform: skewX(-12deg) scale(1.08);
+  }
+  70% {
+    transform: skewX(8deg) scale(1.08);
+  }
+}
+
+/* 12. Espiral (resorte con salto y oscilación de clip) */
+.sg-anim-spiral-bounce {
+  display: inline-block !important;
+  transform-origin: center center;
+  animation: sg-spiral-bounce 2.6s ease-in-out infinite;
+}
+
+@keyframes sg-spiral-bounce {
+  0%, 100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  25% {
+    transform: rotate(-16deg) translateY(-3px) scale(1.14);
+  }
+  75% {
+    transform: rotate(16deg) translateY(-1px) scale(1.14);
+  }
+}
+
+/* 13. Paleta de colores */
+.sg-anim-palette-tilt {
+  display: inline-block !important;
+  transform-origin: center center;
+  animation: sg-palette-tilt 3.2s ease-in-out infinite;
+}
+
+@keyframes sg-palette-tilt {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  35% {
+    transform: rotate(-15deg) scale(1.12);
+  }
+  70% {
+    transform: rotate(15deg) scale(1.12);
+  }
+}
+
+/* 14. Muestras de color de tapa */
+.sg-thesis-swatch {
+  animation: sg-swatch-pulse 3s ease-in-out infinite;
+}
+
+@keyframes sg-swatch-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.18);
+  }
+}
+
+/* 15. Micro-interacciones de opciones de menú desplegable */
+.sg-thesis-select li.sg-option {
+  transition: transform 180ms ease, background-color 180ms ease !important;
+}
+
+.sg-thesis-select li.sg-option:hover,
+.sg-thesis-select li.sg-option.sg-focused {
+  transform: translateX(4px);
+}
+
+.sg-thesis-select .sg-option-icon-box {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.sg-thesis-select li.sg-option:hover .sg-option-icon-box,
+.sg-thesis-select li.sg-option.sg-focused .sg-option-icon-box {
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* CD con giro continuo */
+.sg-icon-cd {
+  display: inline-block !important;
+  vertical-align: middle;
+}
+
+.sg-icon-cd-spinning {
+  display: inline-block !important;
+  transform-origin: center center;
+  animation: sg-cd-spin 2.6s linear infinite;
+}
+
+@keyframes sg-cd-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Icono de Lomo de libro con animación */
+.sg-icon-lomo {
+  display: inline-block !important;
+  vertical-align: middle;
+}
+
+.sg-icon-lomo-animated {
+  display: inline-block !important;
+  animation: sg-lomo-tilt 2.5s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+@keyframes sg-lomo-tilt {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  20% {
+    transform: translateY(-2px) rotate(-10deg) scale(1.08);
+  }
+  40% {
+    transform: translateY(-2px) rotate(10deg) scale(1.08);
+  }
+  60% {
+    transform: translateY(0) rotate(-3deg) scale(1.03);
+  }
+  80% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+}
+
+/* Icono de X / No para opciones sin servicio adicional */
+.sg-icon-no {
+  display: inline-block !important;
+  vertical-align: middle;
+  transform-origin: center center;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sg-option:hover .sg-icon-no,
+.sg-trigger:hover .sg-icon-no {
+  transform: scale(1.15) rotate(-6deg);
+}
+
+/* 💤 ESTADO EN REPOSO: Pausadas por defecto hasta que el usuario pase el puntero */
+.sg-anim-ruler,
+.sg-anim-paper-float,
+.sg-anim-paper-tall,
+.sg-anim-grid-pulse,
+.sg-anim-sheets-fan,
+.sg-anim-bond-press,
+.sg-anim-thread-wave,
+.sg-anim-sun-glow,
+.sg-anim-book-open,
+.sg-anim-hardcover,
+.sg-anim-vinyl-flex,
+.sg-anim-spiral-bounce,
+.sg-anim-palette-tilt,
+.sg-thesis-swatch,
+.sg-icon-cd-spinning,
+.sg-icon-lomo-animated {
+  animation-play-state: paused !important;
+}
+
+/* ⚡ ACTIVACIÓN: Al pasar el cursor (hover), enfocar con teclado o abrir el menú */
+.form-group:hover .sg-anim-ruler,
+.form-group:hover .sg-anim-paper-float,
+.form-group:hover .sg-anim-paper-tall,
+.form-group:hover .sg-anim-grid-pulse,
+.form-group:hover .sg-anim-sheets-fan,
+.form-group:hover .sg-anim-bond-press,
+.form-group:hover .sg-anim-thread-wave,
+.form-group:hover .sg-anim-sun-glow,
+.form-group:hover .sg-anim-book-open,
+.form-group:hover .sg-anim-hardcover,
+.form-group:hover .sg-anim-vinyl-flex,
+.form-group:hover .sg-anim-spiral-bounce,
+.form-group:hover .sg-anim-palette-tilt,
+.form-group:hover .sg-thesis-swatch,
+.form-group:hover .sg-icon-cd-spinning,
+.form-group:hover .sg-icon-lomo-animated,
+label:hover .label-icon i,
+label:hover .label-icon svg,
+.label-icon:hover i,
+.label-icon:hover svg,
+.sg-thesis-select:hover .sg-anim-ruler,
+.sg-thesis-select:hover .sg-anim-sheets-fan,
+.sg-thesis-select:hover .sg-anim-book-open,
+.sg-thesis-select:hover .sg-anim-palette-tilt,
+.sg-thesis-select.sg-open .sg-anim-ruler,
+.sg-thesis-select.sg-open .sg-anim-sheets-fan,
+.sg-thesis-select.sg-open .sg-anim-book-open,
+.sg-thesis-select.sg-open .sg-anim-palette-tilt,
+.sg-trigger:hover [class*="sg-anim-"],
+.sg-trigger:focus-visible [class*="sg-anim-"],
+.sg-option:hover [class*="sg-anim-"],
+.sg-option.sg-focused [class*="sg-anim-"],
+.sg-option:hover .sg-thesis-swatch,
+.sg-option.sg-focused .sg-thesis-swatch,
+#cdSection:hover .sg-icon-cd-spinning,
+#lomoSection:hover .sg-icon-lomo-animated,
+.sg-switch:hover .label-icon i,
+.sg-icon-cd-spinning:hover,
+.sg-icon-lomo-animated:hover,
+[class*="sg-anim-"]:hover {
+  animation-play-state: running !important;
+}
+
+/* ⏱️ DESACTIVACIÓN TRAS 30 SEGUNDOS CONTINUOS DE HOVER */
+.sg-anim-expired,
+.sg-anim-expired *,
+.form-group.sg-anim-expired [class*="sg-anim-"],
+.form-group.sg-anim-expired .sg-icon-cd-spinning,
+.form-group.sg-anim-expired .sg-icon-lomo-animated,
+.form-group.sg-anim-expired .sg-thesis-swatch,
+.sg-thesis-select.sg-anim-expired [class*="sg-anim-"],
+.sg-thesis-select.sg-anim-expired .sg-thesis-swatch,
+#cdSection.sg-anim-expired .sg-icon-cd-spinning,
+#lomoSection.sg-anim-expired .sg-icon-lomo-animated,
+label.sg-anim-expired .label-icon i,
+label.sg-anim-expired .label-icon svg {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sg-icon-cd-spinning,
+  .sg-icon-lomo-animated,
+  .sg-anim-ruler,
+  .sg-anim-paper-float,
+  .sg-anim-paper-tall,
+  .sg-anim-grid-pulse,
+  .sg-anim-sheets-fan,
+  .sg-anim-bond-press,
+  .sg-anim-thread-wave,
+  .sg-anim-sun-glow,
+  .sg-anim-book-open,
+  .sg-anim-hardcover,
+  .sg-anim-vinyl-flex,
+  .sg-anim-spiral-bounce,
+  .sg-anim-palette-tilt,
+  .sg-thesis-swatch {
+    animation-duration: 10s !important;
   }
 }
 

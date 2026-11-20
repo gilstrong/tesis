@@ -16,10 +16,11 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
 
   <!-- ESTILOS -->
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=3.9" />
   <link rel="stylesheet" href="/icons.css" />
   <link rel="stylesheet" href="tailwind.css" />
   <link rel="preload" as="image" href="/logo.webp" fetchpriority="high" />
+  <link rel="expect" href="#main-nav" blocking="render" />
   <script defer src="/icons.js"></script>
 
 
@@ -416,7 +417,7 @@
     <!-- ========================================
          🧭 NAVEGACIÓN PRINCIPAL
          ======================================== -->
-    <servigaco-nav></servigaco-nav>
+    <servigaco-nav id="main-nav"></servigaco-nav>
 
     <!-- ========================================
          📋 SECCIÓN: CALCULADORA GENERAL

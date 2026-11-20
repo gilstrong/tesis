@@ -16,10 +16,11 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
 
   <!-- ESTILOS -->
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=3.9" />
   <link rel="stylesheet" href="/icons.css" />
   <link rel="stylesheet" href="tailwind.css" />
   <link rel="preload" as="image" href="/logo.webp" fetchpriority="high" />
+  <link rel="expect" href="#main-nav" blocking="render" />
   <script defer src="/icons.js"></script>
 
 </head>
@@ -30,7 +31,7 @@
     <!-- ========================================
          🧭 NAVEGACIÓN PRINCIPAL
          ======================================== -->
-    <servigaco-nav></servigaco-nav>
+    <servigaco-nav id="main-nav"></servigaco-nav>
 
     <!-- ========================================
          📝 SECCIÓN: CALCULADORA DE TESIS
@@ -75,7 +76,7 @@
         <!-- Tamaño de papel -->
         <div class="form-group">
           <label for="tamano">
-            <span class="label-icon"><i class="ti ti-ruler" aria-hidden="true"></i></span>
+            <span class="label-icon"><i class="ti ti-ruler sg-anim-ruler" aria-hidden="true"></i></span>
             Tamaño de papel
           </label>
           <select id="tamano" name="tamano" required aria-describedby="alertaTabloide">
@@ -94,7 +95,7 @@
         <!-- Tipo de papel -->
         <div class="form-group">
           <label for="papel">
-            <span class="label-icon"><i class="ti ti-file-text" aria-hidden="true"></i></span>
+            <span class="label-icon"><i class="ti ti-files sg-anim-sheets-fan" aria-hidden="true"></i></span>
             Tipo de papel
           </label>
           <select id="papel" name="papel" required>
@@ -175,7 +176,7 @@
         <!-- Tipo de empastado -->
         <div class="form-group">
           <label for="tipoEmpastado">
-            <span class="label-icon"><i class="ti ti-book" aria-hidden="true"></i></span>
+            <span class="label-icon"><i class="ti ti-book sg-anim-book-open" aria-hidden="true"></i></span>
             Tipo de empastado
           </label>
           <select id="tipoEmpastado" name="tipoEmpastado" required>
@@ -189,11 +190,12 @@
         <div id="colorTapaSection" class="form-section">
           <div class="form-group">
             <label for="colorTapa">
-              <span class="label-icon"><i class="ti ti-palette" aria-hidden="true"></i></span>
+              <span class="label-icon"><i class="ti ti-palette sg-anim-palette-tilt" aria-hidden="true"></i></span>
               Color de tapa
             </label>
             <select id="colorTapa" name="colorTapa">
               <option value="beige">Beige</option>
+              <option value="negro">Negro</option>
               <option value="morado">Morado</option>
               <option value="azul_marino">Azul marino</option>
               <option value="azul_cielo">Azul cielo</option>
@@ -208,7 +210,7 @@
         <!-- ¿Lleva lomo? -->
         <div class="form-group">
           <label for="lomo">
-            <span class="label-icon"><i class="ti ti-ruler" aria-hidden="true"></i></span>
+            <span class="label-icon"><svg class="sg-icon-lomo sg-icon-lomo-animated" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /><line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="17" x2="20" y2="17" /><line x1="9" y1="11" x2="15" y2="11" /><line x1="10" y1="13" x2="14" y2="13" /></svg></span>
             ¿Lleva lomo?
           </label>
           <select id="lomo" name="lomo">
@@ -220,7 +222,7 @@
         <!-- ¿Lleva CD? -->
         <div class="form-group">
           <label for="llevaCd">
-            <span class="label-icon"><i class="ti ti-disc" aria-hidden="true"></i></span>
+            <span class="label-icon"><svg class="sg-icon-cd sg-icon-cd-spinning" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M7 12a5 5 0 0 1 5 -5" /><path d="M12 17a5 5 0 0 0 5 -5" /></svg></span>
             ¿Lleva CD?
           </label>
           <select id="llevaCd" name="llevaCd">
@@ -233,7 +235,7 @@
         <div id="cdSection" class="form-section">
           <div class="form-group">
             <label for="cantidadCd">
-              <span class="label-icon"><i class="ti ti-disc" aria-hidden="true"></i></span>
+              <span class="label-icon"><svg class="sg-icon-cd sg-icon-cd-spinning" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M7 12a5 5 0 0 1 5 -5" /><path d="M12 17a5 5 0 0 0 5 -5" /></svg></span>
               Cantidad de CD
             </label>
             <input 
@@ -594,9 +596,9 @@
   <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
-  <script defer src="pricing-config.js"></script>
-  <script defer src="script.js"></script>
-  <script defer src="components.js"></script>
+  <script defer src="pricing-config.js?v=3.0"></script>
+  <script defer src="script.js?v=3.4"></script>
+  <script defer src="components.js?v=3.1"></script>
   <!-- 📦 Notion Sync — cliente frontend para sincronización con Notion -->
   <script defer src="notion-sync.js"></script>
 

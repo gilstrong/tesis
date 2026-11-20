@@ -53,7 +53,8 @@ const IMAGEN_EJEMPLAR_TAPA = Object.freeze({
   beige: SERVIGACO_ASSET_URL('beige.png'),
   morado: SERVIGACO_ASSET_URL('morado.png'),
   blanco: SERVIGACO_ASSET_URL('blanca.png'),
-  azul_cielo: SERVIGACO_ASSET_URL('azulcielo.png')
+  azul_cielo: SERVIGACO_ASSET_URL('azulcielo.png'),
+  negro: SERVIGACO_ASSET_URL('negra.png')
 });
 
 const BLOQUE_CUENTAS = `
@@ -180,7 +181,8 @@ const elementos = {
   soloPaginas: document.getElementById('soloPaginas'),
   colorTapaSection: document.getElementById('colorTapaSection'),
   
-  // CD
+  // Lomo & CD
+  lomo: document.getElementById('lomo'),
   llevaCd: document.getElementById('llevaCd'),
   cdSection: document.getElementById('cdSection'),
   
@@ -209,51 +211,60 @@ let isProcessingAction = false; // Flag para evitar doble click en acciones
 let idCotizacionAEliminar = null; // Variable temporal para eliminación
 
 // Inicializar Firebase
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
+let db = null;
+let auth = null;
+if (typeof firebase !== 'undefined') {
+  try {
+    if (!firebase.apps?.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    db = firebase.database();
+    auth = firebase.auth();
+  } catch (err) {
+    console.warn('Firebase no se pudo inicializar:', err);
+  }
 }
-const db = firebase.database();
-const auth = firebase.auth();
 const ACTIVAR_SEGURIDAD = true; // Control de seguridad
 let cotizacionHistoricaCargada = false;
 
 const THESIS_SELECT_PRESETS = {
   tamano: {
-    icon: 'ti-ruler',
+    icon: 'ti-ruler sg-anim-ruler',
     tone: 'blue',
     placeholder: 'Elige el formato de tu tesis',
     options: {
-      carta: { title: 'Carta', description: '8½ × 11 pulgadas · formato estándar', icon: 'ti-file-text' },
-      legal: { title: 'Legal', description: '8½ × 14 pulgadas · formato extendido', icon: 'ti-file-description' },
-      tabloide: { title: 'Tabloide', description: '11 × 17 pulgadas · papel satinado', icon: 'ti-layout-dashboard' }
+      carta: { title: 'Carta', description: '8½ × 11 pulgadas · formato estándar', icon: 'ti-file-text sg-anim-paper-float' },
+      legal: { title: 'Legal', description: '8½ × 14 pulgadas · formato extendido', icon: 'ti-file-description sg-anim-paper-tall' },
+      tabloide: { title: 'Tabloide', description: '11 × 17 pulgadas · papel satinado', icon: 'ti-layout-dashboard sg-anim-grid-pulse' }
     }
   },
   papel: {
-    icon: 'ti-files',
+    icon: 'ti-files sg-anim-sheets-fan',
     tone: 'purple',
     placeholder: 'Elige el acabado del papel',
     options: {
-      bond: { description: 'Acabado mate para impresión cotidiana', icon: 'ti-file-text' },
-      hilo: { description: 'Textura distintiva para una presentación formal', icon: 'ti-files' },
-      satinado: { description: 'Superficie lisa con mayor intensidad de color', icon: 'ti-sun' }
+      bond: { description: 'Acabado mate para impresión cotidiana', icon: 'ti-file-text sg-anim-bond-press' },
+      hilo: { description: 'Textura distintiva para una presentación formal', icon: 'ti-files sg-anim-thread-wave' },
+      satinado: { description: 'Superficie lisa con mayor intensidad de color', icon: 'ti-sun sg-anim-sun-glow' }
     }
   },
   tipoEmpastado: {
-    icon: 'ti-book',
+    icon: 'ti-book sg-anim-book-open',
     tone: 'amber',
     placeholder: 'Elige cómo presentar los tomos',
     options: {
-      tapa_dura: { description: 'Cubierta rígida · presentación clásica', icon: 'ti-book-2' },
-      vinil: { description: 'Cubierta flexible · acabado plastificado', icon: 'ti-book' },
-      espiral: { description: 'Encuadernado flexible y fácil de consultar', icon: 'ti-paperclip' }
+      tapa_dura: { description: 'Cubierta rígida · presentación clásica', icon: 'ti-book-2 sg-anim-hardcover' },
+      vinil: { description: 'Cubierta flexible · acabado plastificado', icon: 'ti-book sg-anim-vinyl-flex' },
+      espiral: { description: 'Encuadernado flexible y fácil de consultar', icon: 'ti-paperclip sg-anim-spiral-bounce' }
     }
   },
   colorTapa: {
-    icon: 'ti-palette',
+    icon: 'ti-palette sg-anim-palette-tilt',
     tone: 'rose',
     placeholder: 'Elige el color de la cubierta',
     options: {
       beige: { description: 'Beige', tone: 'amber', swatch: '#d6c3a1' },
+      negro: { description: 'Negro', tone: 'slate', swatch: '#18181b' },
       morado: { description: 'Morado', tone: 'purple', swatch: '#8b5cf6' },
       azul_marino: { description: 'Azul marino', tone: 'blue', swatch: '#1e3a8a' },
       azul_cielo: { description: 'Azul cielo', tone: 'cyan', swatch: '#38bdf8' },
@@ -264,12 +275,20 @@ const THESIS_SELECT_PRESETS = {
     }
   },
   lomo: {
-    icon: 'ti-ruler',
-    tone: 'cyan',
+    icon: 'ti-book-2',
+    tone: 'amber',
     placeholder: 'Indica si el tomo lleva lomo',
     options: {
-      no: { description: 'Sin costo adicional de lomo', icon: 'ti-file-x', tone: 'slate' },
-      si: { description: 'Añadir lomo a cada tomo', icon: 'ti-circle-check', tone: 'green' }
+      no: {
+        description: 'Sin costo adicional de lomo',
+        svg: '<svg class="sg-icon-no" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="9" /><path d="M10 10l4 4m0 -4l-4 4" /></svg>',
+        tone: 'rose'
+      },
+      si: {
+        description: 'Añadir lomo a cada tomo',
+        svg: '<svg class="sg-icon-lomo sg-icon-lomo-animated" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /><line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="17" x2="20" y2="17" /><line x1="9" y1="11" x2="15" y2="11" /><line x1="10" y1="13" x2="14" y2="13" /></svg>',
+        tone: 'amber'
+      }
     }
   },
   llevaCd: {
@@ -277,8 +296,16 @@ const THESIS_SELECT_PRESETS = {
     tone: 'purple',
     placeholder: 'Indica si incluirás CD',
     options: {
-      no: { description: 'Sin CD en esta cotización', icon: 'ti-file-x', tone: 'slate' },
-      si: { description: 'Añadir CD y especificar la cantidad', icon: 'ti-disc', tone: 'blue' }
+      no: {
+        description: 'Sin CD en esta cotización',
+        svg: '<svg class="sg-icon-no" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="9" /><path d="M10 10l4 4m0 -4l-4 4" /></svg>',
+        tone: 'rose'
+      },
+      si: {
+        description: 'Añadir CD y especificar la cantidad',
+        svg: '<svg class="sg-icon-cd sg-icon-cd-spinning" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M7 12a5 5 0 0 1 5 -5" /><path d="M12 17a5 5 0 0 0 5 -5" /></svg>',
+        tone: 'blue'
+      }
     }
   }
 };
@@ -291,6 +318,8 @@ function crearIconoOpcion(option, tone) {
     swatch.className = 'sg-thesis-swatch';
     swatch.style.setProperty('--sg-thesis-swatch-color', option.swatch);
     iconBox.append(swatch);
+  } else if (option.svg) {
+    iconBox.innerHTML = option.svg;
   } else {
     const icon = document.createElement('i');
     icon.className = `ti ${option.icon || 'ti-check'}`;
@@ -412,7 +441,8 @@ function inicializarSelectorTesis(select, config = {}) {
     const tone = optionConfig.tone || preset?.tone || 'cyan';
     const icon = crearIconoOpcion({
       icon: optionConfig.icon || preset?.icon,
-      swatch: optionConfig.swatch
+      swatch: optionConfig.swatch,
+      svg: optionConfig.svg
     }, tone);
     const info = document.createElement('span');
     info.className = 'sg-option-info';
@@ -874,6 +904,13 @@ function toggleSeccionCD() {
 }
 
 /**
+ * Actualiza la vista del selector de lomo
+ */
+function actualizarIconoLomo() {
+  actualizarSelectoresTesis();
+}
+
+/**
  * Alterna visibilidad de tabla de precios
  */
 function toggleTablaPrecios() {
@@ -1139,10 +1176,10 @@ ultimaCotizacion = generarHTMLCotizacion(datosUltimaCotizacion);
     elementos.resultado.style.display = 'block';
     if (!soloVista) mostrarNotificacion('Cotización calculada exitosamente', 'success');
 
-    if (!soloVista) {
+    if (!soloVista && db) {
       const datosDashboard = {
         fecha: new Date().toISOString(),
-        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        timestamp: (typeof firebase !== 'undefined' && firebase.database?.ServerValue) ? firebase.database.ServerValue.TIMESTAMP : Date.now(),
         tipo: "Tesis",
         nombre: idCotizacion,
         total: totalRedondeado.toFixed(2),
@@ -1670,9 +1707,13 @@ function reiniciar() {
   if (colorTapa) colorTapa.value = 'beige';
   
   const lomo = document.getElementById('lomo');
-  if (lomo) lomo.value = 'no';
+  if (lomo) {
+    lomo.value = 'no';
+    actualizarIconoLomo();
+  }
   
   elementos.llevaCd.value = 'no';
+  toggleSeccionCD();
 
   // Ocultar secciones
   elementos.cdSection.style.display = 'none';
@@ -1714,8 +1755,9 @@ function inicializar() {
     el.addEventListener('change', actualizarVista);
   });
 
-  // Evento para CD
+  // Evento para CD y Lomo
   elementos.llevaCd.addEventListener('change', toggleSeccionCD);
+  elementos.lomo?.addEventListener('change', actualizarIconoLomo);
 
   // Eventos de botones
   elementos.btnCalcular.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); calcular(); });
@@ -1753,7 +1795,9 @@ function inicializar() {
   document.getElementById('btnCerrarDashboard')?.addEventListener('click', () => document.getElementById('modalDashboard').classList.add('hidden'));
   document.getElementById('btnFiltrarDashboard')?.addEventListener('click', cargarDatosDashboard);
 
-  auth.onAuthStateChanged(actualizarIconoAuth);
+  if (auth) {
+    auth.onAuthStateChanged(actualizarIconoAuth);
+  }
 
   // Evento tabla de precios (opcional)
   if (elementos.btnMostrarTabla) {
@@ -1801,6 +1845,53 @@ function inicializar() {
 
   // Actualizar vista inicial
   actualizarVista();
+
+  // Inicializar temporizador para desactivar animaciones tras 30s de hover continuo
+  inicializarTemporizadorAnimaciones();
+}
+
+/**
+ * Control de animaciones educativas y micro-interacciones:
+ * - Están en reposo (pausadas) por defecto vía CSS.
+ * - Al pasar el puntero (hover) se activan de inmediato.
+ * - Si el usuario mantiene el puntero durante 30 segundos continuos sobre el elemento o contenedor,
+ *   la animación se desactiva (se pausa) agregando la clase 'sg-anim-expired'.
+ * - Al retirar el puntero (pointerout/pointerleave), el temporizador se limpia y se reactiva para la próxima interacción.
+ */
+function inicializarTemporizadorAnimaciones() {
+  const hoverTimers = new Map();
+  const SELECTOR_HOVER = '.form-group, .sg-thesis-select, .sg-option, .sg-switch, #cdSection, #lomoSection, label, .sg-thesis-swatch';
+
+  document.addEventListener('pointerover', (e) => {
+    const container = e.target.closest(SELECTOR_HOVER);
+    if (!container) return;
+
+    // Si ya existe un temporizador activo para este contenedor, no lo reiniciamos mientras el cursor permanezca dentro
+    if (hoverTimers.has(container)) return;
+
+    const timer = setTimeout(() => {
+      container.classList.add('sg-anim-expired');
+    }, 30000);
+
+    hoverTimers.set(container, timer);
+  }, { passive: true });
+
+  document.addEventListener('pointerout', (e) => {
+    const container = e.target.closest(SELECTOR_HOVER);
+    if (!container) return;
+
+    // Si el puntero se movió a un elemento hijo del mismo contenedor, mantenemos el temporizador activo
+    if (e.relatedTarget && container.contains(e.relatedTarget)) {
+      return;
+    }
+
+    // El puntero salió del contenedor: limpiar temporizador y resetear estado expirado
+    if (hoverTimers.has(container)) {
+      clearTimeout(hoverTimers.get(container));
+      hoverTimers.delete(container);
+    }
+    container.classList.remove('sg-anim-expired');
+  }, { passive: true });
 }
 
 // Iniciar cuando el DOM esté listo
