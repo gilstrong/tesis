@@ -871,6 +871,7 @@ function actualizarVista() {
     }
   }
   actualizarSelectoresTesis();
+  actualizarCalculoEnVivo();
 }
 
 
@@ -901,6 +902,7 @@ function toggleSeccionCD() {
   const mostrar = elementos.llevaCd.value === 'si';
   elementos.cdSection.style.display = mostrar ? 'block' : 'none';
   actualizarSelectoresTesis();
+  actualizarCalculoEnVivo();
 }
 
 /**
@@ -908,6 +910,7 @@ function toggleSeccionCD() {
  */
 function actualizarIconoLomo() {
   actualizarSelectoresTesis();
+  actualizarCalculoEnVivo();
 }
 
 /**
@@ -1196,6 +1199,142 @@ ultimaCotizacion = generarHTMLCotizacion(datosUltimaCotizacion);
     
   } catch (error) {
     mostrarNotificacion(error.message, 'error');
+  }
+}
+
+/**
+ * Realiza el cálculo numérico puro de la cotización de tesis sin efectos secundarios
+ * (no lanza excepciones, no genera toasts y no envía a Firebase).
+ * @returns {Object} { valido, total, totalRedondeado, totalPaginas, tomos, tipoEmp, colorTapa, impresion, empastado, lomoVal, cdVal, esSatinado }
+ */
+function calcularTotalesPuros() {
+  try {
+    if (!elementos || !elementos.papel || !elementos.tipoEmpastado) {
+      return { valido: false, total: 0, totalRedondeado: 0, totalPaginas: 0, tomos: 1 };
+    }
+    const esSatinado = elementos.papel.value === 'satinado';
+    const paginasSatinado = obtenerValorNumerico('paginas');
+    const bn = obtenerValorNumerico('bn');
+    const color = obtenerValorNumerico('color');
+    const totalPaginas = esSatinado ? paginasSatinado : (bn + color);
+
+    if (totalPaginas <= 0) {
+      return { valido: false, total: 0, totalRedondeado: 0, totalPaginas: 0, tomos: 1, esSatinado };
+    }
+
+    const tomos = Math.max(1, obtenerValorNumerico('tomos', 1));
+    const serviciosConfigurados = typeof recopilarServiciosConfiguradosTesis === 'function' ? recopilarServiciosConfiguradosTesis() : [];
+
+    // Cálculo de impresión seguro
+    let impresion = 0;
+    if (esSatinado) {
+      let precio;
+      if (elementos.itlaCheckbox?.checked) {
+        precio = PRECIO_ITLA_SATINADO;
+      } else if (elementos.tamano.value === 'legal') {
+        precio = obtenerPrecioRango(PRECIOS_LEGAL_SATINADO, totalPaginas);
+      } else {
+        precio = PRECIOS[elementos.tamano.value]?.satinado?.precio || 0;
+      }
+      impresion = totalPaginas * precio;
+    } else {
+      let precioBN = 0, precioColor = 0;
+      const tamano = elementos.tamano.value;
+      if (tamano === 'legal') {
+        const baseBN = obtenerPrecioRango(PRECIOS_LEGAL_BN, bn);
+        const baseColor = obtenerPrecioRango(PRECIOS_LEGAL_COLOR, color);
+        if (elementos.papel.value === 'hilo') {
+          precioBN = baseBN + 2;
+          precioColor = baseColor + 3;
+        } else {
+          precioBN = baseBN;
+          precioColor = baseColor;
+        }
+      } else {
+        const papelPrecios = PRECIOS[tamano]?.[elementos.papel.value] || PRECIOS[tamano]?.bond;
+        precioBN = papelPrecios?.bn || 0;
+        precioColor = papelPrecios?.color || 0;
+      }
+      impresion = (bn * precioBN) + (color * precioColor);
+    }
+
+    // Cálculo empastado
+    const { empastado, tipoEmp, colorTapa } = calcularEmpastado(tomos, totalPaginas);
+
+    // Servicios adicionales
+    const { lomoVal, cdVal } = calcularServiciosAdicionales(tomos);
+
+    const total = impresion * tomos + empastado + lomoVal + cdVal
+      + serviciosConfigurados.reduce((sum, service) => sum + service.total, 0);
+    const totalRedondeado = redondearA5(total);
+
+    return {
+      valido: true,
+      total,
+      totalRedondeado,
+      totalPaginas,
+      tomos,
+      tipoEmp,
+      colorTapa,
+      impresion,
+      empastado,
+      lomoVal,
+      cdVal,
+      esSatinado
+    };
+  } catch (err) {
+    return { valido: false, total: 0, totalRedondeado: 0, totalPaginas: 0, tomos: 1 };
+  }
+}
+
+let debounceLiveRenderTimer = null;
+
+/**
+ * Actualiza el indicador flotante de cálculo en vivo y sincroniza
+ * la cotización completa si ya se encuentra abierta en pantalla.
+ */
+function actualizarCalculoEnVivo() {
+  const bar = document.getElementById('sgLiveTotalBar');
+  if (!bar) return;
+
+  const numEl = document.getElementById('sgLiveAmount');
+  const summaryEl = document.getElementById('sgLiveSummary');
+  const dotEl = bar.querySelector('.sg-live-indicator-dot');
+
+  const res = calcularTotalesPuros();
+
+  if (!res.valido) {
+    if (numEl) numEl.textContent = '0';
+    if (summaryEl) {
+      const esSatinado = elementos.papel?.value === 'satinado';
+      summaryEl.textContent = esSatinado ? 'Ingresa páginas totales' : 'Ingresa páginas B/N y Color';
+    }
+    if (dotEl) dotEl.classList.add('sg-idle');
+  } else {
+    const formatted = res.totalRedondeado.toLocaleString('es-DO');
+    if (numEl) {
+      if (numEl.textContent !== formatted) {
+        numEl.textContent = formatted;
+        numEl.classList.remove('sg-bump');
+        void numEl.offsetWidth;
+        numEl.classList.add('sg-bump');
+        setTimeout(() => numEl.classList.remove('sg-bump'), 220);
+      }
+    }
+    if (summaryEl) {
+      const empLabel = res.tipoEmp === 'tapa_dura' ? 'Tapa dura' : (res.tipoEmp === 'espiral' ? 'Espiral' : 'Tapa blanda');
+      const tomosLabel = `${res.tomos} ${res.tomos === 1 ? 'tomo' : 'tomos'}`;
+      summaryEl.textContent = `${res.totalPaginas} págs • ${tomosLabel} • ${empLabel}`;
+    }
+    if (dotEl) dotEl.classList.remove('sg-idle');
+
+    // Si la cotización completa ya está desplegada, actualizarla en tiempo real sin recargar historial
+    if (elementos.resultado && elementos.resultado.style.display !== 'none' && !cotizacionHistoricaCargada) {
+      clearTimeout(debounceLiveRenderTimer);
+      debounceLiveRenderTimer = setTimeout(() => {
+        calcular({ soloVista: true });
+      }, 160);
+    }
   }
 }
 
@@ -1760,7 +1899,14 @@ function inicializar() {
   elementos.lomo?.addEventListener('change', actualizarIconoLomo);
 
   // Eventos de botones
-  elementos.btnCalcular.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); calcular(); });
+  elementos.btnCalcular.addEventListener('click', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await calcular();
+    if (elementos.resultado && elementos.resultado.style.display !== 'none') {
+      elementos.resultado.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
   elementos.btnGenerar.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); imprimir(); });
   if (elementos.btnDescargarPdf) {
     elementos.btnDescargarPdf.addEventListener('click', (e) => {
@@ -1804,12 +1950,53 @@ function inicializar() {
     elementos.btnMostrarTabla.addEventListener('click', toggleTablaPrecios);
   }
 
-  // Listeners para persistencia en todos los inputs
+  // Listeners para persistencia y cálculo en vivo en todos los inputs
   const inputs = document.querySelectorAll('input, select');
   inputs.forEach(el => {
-    el.addEventListener('change', guardarTesisLocalStorage);
-    el.addEventListener('input', guardarTesisLocalStorage);
+    el.addEventListener('change', () => {
+      guardarTesisLocalStorage();
+      actualizarCalculoEnVivo();
+    });
+    el.addEventListener('input', () => {
+      guardarTesisLocalStorage();
+      actualizarCalculoEnVivo();
+    });
   });
+
+  // Configurar indicador flotante de cálculo en vivo
+  const liveDetailsBtn = document.getElementById('sgLiveDetailsBtn');
+  if (liveDetailsBtn) {
+    liveDetailsBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const res = calcularTotalesPuros();
+      if (!res.valido) {
+        mostrarNotificacion('Ingresa la cantidad de páginas para calcular', 'warning');
+        const inputTarget = (elementos.papel?.value === 'satinado') ? elementos.paginas : elementos.bn;
+        inputTarget?.focus();
+        return;
+      }
+      await calcular();
+      if (elementos.resultado && elementos.resultado.style.display !== 'none') {
+        elementos.resultado.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
+
+  // Ocultar barra flotante cuando la cotización completa esté en pantalla
+  const cotizacionSec = document.getElementById('cotizacionGenerada');
+  const liveBar = document.getElementById('sgLiveTotalBar');
+  if (liveBar && cotizacionSec && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && cotizacionSec.style.display !== 'none') {
+          liveBar.classList.add('sg-live-hidden');
+        } else {
+          liveBar.classList.remove('sg-live-hidden');
+        }
+      });
+    }, { threshold: 0.12 });
+    observer.observe(cotizacionSec);
+  }
 
   // Eventos Modal
   const btnCerrarModal = document.getElementById('btnCerrarModal');

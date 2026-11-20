@@ -362,6 +362,10 @@ class ServigacoAIChat extends HTMLElement {
             .notif-dot { position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; background: var(--accent-orange); border-radius: 50%; display: none; border: 2.5px solid var(--bg-secondary); transform-origin: center; animation: pulse 2s infinite; }
             @keyframes pulse { 0%, 100% { transform: scale(0.92); opacity: 0.85; } 50% { transform: scale(1.05); opacity: 1; } }
             @media (prefers-reduced-motion: reduce) { .notif-dot { animation: none; } }
+            @media (max-width: 640px) {
+                #chat-bubble { bottom: 84px; right: 16px; width: 48px; height: 48px; font-size: 22px; }
+                #chat-panel { bottom: 140px; right: 12px; width: calc(100vw - 24px); max-width: 360px; }
+            }
         </style>
 
         <button id="chat-bubble" aria-label="Abrir asistente">

@@ -16,7 +16,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
 
   <!-- ESTILOS -->
-  <link rel="stylesheet" href="style.css?v=3.9" />
+  <link rel="stylesheet" href="style.css?v=4.1" />
   <link rel="stylesheet" href="/icons.css" />
   <link rel="stylesheet" href="tailwind.css" />
   <link rel="preload" as="image" href="/logo.webp" fetchpriority="high" />
@@ -69,7 +69,7 @@
             <input type="checkbox" role="switch" id="itlaCheckbox" name="itlaCheckbox">
             <span class="sg-switch-track" aria-hidden="true"><span class="sg-switch-thumb"></span></span>
             <span class="label-icon m-0" style="margin-bottom: 0;"><i class="ti ti-school" aria-hidden="true"></i></span>
-            <span class="sg-switch-label font-bold text-indigo-900 dark:text-indigo-200">UNIVERIDAD ITLA</span>
+            <span class="sg-switch-label font-bold text-indigo-900 dark:text-indigo-200">UNIVERSIDAD ITLA</span>
           </label>
         </div>
 
@@ -413,6 +413,31 @@
 
     <servigaco-footer></servigaco-footer>
 
+    <!-- ========================================
+         ⚡ INDICADOR FLOTANTE: CÁLCULO EN VIVO
+         ======================================== -->
+    <aside id="sgLiveTotalBar" class="sg-live-total-bar" aria-label="Resumen de cálculo en vivo" aria-live="polite">
+      <div class="sg-live-inner">
+        <div class="sg-live-meta">
+          <span class="sg-live-indicator-dot sg-idle" title="Cálculo automático en vivo"></span>
+          <div class="sg-live-text-wrap">
+            <div class="sg-live-eyebrow">Total Estimado</div>
+            <div id="sgLiveSummary" class="sg-live-sub">Ingresa las páginas</div>
+          </div>
+        </div>
+        <div class="sg-live-action-wrap">
+          <div class="sg-live-price">
+            <span class="sg-live-curr">RD$</span>
+            <span id="sgLiveAmount" class="sg-live-num">0</span>
+          </div>
+          <button type="button" id="sgLiveDetailsBtn" class="sg-live-trigger" title="Ver cotización detallada">
+            <span>Ver detalle</span>
+            <i class="ti ti-arrow-down" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
   </main>
 
   <!-- ========================================
@@ -597,8 +622,8 @@
   <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
   <script defer src="pricing-config.js?v=3.0"></script>
-  <script defer src="script.js?v=3.4"></script>
-  <script defer src="components.js?v=3.1"></script>
+  <script defer src="script.js?v=3.5"></script>
+  <script defer src="components.js?v=3.2"></script>
   <!-- 📦 Notion Sync — cliente frontend para sincronización con Notion -->
   <script defer src="notion-sync.js"></script>
 

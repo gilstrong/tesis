@@ -4090,3 +4090,224 @@ button.sg-tool-btn:disabled {
   }
 }
 
+/* ========================================
+   ⚡ BARRA FLOTANTE DE CÁLCULO EN VIVO
+   ======================================== */
+.sg-live-total-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  width: min(calc(100% - 32px), 520px);
+  z-index: 60;
+  pointer-events: auto;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, filter 0.3s ease;
+}
+
+.sg-live-total-bar.sg-live-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(32px);
+}
+
+.sg-live-inner {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 10px 8px 18px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(16px) saturate(1.8);
+  backdrop-filter: blur(16px) saturate(1.8);
+  border: 1px double rgba(51, 51, 51, 0.14);
+  box-shadow:
+    0 14px 34px -4px rgba(25, 35, 60, 0.18),
+    0 4px 12px rgba(0, 0, 0, 0.05),
+    inset 1.5px -1.5px 1px -1px rgba(255, 255, 255, 0.95),
+    inset -1.5px 1.5px 1px -1px rgba(255, 255, 255, 0.95),
+    inset 0 0 2px rgba(0, 0, 0, 0.15);
+}
+
+html.dark .sg-live-inner {
+  background: rgba(30, 36, 50, 0.88);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 16px 36px -4px rgba(0, 0, 0, 0.55),
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 1.5px -1.5px 1px -1px rgba(255, 255, 255, 0.3),
+    inset -1.5px 1.5px 1px -1px rgba(255, 255, 255, 0.3),
+    inset 0 0 2px rgba(0, 0, 0, 0.4);
+}
+
+.sg-live-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.sg-live-indicator-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  flex-shrink: 0;
+  animation: sg-pulse-live 2s infinite ease-in-out;
+}
+
+.sg-live-indicator-dot.sg-idle {
+  background: #94a3b8;
+  box-shadow: none;
+  animation: none;
+}
+
+@keyframes sg-pulse-live {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.75; }
+}
+
+.sg-live-text-wrap {
+  min-width: 0;
+}
+
+.sg-live-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  line-height: 1.1;
+}
+
+html.dark .sg-live-eyebrow {
+  color: #94a3b8;
+}
+
+.sg-live-sub {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+html.dark .sg-live-sub {
+  color: #f1f5f9;
+}
+
+.sg-live-action-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.sg-live-price {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+html.dark .sg-live-price {
+  color: #38bdf8;
+}
+
+.sg-live-curr {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #6366f1;
+}
+
+html.dark .sg-live-curr {
+  color: #818cf8;
+}
+
+.sg-live-num {
+  font-size: 1.28rem;
+  letter-spacing: -0.02em;
+  display: inline-block;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
+}
+
+.sg-live-num.sg-bump {
+  transform: scale(1.18);
+  color: #4f46e5;
+}
+
+html.dark .sg-live-num.sg-bump {
+  color: #a5b4fc;
+}
+
+.sg-live-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.sg-live-trigger:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 14px rgba(79, 70, 229, 0.45);
+  filter: brightness(1.08);
+}
+
+.sg-live-trigger:active {
+  transform: scale(0.96);
+}
+
+.sg-live-trigger i {
+  font-size: 0.95rem;
+  transition: transform 0.2s ease;
+}
+
+.sg-live-trigger:hover i {
+  transform: translateY(2px);
+}
+
+@media (max-width: 480px) {
+  .sg-live-total-bar {
+    bottom: 14px;
+    width: calc(100% - 20px);
+  }
+  .sg-live-inner {
+    padding: 8px 12px 8px 14px;
+    gap: 8px;
+  }
+  .sg-live-sub {
+    max-width: 140px;
+    font-size: 0.76rem;
+  }
+  .sg-live-num {
+    font-size: 1.15rem;
+  }
+  .sg-live-trigger {
+    padding: 7px 12px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+  .sg-live-trigger span {
+    display: inline;
+  }
+  .sg-live-trigger i {
+    font-size: 0.95rem;
+    margin: 0;
+  }
+}
+
