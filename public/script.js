@@ -2364,60 +2364,92 @@ function renderizarCotizacionesGuardadas() {
 }
 
 function cargarCotizacionGuardada(id) {
-  const cotizacion = todasLasCotizaciones.find(c => c.id === id);
-  if (cotizacion && cotizacion.inputs) {
-    cotizacionHistoricaCargada = true;
-    const d = cotizacion.inputs;
-    
-    if (d.tamano) elementos.tamano.value = d.tamano;
-    if (d.papel) elementos.papel.value = d.papel;
-    if (d.bn) document.getElementById('bn').value = d.bn;
-    if (d.color) document.getElementById('color').value = d.color;
-    if (d.paginas) document.getElementById('paginas').value = d.paginas;
-    if (d.tomos) document.getElementById('tomos').value = d.tomos;
-    if (d.tipoEmpastado) elementos.tipoEmpastado.value = d.tipoEmpastado;
-    if (d.colorTapa) document.getElementById('colorTapa').value = d.colorTapa;
-    if (typeof d.itlaAplicado === 'boolean' && elementos.itlaCheckbox) {
-      elementos.itlaCheckbox.checked = d.itlaAplicado;
+  try {
+    const cotizacion = todasLasCotizaciones.find(c => c.id === id);
+    if (!cotizacion) {
+      return mostrarNotificacion('No se encontró la cotización seleccionada.', 'error');
     }
-    if (d.lomo) document.getElementById('lomo').value = d.lomo;
-    if (d.llevaCd) elementos.llevaCd.value = d.llevaCd;
-    if (d.cantidadCd) document.getElementById('cantidadCd').value = d.cantidadCd;
 
-    actualizarVista();
-    toggleSeccionCD();
-    datosParaGuardar = null;
-    if (cotizacion.snapshotPrecio) {
-      datosUltimaCotizacion = cotizacion.snapshotPrecio;
-      ultimaCotizacion = generarHTMLCotizacion(datosUltimaCotizacion);
-      elementos.resultado.innerHTML = ultimaCotizacion;
-      elementos.resultado.style.display = 'block';
+    cotizacionHistoricaCargada = true;
+
+    if (cotizacion.inputs) {
+      const d = cotizacion.inputs;
+
+      if (d.tamano && elementos.tamano) elementos.tamano.value = d.tamano;
+      if (d.papel && elementos.papel) elementos.papel.value = d.papel;
+      if (d.bn && document.getElementById('bn')) document.getElementById('bn').value = d.bn;
+      if (d.color && document.getElementById('color')) document.getElementById('color').value = d.color;
+      if (d.paginas && document.getElementById('paginas')) document.getElementById('paginas').value = d.paginas;
+      if (d.tomos && document.getElementById('tomos')) document.getElementById('tomos').value = d.tomos;
+      if (d.tipoEmpastado && elementos.tipoEmpastado) elementos.tipoEmpastado.value = d.tipoEmpastado;
+      if (d.colorTapa && document.getElementById('colorTapa')) document.getElementById('colorTapa').value = d.colorTapa;
+      if (typeof d.itlaAplicado === 'boolean' && elementos.itlaCheckbox) {
+        elementos.itlaCheckbox.checked = d.itlaAplicado;
+      }
+      if (d.lomo && document.getElementById('lomo')) document.getElementById('lomo').value = d.lomo;
+      if (d.llevaCd && elementos.llevaCd) elementos.llevaCd.value = d.llevaCd;
+      if (d.cantidadCd && document.getElementById('cantidadCd')) document.getElementById('cantidadCd').value = d.cantidadCd;
+
+      actualizarVista();
+      toggleSeccionCD();
+      actualizarSelectoresTesis();
+      datosParaGuardar = null;
+
+      if (cotizacion.snapshotPrecio) {
+        datosUltimaCotizacion = cotizacion.snapshotPrecio;
+        ultimaCotizacion = generarHTMLCotizacion(datosUltimaCotizacion);
+        elementos.resultado.innerHTML = ultimaCotizacion;
+        elementos.resultado.style.display = 'block';
+      } else {
+        // Si no hay snapshot, calculamos solo vista para mostrar el desglose actualizado con estos inputs
+        calcular({ soloVista: true });
+      }
+      mostrarNotificacion(`Tesis de "${cotizacion.nombre}" cargada en el formulario`, 'success');
     } else {
+      // Cotización sin detalle de inputs (resumen histórico / automática)
       datosUltimaCotizacion = null;
       ultimaCotizacion = '';
+      datosParaGuardar = null;
+
+      // Intentar extraer tomos si vienen en la descripción
+      const matchTomos = cotizacion.descripcion ? cotizacion.descripcion.match(/(\d+)\s+tomos?/i) : null;
+      if (matchTomos && document.getElementById('tomos')) {
+        document.getElementById('tomos').value = matchTomos[1];
+      }
+
       elementos.resultado.replaceChildren();
       const historical = document.createElement('div');
-      const title = document.createElement('h3');
-      const description = document.createElement('p');
-      const amount = document.createElement('p');
-      const note = document.createElement('p');
-      historical.className = 'rounded-xl border border-amber-200 bg-amber-50 p-5 text-gray-800';
-      title.className = 'font-bold';
-      title.textContent = `Cotización histórica: ${cotizacion.nombre}`;
-      description.textContent = cotizacion.descripcion || 'Sin descripción guardada.';
-      amount.className = 'mt-3 text-lg font-bold';
-      amount.textContent = `Total histórico: RD$${formatearMonto(Number(cotizacion.total || 0))}`;
-      note.className = 'mt-2 text-sm';
-      note.textContent = 'Este importe guardado se conserva; pulsa Calcular para crear una cotización con los precios vigentes.';
-      historical.append(title, description, amount, note);
+      historical.className = 'rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 p-6 text-gray-800 dark:text-gray-200 shadow-lg';
+      historical.innerHTML = `
+        <div class="flex items-center gap-3 mb-2">
+          <span class="text-2xl">${window.servigacoIcon ? window.servigacoIcon('history') : '📜'}</span>
+          <h3 class="font-bold text-xl text-amber-900 dark:text-amber-200">Cotización Histórica: ${cotizacion.nombre}</h3>
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-400">${cotizacion.descripcion || 'Sin descripción guardada.'}</p>
+        <div class="my-4 p-4 rounded-xl bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-800 flex justify-between items-center">
+          <span class="font-semibold text-gray-700 dark:text-gray-300">Total registrado:</span>
+          <span class="text-2xl font-black text-indigo-600 dark:text-indigo-400">RD$${formatearMonto(Number(cotizacion.total || 0))}</span>
+        </div>
+        <p class="text-xs text-amber-800 dark:text-amber-300">
+          ℹ️ Esta cotización fue registrada como resumen general. Los parámetros de páginas y materiales están listos en el formulario para ajustarse. Pulsa <strong>"Calcular Total"</strong> para regenerar el desglose con los precios vigentes.
+        </p>
+      `;
       elementos.resultado.append(historical);
       elementos.resultado.style.display = 'block';
+      mostrarNotificacion(`Cotización histórica "${cotizacion.nombre}" cargada`, 'info');
     }
-    cotizacionHistoricaCargada = true;
+
     cerrarModalCotizaciones();
-    mostrarNotificacion(`Tesis de "${cotizacion.nombre}" cargada`, 'success');
+    if (elementos.resultado && elementos.resultado.style.display !== 'none') {
+      elementos.resultado.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  } catch (error) {
+    console.error('Error al cargar cotización guardada:', error);
+    mostrarNotificacion('Error al cargar: ' + error.message, 'error');
   }
 }
+window.cargarCotizacionGuardada = cargarCotizacionGuardada;
+window.eliminarCotizacionGuardada = eliminarCotizacionGuardada;
 
 // ============================================
 // 📊 LÓGICA DEL DASHBOARD (TESIS)
