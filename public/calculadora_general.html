@@ -3206,9 +3206,12 @@
   (function () {
     'use strict';
 
-    // ── Config de tipos de papel (extensible) ────────────────────────────────
+    // ── Config de tipos de papel (Bond 20, Satinado sin brillo 120g, Satinado con brillo 100g, Hilo 20) ─
     var PAPER_REFERENCES = {
-      bond20: { label: 'Bond 20', paginasPorCm: 175 }
+      bond20:          { label: 'Papel Bond (20)',            grosorMm: 0.095 },
+      satinado_mate:   { label: 'Satinado sin brillo (120g)', grosorMm: 0.098 },
+      satinado_brillo: { label: 'Satinado con brillo (100g)', grosorMm: 0.072 },
+      hilo20:          { label: 'Papel Hilo (20)',            grosorMm: 0.112 }
     };
 
     // ── Config visual ────────────────────────────────────────────────────────
@@ -3220,16 +3223,29 @@
     };
 
     // ── Cálculo puro ─────────────────────────────────────────────────────────
-    function lomo_computar(paginas, papelRef) {
+    function lomo_computar(paginas, papelKey, caras) {
       var p = parseInt(paginas, 10);
       if (!p || p <= 0 || !isFinite(p)) return null;
-      var hojas   = Math.ceil(p / 2);
-      var lomoCm  = p / papelRef.paginasPorCm;
+      var ref = PAPER_REFERENCES[papelKey] || PAPER_REFERENCES.bond20;
+      var numCaras = parseInt(caras, 10) === 1 ? 1 : 2;
+      var hojas   = numCaras === 1 ? p : Math.ceil(p / 2);
+      var lomoMm  = hojas * ref.grosorMm;
+      var lomoCm  = lomoMm / 10;
       var lomoIn  = lomoCm / 2.54;
       var anchoPx = lomoCm * LOMO_VIS.PX_POR_CM;
       var visPx   = Math.max(LOMO_VIS.MIN_PX, Math.min(anchoPx, LOMO_VIS.MAX_PX));
       var topado  = anchoPx > LOMO_VIS.MAX_PX;
-      return { paginas: p, hojas: hojas, lomoCm: lomoCm, lomoIn: lomoIn, visPx: visPx, topado: topado };
+      return { 
+        paginas: p, 
+        hojas: hojas, 
+        caras: numCaras, 
+        papelLabel: ref.label, 
+        lomoMm: lomoMm, 
+        lomoCm: lomoCm, 
+        lomoIn: lomoIn, 
+        visPx: visPx, 
+        topado: topado 
+      };
     }
 
     // ── Actualizar DOM ───────────────────────────────────────────────────────
@@ -3249,31 +3265,34 @@
         if (elMeta)    elMeta.innerHTML    = '— páginas &nbsp;|&nbsp; — hojas';
         if (elSpine)   elSpine.style.width = LOMO_VIS.MIN_PX + 'px';
         if (elRuler)   elRuler.style.width = LOMO_VIS.MIN_PX + 'px';
-        if (elRulerCm) elRulerCm.textContent = '— cm';
+        if (elRulerCm) elRulerCm.textContent = '— mm';
         if (elRulerIn) elRulerIn.textContent  = '—"';
         if (elNotice)  elNotice.classList.remove('visible');
         return;
       }
 
-      var cmDisplay = res.lomoCm.toFixed(2);
-      var inDisplay = res.lomoIn.toFixed(2);
+      var mmDisplay = res.lomoMm.toFixed(1) + ' mm';
+      var cmDisplay = '(' + res.lomoCm.toFixed(2) + ' cm)';
+      var inDisplay = res.lomoIn.toFixed(2) + '"';
 
-      if (elCm)      elCm.textContent    = cmDisplay + ' cm';
-      if (elIn)      elIn.textContent    = inDisplay + '"';
-      if (elMeta)    elMeta.innerHTML    = res.paginas + ' páginas &nbsp;|&nbsp; ' + res.hojas + ' hojas';
+      if (elCm)      elCm.innerHTML      = '<strong>' + mmDisplay + '</strong> <span class="text-sm font-normal text-gray-500">' + cmDisplay + '</span>';
+      if (elIn)      elIn.textContent    = inDisplay;
+      if (elMeta)    elMeta.innerHTML    = res.paginas + ' páginas &nbsp;|&nbsp; ' + res.hojas + ' hojas (' + (res.caras === 1 ? '1 cara' : '2 caras') + ') &nbsp;|&nbsp; <span class="text-indigo-600 dark:text-indigo-400 font-semibold">' + res.papelLabel + '</span>';
       if (elSpine)   elSpine.style.width = res.visPx + 'px';
       if (elRuler)   elRuler.style.width = res.visPx + 'px';
-      if (elRulerCm) elRulerCm.textContent = cmDisplay + ' cm';
-      if (elRulerIn) elRulerIn.textContent  = inDisplay + '"';
+      if (elRulerCm) elRulerCm.textContent = mmDisplay;
+      if (elRulerIn) elRulerIn.textContent  = inDisplay;
       if (elNotice)  elNotice.classList[res.topado ? 'add' : 'remove']('visible');
     }
 
     // ── Calcular ─────────────────────────────────────────────────────────────
     window.lomo_calcular = function (papelKey) {
-      papelKey = papelKey || 'bond20';
-      var ref = PAPER_REFERENCES[papelKey] || PAPER_REFERENCES.bond20;
+      var selectPapel = document.getElementById('lomoSelectPapel');
+      var selectCaras = document.getElementById('lomoSelectCaras');
+      var pKey = papelKey || (selectPapel ? selectPapel.value : 'bond20');
+      var caras = selectCaras ? selectCaras.value : 2;
       var input = document.getElementById('lomoInputPaginas');
-      var res = lomo_computar(input ? input.value : '', ref);
+      var res = lomo_computar(input ? input.value : '', pKey, caras);
       lomo_actualizarUI(res);
     };
 
@@ -3486,7 +3505,7 @@
           <h3 class="text-xl font-bold text-white flex items-center gap-2">
             <span class="text-2xl"><i class="ti ti-ruler" aria-hidden="true"></i></span> Estimador de Lomo
           </h3>
-          <p class="text-indigo-200 text-sm mt-0.5">Grosor estimado del lomo · Bond 20 · Dúplex</p>
+          <p class="text-indigo-200 text-sm mt-0.5">Grosor milimétrico del lomo según páginas, papel y caras</p>
         </div>
         <button onclick="lomo_cerrarModal()" class="p-2 rounded-full text-white/70 hover:bg-white/20 hover:text-white transition-all" aria-label="Cerrar modal">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -3511,7 +3530,7 @@
               min="1" placeholder="Ej: 185" aria-label="Cantidad de páginas del libro"
               class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200 outline-none font-medium dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             />
-            <small class="text-xs text-gray-400 mt-1 ml-1">Impresión dúplex · Bond 20</small>
+            <small class="text-xs text-gray-400 mt-1 ml-1">Escribe el total de páginas del documento</small>
           </div>
 
           <!-- Upload PDF -->
@@ -3528,6 +3547,45 @@
             <small class="text-xs text-gray-400 mt-1 ml-1">Extrae portada y contraportada automáticamente</small>
           </div>
 
+        </div>
+
+        <!-- Fila de opciones: Tipo de Papel + Caras de Impresión -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          <!-- Selector de Papel -->
+          <div>
+            <label for="lomoSelectPapel" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+              <span class="bg-amber-100 text-amber-600 p-1.5 rounded-lg text-xs"><i class="ti ti-files" aria-hidden="true"></i></span>
+              Tipo de papel
+            </label>
+            <select
+              id="lomoSelectPapel"
+              onchange="lomo_calcular()"
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200 outline-none font-medium dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            >
+              <option value="bond20" selected>Papel Bond (20)</option>
+              <option value="satinado_mate">Satinado sin brillo (120g)</option>
+              <option value="satinado_brillo">Satinado con brillo (100g)</option>
+              <option value="hilo20">Papel Hilo (20)</option>
+            </select>
+            <small class="text-xs text-gray-400 mt-1 ml-1">Calibre exacto de taller por hoja</small>
+          </div>
+
+          <!-- Selector de Caras de Impresión -->
+          <div>
+            <label for="lomoSelectCaras" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+              <span class="bg-teal-100 text-teal-600 p-1.5 rounded-lg text-xs"><i class="ti ti-copy" aria-hidden="true"></i></span>
+              Modo de impresión
+            </label>
+            <select
+              id="lomoSelectCaras"
+              onchange="lomo_calcular()"
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200 outline-none font-medium dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            >
+              <option value="1">1 cara (Tesis / 1 hoja por pág.)</option>
+              <option value="2" selected>2 caras / Dúplex (Libro / 2 págs. por hoja)</option>
+            </select>
+            <small class="text-xs text-gray-400 mt-1 ml-1">Calcula cuántas hojas físicas forman el lomo</small>
+          </div>
         </div>
 
         <!-- Barra de progreso PDF (oculta por defecto) -->
@@ -3597,8 +3655,8 @@
 
         <!-- Disclaimer -->
         <p class="lomo-disclaimer">
-          <strong>Referencia:</strong> Bond 20 — 175 páginas = 1.00 cm de grosor. Medición realizada físicamente con regla.<br>
-          El resultado es una estimación. El grosor real puede variar según el fabricante y las características del papel.
+          <strong>Referencia de taller:</strong> Calibre real por hoja para Papel Bond (20, ~0.095 mm), Satinado sin brillo (120g, ~0.098 mm), Satinado con brillo (100g, ~0.072 mm) y Papel Hilo (20, ~0.112 mm).<br>
+          El resultado es una estimación de precisión para ajuste de encuadernación, lomo y quemado.
         </p>
 
       </div><!-- /cuerpo -->

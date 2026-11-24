@@ -2692,3 +2692,193 @@ function cerrarModalAnalizadorPDF() {
   modal.classList.add('hidden');
   document.body.style.overflow = '';
 }
+
+
+// ============================================
+// 📏 ESTIMADOR DE LOMO - FUNCIONES GLOBALES
+// ============================================
+
+const LOMO_PAPER_REFS = {
+  bond20:          { label: 'Papel Bond (20)',            grosorMm: 0.095 },
+  satinado_mate:   { label: 'Satinado sin brillo (120g)', grosorMm: 0.098 },
+  satinado_brillo: { label: 'Satinado con brillo (100g)', grosorMm: 0.072 },
+  hilo20:          { label: 'Papel Hilo (20)',            grosorMm: 0.112 }
+};
+
+const LOMO_VIS = {
+  PX_POR_CM:   45,
+  MIN_PX:       8,
+  MAX_PX:     220
+};
+
+function lomo_computar(paginas, papelKey, caras) {
+  const p = parseInt(paginas, 10);
+  if (!p || p <= 0 || !isFinite(p)) return null;
+  const ref = LOMO_PAPER_REFS[papelKey] || LOMO_PAPER_REFS.bond20;
+  const numCaras = parseInt(caras, 10) === 2 ? 2 : 1;
+  const hojas   = numCaras === 1 ? p : Math.ceil(p / 2);
+  const lomoMm  = hojas * ref.grosorMm;
+  const lomoCm  = lomoMm / 10;
+  const lomoIn  = lomoCm / 2.54;
+  const anchoPx = lomoCm * LOMO_VIS.PX_POR_CM;
+  const visPx   = Math.max(LOMO_VIS.MIN_PX, Math.min(anchoPx, LOMO_VIS.MAX_PX));
+  const topado  = anchoPx > LOMO_VIS.MAX_PX;
+
+  return {
+    paginas: p,
+    hojas: hojas,
+    caras: numCaras,
+    papelLabel: ref.label,
+    lomoMm: lomoMm,
+    lomoCm: lomoCm,
+    lomoIn: lomoIn,
+    visPx: visPx,
+    topado: topado
+  };
+}
+
+function lomo_actualizarUI(res) {
+  const elCm      = document.getElementById('lomoResCm');
+  const elIn      = document.getElementById('lomoResIn');
+  const elMeta    = document.getElementById('lomoResPaginasHojas');
+  const elSpine   = document.getElementById('lomoSpine');
+  const elRuler   = document.getElementById('lomoRulerTrack');
+  const elRulerCm = document.getElementById('lomoRulerCm');
+  const elRulerIn = document.getElementById('lomoRulerIn');
+  const elNotice  = document.getElementById('lomoScaleNotice');
+
+  if (!res) {
+    if (elCm)      elCm.textContent    = '—';
+    if (elIn)      elIn.textContent    = '—';
+    if (elMeta)    elMeta.innerHTML    = '— páginas &nbsp;|&nbsp; — hojas';
+    if (elSpine)   elSpine.style.width = LOMO_VIS.MIN_PX + 'px';
+    if (elRuler)   elRuler.style.width = LOMO_VIS.MIN_PX + 'px';
+    if (elRulerCm) elRulerCm.textContent = '— mm';
+    if (elRulerIn) elRulerIn.textContent  = '—"';
+    if (elNotice)  elNotice.classList.remove('visible');
+    return;
+  }
+
+  const mmDisplay = res.lomoMm.toFixed(1) + ' mm';
+  const cmDisplay = '(' + res.lomoCm.toFixed(2) + ' cm)';
+  const inDisplay = res.lomoIn.toFixed(2) + '"';
+
+  if (elCm)      elCm.innerHTML      = `<strong>${mmDisplay}</strong> <span class="text-xs font-normal text-gray-500">${cmDisplay}</span>`;
+  if (elIn)      elIn.textContent    = inDisplay;
+  if (elMeta)    elMeta.innerHTML    = `${res.paginas} páginas &nbsp;|&nbsp; ${res.hojas} hojas (${res.caras === 1 ? '1 cara' : '2 caras'}) &nbsp;|&nbsp; <span class="text-indigo-600 dark:text-indigo-400 font-semibold">${res.papelLabel}</span>`;
+  if (elSpine)   elSpine.style.width = res.visPx + 'px';
+  if (elRuler)   elRuler.style.width = res.visPx + 'px';
+  if (elRulerCm) elRulerCm.textContent = mmDisplay;
+  if (elRulerIn) elRulerIn.textContent  = inDisplay;
+  if (elNotice)  elNotice.classList[res.topado ? 'add' : 'remove']('visible');
+}
+
+function lomo_calcular() {
+  const selectPapel = document.getElementById('lomoSelectPapel');
+  const selectCaras = document.getElementById('lomoSelectCaras');
+  const pKey = selectPapel ? selectPapel.value : 'bond20';
+  const caras = selectCaras ? selectCaras.value : 1;
+  const input = document.getElementById('lomoInputPaginas');
+  const res = lomo_computar(input ? input.value : '', pKey, caras);
+  lomo_actualizarUI(res);
+  return res;
+}
+
+function lomo_abrirModal() {
+  const modal = document.getElementById('modalEstimadorLomo');
+  if (!modal) return;
+
+  // Auto-detectar páginas y tipo de papel desde el formulario de tesis
+  const papelEl = document.getElementById('papel');
+  const papelVal = papelEl ? papelEl.value : 'bond';
+  const selectPapel = document.getElementById('lomoSelectPapel');
+
+  let pags = 0;
+  if (papelVal === 'satinado') {
+    const pInput = document.getElementById('paginas');
+    pags = pInput ? parseInt(pInput.value, 10) || 0 : 0;
+    if (selectPapel) selectPapel.value = 'satinado_mate';
+  } else if (papelVal === 'hilo') {
+    const bnVal = parseInt(document.getElementById('bn')?.value, 10) || 0;
+    const colVal = parseInt(document.getElementById('color')?.value, 10) || 0;
+    pags = bnVal + colVal;
+    if (selectPapel) selectPapel.value = 'hilo20';
+  } else {
+    // bond (predeterminado)
+    const bnVal = parseInt(document.getElementById('bn')?.value, 10) || 0;
+    const colVal = parseInt(document.getElementById('color')?.value, 10) || 0;
+    pags = bnVal + colVal;
+    if (selectPapel) selectPapel.value = 'bond20';
+  }
+
+  const inp = document.getElementById('lomoInputPaginas');
+  if (inp && pags > 0) {
+    inp.value = pags;
+  }
+
+  // Asegurar que si selectPapel no tiene valor, use bond20
+  if (selectPapel && !selectPapel.value) {
+    selectPapel.value = 'bond20';
+  }
+
+  // En tesis, el estándar por defecto es 1 cara (simplex)
+  const selectCaras = document.getElementById('lomoSelectCaras');
+  if (selectCaras && !selectCaras.value) {
+    selectCaras.value = '1';
+  }
+
+  lomo_calcular();
+
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function lomo_cerrarModal() {
+  const modal = document.getElementById('modalEstimadorLomo');
+  if (modal) modal.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function lomo_clickOutside(e) {
+  if (e.target.id === 'modalEstimadorLomo') {
+    lomo_cerrarModal();
+  }
+}
+
+function lomo_aplicarAlFormulario() {
+  const res = lomo_calcular();
+  if (!res) {
+    if (typeof mostrarNotificacion === 'function') {
+      mostrarNotificacion('Ingresa una cantidad válida de páginas primero', 'warning');
+    }
+    return;
+  }
+
+  const selectLomo = document.getElementById('lomo');
+  if (selectLomo) {
+    selectLomo.value = 'si';
+    // Notificar cambio al custom selector y al formulario
+    selectLomo.dispatchEvent(new Event('change', { bubbles: true }));
+    if (typeof window.actualizarSelectoresTesis === 'function') {
+      window.actualizarSelectoresTesis();
+    }
+  }
+
+  lomo_cerrarModal();
+
+  if (typeof mostrarNotificacion === 'function') {
+    mostrarNotificacion(`Lomo estimado: ${res.lomoMm.toFixed(1)} mm (${res.lomoCm.toFixed(2)} cm). Opción "Lleva lomo: Sí" activada.`, 'success');
+  }
+
+  // Si existe calcular(), recalcular
+  if (typeof calcular === 'function') {
+    calcular();
+  }
+}
+
+// Exponer en window para onclicks inline
+window.lomo_abrirModal = lomo_abrirModal;
+window.lomo_cerrarModal = lomo_cerrarModal;
+window.lomo_clickOutside = lomo_clickOutside;
+window.lomo_calcular = lomo_calcular;
+window.lomo_aplicarAlFormulario = lomo_aplicarAlFormulario;
