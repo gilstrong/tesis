@@ -255,11 +255,16 @@ class ServiGacoNav extends HTMLElement {
 
 customElements.define('servigaco-nav', ServiGacoNav);
 
-// Manejo seguro de promesas de View Transitions para evitar "AbortError: Transition was skipped"
+// Manejo seguro de promesas de View Transitions para evitar "AbortError: Transition was skipped" e "InvalidStateError"
 window.addEventListener('unhandledrejection', (event) => {
+  const msg = typeof event.reason?.message === 'string' ? event.reason.message : '';
+  const name = event.reason?.name;
   if (
-    event.reason?.name === 'AbortError' ||
-    (typeof event.reason?.message === 'string' && event.reason.message.includes('Transition was skipped'))
+    name === 'AbortError' ||
+    name === 'InvalidStateError' ||
+    msg.includes('Transition was skipped') ||
+    msg.includes('Transition was aborted') ||
+    msg.includes('ViewTransition')
   ) {
     event.preventDefault();
   }
@@ -269,6 +274,7 @@ if ('onpagereveal' in window) {
     if (event.viewTransition) {
       event.viewTransition.ready?.catch(() => {});
       event.viewTransition.finished?.catch(() => {});
+      event.viewTransition.updateCallbackDone?.catch(() => {});
     }
   });
 }
@@ -277,6 +283,7 @@ if ('onpageswap' in window) {
     if (event.viewTransition) {
       event.viewTransition.ready?.catch(() => {});
       event.viewTransition.finished?.catch(() => {});
+      event.viewTransition.updateCallbackDone?.catch(() => {});
     }
   });
 }
@@ -808,6 +815,7 @@ function setSettingsValue(catalog, path, value) {
 }
 
 function escapeSettingsHtml(value) {
+    if (value === null || value === undefined) return '';
     return String(value).replace(/[&<>"']/g, character => ({
         '&': '&amp;',
         '<': '&lt;',
@@ -1079,7 +1087,7 @@ class ServigacoSettings extends HTMLElement {
                 <div class="settings-input-wrap">
                     <input id="${id}" class="settings-control" type="${inputType}" data-price-input
                         data-path="${encodeURIComponent(JSON.stringify(path))}" data-kind="${type}"
-                        value="${escapeSettingsHtml(value === null ? '' : value)}"
+                        value="${escapeSettingsHtml(value == null ? '' : value)}"
                         ${inputType === 'number' ? `min="${min}" step="${step}"` : ''}
                         ${optionalMax ? '' : 'required'}>
                     <span class="settings-unit">${unit}</span>
@@ -1093,7 +1101,7 @@ class ServigacoSettings extends HTMLElement {
         this.querySelectorAll('[data-price-input]').forEach(input => {
             const path = JSON.parse(decodeURIComponent(input.dataset.path));
             const value = getSettingsValue(catalog, path);
-            input.value = value === null ? '' : String(value);
+            input.value = value == null ? '' : String(value);
         });
         this.renderCustomServices();
     }

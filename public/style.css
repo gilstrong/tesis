@@ -3456,7 +3456,6 @@ html.dark .sg-thesis-select .sg-thesis-error { color: #fca5a5; }
 .sg-anim-ruler {
   display: inline-block !important;
   transform-origin: center center;
-  animation: sg-ruler-tilt 2.8s ease-in-out infinite;
 }
 
 @keyframes sg-ruler-tilt {
@@ -3475,7 +3474,6 @@ html.dark .sg-thesis-select .sg-thesis-error { color: #fca5a5; }
 .sg-anim-paper-float {
   display: inline-block !important;
   transform-origin: center center;
-  animation: sg-paper-float 2.6s ease-in-out infinite;
 }
 
 @keyframes sg-paper-float {
@@ -3491,7 +3489,6 @@ html.dark .sg-thesis-select .sg-thesis-error { color: #fca5a5; }
 .sg-anim-paper-tall {
   display: inline-block !important;
   transform-origin: center bottom;
-  animation: sg-paper-tall 2.8s ease-in-out infinite;
 }
 
 @keyframes sg-paper-tall {
@@ -3507,7 +3504,6 @@ html.dark .sg-thesis-select .sg-thesis-error { color: #fca5a5; }
 .sg-anim-grid-pulse {
   display: inline-block !important;
   transform-origin: center center;
-  animation: sg-grid-pulse 2.8s ease-in-out infinite;
 }
 
 @keyframes sg-grid-pulse {
@@ -3523,7 +3519,6 @@ html.dark .sg-thesis-select .sg-thesis-error { color: #fca5a5; }
 .sg-anim-sheets-fan {
   display: inline-block !important;
   transform-origin: center center;
-  animation: sg-sheets-fan 3s ease-in-out infinite;
 }
 
 @keyframes sg-sheets-fan {
@@ -3542,7 +3537,6 @@ html.dark .sg-thesis-select .sg-thesis-error { color: #fca5a5; }
 .sg-anim-bond-press {
   display: inline-block !important;
   transform-origin: center bottom;
-  animation: sg-bond-press 2.6s ease-in-out infinite;
 }
 
 @keyframes sg-bond-press {
@@ -3558,7 +3552,6 @@ html.dark .sg-thesis-select .sg-thesis-error { color: #fca5a5; }
 .sg-anim-thread-wave {
   display: inline-block !important;
   transform-origin: center center;
-  animation: sg-thread-wave 2.8s ease-in-out infinite;
 }
 
 @keyframes sg-thread-wave {
@@ -3577,7 +3570,6 @@ html.dark .sg-thesis-select .sg-thesis-error { color: #fca5a5; }
 .sg-anim-sun-glow {
   display: inline-block !important;
   transform-origin: center center;
-  animation: sg-sun-glow 2.6s ease-in-out infinite;
 }
 
 @keyframes sg-sun-glow {
@@ -3595,7 +3587,6 @@ html.dark .sg-thesis-select .sg-thesis-error { color: #fca5a5; }
 .sg-anim-book-open {
   display: inline-block !important;
   transform-origin: center bottom;
-  animation: sg-book-open 3s ease-in-out infinite;
 }
 
 @keyframes sg-book-open {
@@ -3614,7 +3605,6 @@ html.dark .sg-thesis-select .sg-thesis-error { color: #fca5a5; }
 .sg-anim-hardcover {
   display: inline-block !important;
   transform-origin: center bottom;
-  animation: sg-hardcover-tilt 2.6s ease-in-out infinite;
 }
 
 @keyframes sg-hardcover-tilt {
@@ -3633,7 +3623,6 @@ html.dark .sg-thesis-select .sg-thesis-error { color: #fca5a5; }
 .sg-anim-vinyl-flex {
   display: inline-block !important;
   transform-origin: center bottom;
-  animation: sg-vinyl-flex 2.8s ease-in-out infinite;
 }
 
 @keyframes sg-vinyl-flex {
@@ -3652,7 +3641,6 @@ html.dark .sg-thesis-select .sg-thesis-error { color: #fca5a5; }
 .sg-anim-spiral-bounce {
   display: inline-block !important;
   transform-origin: center center;
-  animation: sg-spiral-bounce 2.6s ease-in-out infinite;
 }
 
 @keyframes sg-spiral-bounce {
@@ -3784,7 +3772,15 @@ html.dark .sg-thesis-select .sg-thesis-error { color: #fca5a5; }
   transform: scale(1.15) rotate(-6deg);
 }
 
-/* 💤 ESTADO EN REPOSO: Pausadas por defecto hasta que el usuario pase el puntero */
+/* 💿 CD, 📖 Lomo y 🎨 Colores se mantienen siempre activos */
+.sg-icon-cd-spinning,
+.sg-icon-lomo-animated,
+.sg-anim-palette-tilt,
+.sg-thesis-swatch {
+  animation-play-state: running !important;
+}
+
+/* 💤 Títulos y etiquetas de papel y empastado: completamente desactivados */
 .sg-anim-ruler,
 .sg-anim-paper-float,
 .sg-anim-paper-tall,
@@ -3796,11 +3792,8 @@ html.dark .sg-thesis-select .sg-thesis-error { color: #fca5a5; }
 .sg-anim-book-open,
 .sg-anim-hardcover,
 .sg-anim-vinyl-flex,
-.sg-anim-spiral-bounce,
-.sg-anim-palette-tilt,
-.sg-thesis-swatch,
-.sg-icon-cd-spinning,
-.sg-icon-lomo-animated {
+.sg-anim-spiral-bounce {
+  animation: none !important;
   animation-play-state: paused !important;
 }
 
