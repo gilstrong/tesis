@@ -39,7 +39,8 @@
           rojo: 500,
           verde_botella: 500,
           amarillo_medicina: 500,
-          blanco: 600
+          blanco: 600,
+          negro: 500
         },
         legal: 800,
         itla: 700
@@ -148,7 +149,21 @@
         fallbackPorPie: 100
       }
     },
-    booklet: { bondBN: 2.5, bondColor: 15, cartonite: 150 },
+    booklet: {
+      bond: { bn: 5, color: 15 },
+      hilo: { bn: 8, color: 18 },
+      satinado: 30,
+      empastado: {
+        grapado: 0,
+        cartonite: 150,
+        tapa_blanda: 350,
+        tapa_dura: 500,
+        vinyl: 950
+      },
+      bondBN: 5,
+      bondColor: 15,
+      cartonite: 150
+    },
     customServices: {}
   };
 
@@ -401,6 +416,20 @@
           if (Number.isFinite(value) && value >= 0) catalog.booklet[key] = value;
         }
       });
+    }
+    if (catalog.booklet) {
+      if (!catalog.booklet.bond) catalog.booklet.bond = { bn: catalog.booklet.bondBN ?? 5, color: catalog.booklet.bondColor ?? 15 };
+      if (!catalog.booklet.hilo) catalog.booklet.hilo = { bn: 8, color: 18 };
+      if (typeof catalog.booklet.satinado !== 'number') catalog.booklet.satinado = 30;
+      if (!catalog.booklet.empastado) {
+        catalog.booklet.empastado = {
+          grapado: 0,
+          cartonite: catalog.booklet.cartonite ?? 150,
+          tapa_blanda: 350,
+          tapa_dura: 500,
+          vinyl: 950
+        };
+      }
     }
     return catalog;
   }

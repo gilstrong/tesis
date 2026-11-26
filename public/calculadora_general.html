@@ -16,7 +16,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
 
   <!-- ESTILOS -->
-  <link rel="stylesheet" href="style.css?v=3.9" />
+  <link rel="stylesheet" href="style.css?v=4.4" />
   <link rel="stylesheet" href="/icons.css" />
   <link rel="stylesheet" href="tailwind.css" />
   <link rel="preload" as="image" href="/logo.webp" fetchpriority="high" />
@@ -1326,46 +1326,101 @@
               <small class="text-xs text-gray-400 mt-1 ml-1">Si el número es impar, se redondea hacia arriba automáticamente</small>
             </div>
 
-            <!-- Tipo de interior -->
+            <!-- Tipo de papel -->
             <div class="group">
-              <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-palette" aria-hidden="true"></i></span>
-                Tipo de impresión interior
+              <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                <span class="bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 p-1.5 rounded-lg text-xs"><i class="ti ti-file-text" aria-hidden="true"></i></span>
+                Tipo de papel
               </label>
               <div class="flex flex-col gap-3">
-                <label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all">
-                  <input type="radio" name="bookletTipoInterior" id="bookletInteriorBN" value="bn" checked class="accent-blue-600 w-4 h-4">
+                <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all">
+                  <input type="radio" name="bookletPapel" id="bookletPapelBond" value="bond" checked class="accent-blue-600 w-4 h-4">
                   <div>
-                    <span class="font-bold text-gray-800 text-sm"><i class="ti ti-contrast-2" aria-hidden="true"></i> Blanco y Negro</span>
-                    <small class="block text-gray-500 text-xs" id="bookletPrecioBNLabel">RD\.50 por hoja</small>
+                    <span class="font-bold text-gray-800 dark:text-gray-100 text-sm">Papel Bond (20)</span>
+                    <small class="block text-gray-500 dark:text-gray-400 text-xs">Estándar (B/N: RD$5 · Color: RD$15)</small>
                   </div>
                 </label>
-                <label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all">
-                  <input type="radio" name="bookletTipoInterior" id="bookletInteriorColor" value="color" class="accent-blue-600 w-4 h-4">
+                <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all">
+                  <input type="radio" name="bookletPapel" id="bookletPapelHilo" value="hilo" class="accent-blue-600 w-4 h-4">
                   <div>
-                    <span class="font-bold text-gray-800 text-sm"><i class="ti ti-palette" aria-hidden="true"></i> Color</span>
-                    <small class="block text-gray-500 text-xs" id="bookletPrecioColorLabel">RD\.00 por hoja</small>
+                    <span class="font-bold text-gray-800 dark:text-gray-100 text-sm">Papel Hilo (20)</span>
+                    <small class="block text-gray-500 dark:text-gray-400 text-xs">Texturizado fino (B/N: RD$8 · Color: RD$18)</small>
+                  </div>
+                </label>
+                <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all">
+                  <input type="radio" name="bookletPapel" id="bookletPapelSatinado" value="satinado" class="accent-blue-600 w-4 h-4">
+                  <div>
+                    <span class="font-bold text-gray-800 dark:text-gray-100 text-sm">Papel Satinado</span>
+                    <small class="block text-gray-500 dark:text-gray-400 text-xs">Tarifa única: RD$30.00 por hoja</small>
                   </div>
                 </label>
               </div>
             </div>
 
-            <!-- Portada cartonite -->
+            <!-- Tipo de interior -->
             <div class="group">
-              <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-clipboard-list" aria-hidden="true"></i></span>
-                Portada en cartonite
+              <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                <span class="bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 p-1.5 rounded-lg text-xs"><i class="ti ti-palette" aria-hidden="true"></i></span>
+                Tipo de impresión interior
               </label>
               <div class="flex flex-col gap-3">
-                <label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all">
-                  <input type="radio" name="bookletPortada" id="bookletSinPortada" value="no" checked class="accent-blue-600 w-4 h-4">
-                  <span class="font-bold text-gray-800 text-sm">Sin portada en cartonite</span>
-                </label>
-                <label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all">
-                  <input type="radio" name="bookletPortada" id="bookletConPortada" value="si" class="accent-blue-600 w-4 h-4">
+                <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all" id="bookletLabelBN">
+                  <input type="radio" name="bookletTipoInterior" id="bookletInteriorBN" value="bn" checked class="accent-blue-600 w-4 h-4">
                   <div>
-                    <span class="font-bold text-gray-800 text-sm">Con portada en cartonite</span>
-                    <small class="block text-gray-500 text-xs">Precio: <span id="bookletPrecioCartoniteLabel">RD\.00</span></small>
+                    <span class="font-bold text-gray-800 dark:text-gray-100 text-sm"><i class="ti ti-contrast-2" aria-hidden="true"></i> Blanco y Negro</span>
+                    <small class="block text-gray-500 dark:text-gray-400 text-xs" id="bookletPrecioBNLabel">RD$5.00 por hoja</small>
+                  </div>
+                </label>
+                <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all" id="bookletLabelColor">
+                  <input type="radio" name="bookletTipoInterior" id="bookletInteriorColor" value="color" class="accent-blue-600 w-4 h-4">
+                  <div>
+                    <span class="font-bold text-gray-800 dark:text-gray-100 text-sm"><i class="ti ti-palette" aria-hidden="true"></i> Color</span>
+                    <small class="block text-gray-500 dark:text-gray-400 text-xs" id="bookletPrecioColorLabel">RD$15.00 por hoja</small>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Tipo de encuadernado / empastado -->
+            <div class="group md:col-span-2">
+              <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                <span class="bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 p-1.5 rounded-lg text-xs"><i class="ti ti-book" aria-hidden="true"></i></span>
+                Tipo de encuadernado / empastado
+              </label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <label class="flex items-center gap-3 p-3.5 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all">
+                  <input type="radio" name="bookletEmpastado" id="bookletEmpastadoGrapado" value="grapado" checked class="accent-blue-600 w-4 h-4">
+                  <div class="min-w-0">
+                    <span class="font-bold text-gray-800 dark:text-gray-100 text-sm block">Grapado simple</span>
+                    <small class="block text-gray-500 dark:text-gray-400 text-xs" id="bookletPrecioGrapadoLabel">RD$0.00 (Folleto)</small>
+                  </div>
+                </label>
+                <label class="flex items-center gap-3 p-3.5 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all">
+                  <input type="radio" name="bookletEmpastado" id="bookletEmpastadoCartonite" value="cartonite" class="accent-blue-600 w-4 h-4">
+                  <div class="min-w-0">
+                    <span class="font-bold text-gray-800 dark:text-gray-100 text-sm block">Portada Cartonite</span>
+                    <small class="block text-orange-600 dark:text-orange-400 font-semibold text-xs" id="bookletPrecioCartoniteLabel">+RD$150.00</small>
+                  </div>
+                </label>
+                <label class="flex items-center gap-3 p-3.5 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all">
+                  <input type="radio" name="bookletEmpastado" id="bookletEmpastadoTapaBlanda" value="tapa_blanda" class="accent-blue-600 w-4 h-4">
+                  <div class="min-w-0">
+                    <span class="font-bold text-gray-800 dark:text-gray-100 text-sm block">Tapa Blanda</span>
+                    <small class="block text-blue-600 dark:text-blue-400 font-semibold text-xs" id="bookletPrecioTapaBlandaLabel">+RD$350.00</small>
+                  </div>
+                </label>
+                <label class="flex items-center gap-3 p-3.5 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all">
+                  <input type="radio" name="bookletEmpastado" id="bookletEmpastadoTapaDura" value="tapa_dura" class="accent-blue-600 w-4 h-4">
+                  <div class="min-w-0">
+                    <span class="font-bold text-gray-800 dark:text-gray-100 text-sm block">Tapa Dura</span>
+                    <small class="block text-purple-600 dark:text-purple-400 font-semibold text-xs" id="bookletPrecioTapaDuraLabel">+RD$500.00</small>
+                  </div>
+                </label>
+                <label class="flex items-center gap-3 p-3.5 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all sm:col-span-2 lg:col-span-1">
+                  <input type="radio" name="bookletEmpastado" id="bookletEmpastadoVinyl" value="vinyl" class="accent-blue-600 w-4 h-4">
+                  <div class="min-w-0">
+                    <span class="font-bold text-gray-800 dark:text-gray-100 text-sm block">Vinyl (Vinil)</span>
+                    <small class="block text-emerald-600 dark:text-emerald-400 font-semibold text-xs" id="bookletPrecioVinylLabel">+RD$950.00</small>
                   </div>
                 </label>
               </div>
@@ -1389,7 +1444,7 @@
             <div class="space-y-2 text-sm" id="resumenBookletContent"></div>
             <div class="mt-4 pt-4 border-t border-amber-200 flex justify-between items-center">
               <span class="font-black text-gray-800 text-base">Total estimado:</span>
-              <span class="text-2xl font-black text-orange-600" id="bookletTotalDisplay">RD\.00</span>
+              <span class="text-2xl font-black text-orange-600" id="bookletTotalDisplay">RD$0.00</span>
             </div>
           </div>
 
@@ -2102,7 +2157,7 @@
 
   <!-- COMPONENTES Y LÓGICA PRINCIPAL -->
   <script defer src="pricing-config.js"></script>
-  <script defer src="scriptgeneral.js"></script>
+  <script defer src="scriptgeneral.js?v=2.1"></script>
   <script defer src="components.js"></script>
   <!-- 📦 Notion Sync — cliente frontend para sincronización con Notion -->
   <script defer src="notion-sync.js"></script>

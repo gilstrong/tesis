@@ -35,11 +35,19 @@ const firebaseConfig = {
 };
 
 // Inicializar Firebase
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
+let db = null;
+let auth = null;
+if (typeof firebase !== 'undefined') {
+  try {
+    if (!firebase.apps?.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    db = firebase.database();
+    auth = firebase.auth(); // Inicializar Auth
+  } catch (err) {
+    console.warn('Firebase no se pudo inicializar en scriptgeneral.js:', err);
+  }
 }
-const db = firebase.database();
-const auth = firebase.auth(); // Inicializar Auth
 
 document.addEventListener('DOMContentLoaded', () => {
   cargarDeLocalStorage(); // Carga la cotización en curso si la página se recarga
@@ -410,6 +418,29 @@ function recalcularCotizacionConCatalogo() {
       const unitario = data.precioManual > 0 ? item.precioUnitario : preciosPlastificado[data.tamano] || 0;
       item.precioUnitario = unitario;
       item.precio = unitario * item.cantidad;
+    } else if (data.tipo === 'booklet') {
+      const hojasFisicas = Math.ceil((data.paginas || 0) / 2);
+      let precioHoja = 0;
+      if (data.papel === 'satinado') {
+        precioHoja = preciosBooklet.satinado ?? 30;
+      } else if (data.papel === 'hilo') {
+        precioHoja = data.tipoInterior === 'color' ? (preciosBooklet.hilo?.color ?? 18) : (preciosBooklet.hilo?.bn ?? 8);
+      } else {
+        precioHoja = data.tipoInterior === 'color'
+          ? (preciosBooklet.bond?.color ?? preciosBooklet.bondColor ?? 15)
+          : (preciosBooklet.bond?.bn ?? preciosBooklet.bondBN ?? 5);
+      }
+      const preciosEmp = {
+        grapado: preciosBooklet.empastado?.grapado ?? 0,
+        cartonite: preciosBooklet.empastado?.cartonite ?? preciosBooklet.cartonite ?? 150,
+        tapa_blanda: preciosBooklet.empastado?.tapa_blanda ?? 350,
+        tapa_dura: preciosBooklet.empastado?.tapa_dura ?? 500,
+        vinyl: preciosBooklet.empastado?.vinyl ?? 950
+      };
+      const costoEmpastado = preciosEmp[data.tipoEmpastado] ?? 0;
+      const costoUnitario = (hojasFisicas * precioHoja) + costoEmpastado;
+      item.precioUnitario = costoUnitario;
+      item.precio = costoUnitario * item.cantidad;
     } else if (data.tipo === 'servicio-configurado') {
       const service = window.ServigacoPricing.get().customServices?.[data.id];
       if (!service) return;
@@ -1145,6 +1176,19 @@ function limpiarFormulario(formId) {
   if (formId === 'formPlastificado') {
     const cc = document.getElementById('seccionPiezas');
     if (cc) cc.style.display = 'none';
+  }
+  if (formId === 'formBooklet') {
+    const radioBond = document.getElementById('bookletPapelBond');
+    if (radioBond) radioBond.checked = true;
+    const radioBN = document.getElementById('bookletInteriorBN');
+    if (radioBN) radioBN.checked = true;
+    const radioGrapado = document.getElementById('bookletEmpastadoGrapado');
+    if (radioGrapado) radioGrapado.checked = true;
+    const resumen = document.getElementById('resumenBooklet');
+    if (resumen) resumen.style.display = 'none';
+    if (typeof actualizarEtiquetasPreciosBooklet === 'function') {
+      actualizarEtiquetasPreciosBooklet();
+    }
   }
 }
 
@@ -2109,7 +2153,7 @@ async function guardarCotizacionActual() { // ESTA FUNCIÓN AHORA SOLO CREA NUEV
   // 5. Construir Objeto
   const paqueteDeDatos = {
     fecha: new Date().toISOString(),
-    timestamp: firebase.database.ServerValue.TIMESTAMP,
+    timestamp: (typeof firebase !== 'undefined' && firebase.database?.ServerValue) ? firebase.database.ServerValue.TIMESTAMP : Date.now(),
     tipo: "General",
     nombre: nombre,
     tipoComprobante: tipoComp,
@@ -2119,6 +2163,13 @@ async function guardarCotizacionActual() { // ESTA FUNCIÓN AHORA SOLO CREA NUEV
   };
 
   console.log("🚀 Enviando General a Firebase:", paqueteDeDatos);
+
+  if (!db) {
+    mostrarNotificacion("⚠️ Base de datos no disponible. Cotización guardada localmente.", "warning");
+    guardarEnLocalStorage();
+    actualizarCotizacion();
+    return;
+  }
 
   // 6. Enviar
   try {
@@ -2178,6 +2229,13 @@ async function guardarCambiosCotizacion() { // NUEVA FUNCIÓN SOLO PARA EDITAR
     items: cotizacion
   };
 
+  if (!db) {
+    guardarEnLocalStorage();
+    actualizarCotizacion();
+    mostrarNotificacion(`✅ Cambios guardados localmente`, "success");
+    return;
+  }
+
   try {
     await db.ref("cotizaciones").child(idCotizacionActiva).update(paqueteDeDatos);
     mostrarNotificacion(`✅ Cambios guardados correctamente`, "success");
@@ -2220,6 +2278,14 @@ async function ejecutarEliminacionCotizacion() {
   const id = idCotizacionAEliminar;
   document.getElementById('modalConfirmarEliminar').classList.add('hidden');
   idCotizacionAEliminar = null;
+
+  if (!db) {
+    todasLasCotizaciones = todasLasCotizaciones.filter(c => c.id !== id);
+    renderizarCotizacionesGuardadas();
+    mostrarNotificacion('Cotización eliminada localmente', 'success');
+    if (idCotizacionActiva === id) limpiarCotizacion();
+    return;
+  }
 
   try {
     await db.ref("cotizaciones").child(id).remove();
@@ -3514,10 +3580,15 @@ function imprimirReporteIT1(resumen, itbisAPagar) {
 
 async function abrirModalCotizaciones() {
   const container = document.getElementById('listaCotizacionesGuardadas');
-  if (container) container.innerHTML = `<div class="text-center py-10"><p class="text-xl animate-pulse">${window.servigacoIcon('refresh')} Cargando desde Base de Datos...</p></div>`;
+  if (container) container.innerHTML = `<div class="text-center py-10"><p class="text-xl animate-pulse">${window.servigacoIcon ? window.servigacoIcon('refresh') : '🔄'} Cargando desde Base de Datos...</p></div>`;
   
   document.getElementById('modalCotizacionesGuardadas')?.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
+
+  if (!db) {
+    if (container) container.innerHTML = `<div class="text-center py-10"><p class="text-gray-500">Base de datos offline o no disponible en este momento.</p></div>`;
+    return;
+  }
 
   try {
     // Cargar datos frescos de Firebase
@@ -3858,6 +3929,7 @@ window.probarConexionFirebase = async function() {
 // ============================================
 
 function inicializarSeguridad() {
+  if (!auth) return;
   auth.onAuthStateChanged(user => {
     actualizarIconoAuth(user);
     // Si la seguridad está activa, ocultamos cosas automáticamente
@@ -3873,7 +3945,7 @@ function verificarPermisoAdmin() {
   if (!ACTIVAR_SEGURIDAD) return true;
 
   // 2. Si está encendido, verificar usuario real
-  const user = auth.currentUser;
+  const user = auth ? auth.currentUser : null;
   if (user) {
     return true; // Tiene permiso
   } else {
@@ -3885,7 +3957,7 @@ function verificarPermisoAdmin() {
 }
 
 function manejarClickAuth() {
-  const user = auth.currentUser;
+  const user = auth ? auth.currentUser : null;
   if (user) {
     // 🛑 Confirmación de seguridad antes de salir
     if (!confirm("¿Estás seguro de que deseas cerrar la sesión?")) return;
@@ -3951,6 +4023,11 @@ async function procesarLogin(e) {
 function inicializarCombos() {
   const lista = document.getElementById('listaCombos');
   if (!lista) return;
+
+  if (!db) {
+    lista.innerHTML = '<p class="text-gray-600 dark:text-gray-300 text-sm col-span-full italic p-2">Base de datos offline. Combos no disponibles.</p>';
+    return;
+  }
 
   // Escuchar cambios en tiempo real en la colección 'combos'
   db.ref('combos').on('value', (snapshot) => {
@@ -4217,13 +4294,45 @@ function inicializarPreciosBooklet() {
  * Actualiza los textos de precio que se muestran junto a cada opción del form.
  */
 function actualizarEtiquetasPreciosBooklet() {
+  const papel = document.querySelector('input[name="bookletPapel"]:checked')?.value || 'bond';
   const labelBN        = document.getElementById('bookletPrecioBNLabel');
   const labelColor     = document.getElementById('bookletPrecioColorLabel');
-  const labelCartonite = document.getElementById('bookletPrecioCartoniteLabel');
 
-  if (labelBN)        labelBN.textContent        = `RD$${preciosBooklet.bondBN.toFixed(2)} por hoja`;
-  if (labelColor)     labelColor.textContent     = `RD$${preciosBooklet.bondColor.toFixed(2)} por hoja`;
-  if (labelCartonite) labelCartonite.textContent = `RD$${preciosBooklet.cartonite.toFixed(2)}`;
+  const pBondBN = preciosBooklet.bond?.bn ?? preciosBooklet.bondBN ?? 5;
+  const pBondColor = preciosBooklet.bond?.color ?? preciosBooklet.bondColor ?? 15;
+  const pHiloBN = preciosBooklet.hilo?.bn ?? 8;
+  const pHiloColor = preciosBooklet.hilo?.color ?? 18;
+  const pSatinado = preciosBooklet.satinado ?? 30;
+
+  if (papel === 'satinado') {
+    if (labelBN) labelBN.textContent = `RD$${pSatinado.toFixed(2)} por hoja (tarifa única)`;
+    if (labelColor) labelColor.textContent = `RD$${pSatinado.toFixed(2)} por hoja (tarifa única)`;
+  } else if (papel === 'hilo') {
+    if (labelBN) labelBN.textContent = `RD$${pHiloBN.toFixed(2)} por hoja`;
+    if (labelColor) labelColor.textContent = `RD$${pHiloColor.toFixed(2)} por hoja`;
+  } else {
+    if (labelBN) labelBN.textContent = `RD$${pBondBN.toFixed(2)} por hoja`;
+    if (labelColor) labelColor.textContent = `RD$${pBondColor.toFixed(2)} por hoja`;
+  }
+
+  // Etiquetas de empastado
+  const pGrapado = preciosBooklet.empastado?.grapado ?? 0;
+  const pCartonite = preciosBooklet.empastado?.cartonite ?? preciosBooklet.cartonite ?? 150;
+  const pTapaBlanda = preciosBooklet.empastado?.tapa_blanda ?? 350;
+  const pTapaDura = preciosBooklet.empastado?.tapa_dura ?? 500;
+  const pVinyl = preciosBooklet.empastado?.vinyl ?? 950;
+
+  const labelGrapado = document.getElementById('bookletPrecioGrapadoLabel');
+  const labelCartonite = document.getElementById('bookletPrecioCartoniteLabel');
+  const labelTapaBlanda = document.getElementById('bookletPrecioTapaBlandaLabel');
+  const labelTapaDura = document.getElementById('bookletPrecioTapaDuraLabel');
+  const labelVinyl = document.getElementById('bookletPrecioVinylLabel');
+
+  if (labelGrapado) labelGrapado.textContent = `RD$${pGrapado.toFixed(2)} (Folleto)`;
+  if (labelCartonite) labelCartonite.textContent = `+RD$${pCartonite.toFixed(2)}`;
+  if (labelTapaBlanda) labelTapaBlanda.textContent = `+RD$${pTapaBlanda.toFixed(2)}`;
+  if (labelTapaDura) labelTapaDura.textContent = `+RD$${pTapaDura.toFixed(2)}`;
+  if (labelVinyl) labelVinyl.textContent = `+RD$${pVinyl.toFixed(2)}`;
 }
 
 /**
@@ -4231,37 +4340,61 @@ function actualizarEtiquetasPreciosBooklet() {
  * @returns {Object|null} Objeto con el desglose o null si los datos son inválidos.
  */
 function calcularBooklet() {
-  const paginas      = parseInt(document.getElementById('bookletPaginas')?.value  || 0);
+  const paginasVal = document.getElementById('bookletPaginas')?.value?.trim();
+  const paginas    = paginasVal ? parseInt(paginasVal, 10) : 0;
+  const papel      = document.querySelector('input[name="bookletPapel"]:checked')?.value || 'bond';
   const tipoInterior = document.querySelector('input[name="bookletTipoInterior"]:checked')?.value || 'bn';
-  const tienePortada = document.querySelector('input[name="bookletPortada"]:checked')?.value === 'si';
-  const ejemplares   = parseInt(document.getElementById('bookletEjemplares')?.value || 1);
+  const tipoEmpastado = document.querySelector('input[name="bookletEmpastado"]:checked')?.value || 'grapado';
+  const ejemplaresVal = document.getElementById('bookletEjemplares')?.value?.trim();
+  const ejemplares   = ejemplaresVal ? Math.max(1, parseInt(ejemplaresVal, 10) || 1) : 1;
 
-  if (!paginas    || paginas    < 1) return null;
+  if (!paginas || paginas < 1) return null;
   if (!ejemplares || ejemplares < 1) return null;
 
   // Hojas físicas = páginas ÷ 2 (redondeado hacia arriba para números impares)
   const hojasFisicas = Math.ceil(paginas / 2);
 
+  // Precio por hoja según papel
+  let precioHoja = 0;
+  if (papel === 'satinado') {
+    precioHoja = preciosBooklet.satinado ?? 30;
+  } else if (papel === 'hilo') {
+    precioHoja = tipoInterior === 'color' 
+      ? (preciosBooklet.hilo?.color ?? 18) 
+      : (preciosBooklet.hilo?.bn ?? 8);
+  } else {
+    precioHoja = tipoInterior === 'color' 
+      ? (preciosBooklet.bond?.color ?? preciosBooklet.bondColor ?? 15) 
+      : (preciosBooklet.bond?.bn ?? preciosBooklet.bondBN ?? 5);
+  }
+
   // Costo interior por ejemplar
-  const precioHoja    = tipoInterior === 'color' ? preciosBooklet.bondColor : preciosBooklet.bondBN;
   const costoInterior = hojasFisicas * precioHoja;
 
-  // Costo portada por ejemplar
-  const costoPortada = tienePortada ? preciosBooklet.cartonite : 0;
+  // Precios de empastado
+  const preciosEmpastadoMap = {
+    grapado: preciosBooklet.empastado?.grapado ?? 0,
+    cartonite: preciosBooklet.empastado?.cartonite ?? preciosBooklet.cartonite ?? 150,
+    tapa_blanda: preciosBooklet.empastado?.tapa_blanda ?? 350,
+    tapa_dura: preciosBooklet.empastado?.tapa_dura ?? 500,
+    vinyl: preciosBooklet.empastado?.vinyl ?? 950
+  };
+
+  const costoEmpastado = preciosEmpastadoMap[tipoEmpastado] ?? 0;
 
   // Costo por ejemplar y total
-  const costoEjemplar = costoInterior + costoPortada;
+  const costoEjemplar = costoInterior + costoEmpastado;
   const costoTotal    = costoEjemplar * ejemplares;
 
   return {
     paginas,
     hojasFisicas,
+    papel,
     tipoInterior,
     precioHoja,
     costoInterior,
-    tienePortada,
-    costoPortada,
-    precioCartonite: preciosBooklet.cartonite,
+    tipoEmpastado,
+    costoEmpastado,
     ejemplares,
     costoEjemplar,
     costoTotal
@@ -4287,43 +4420,51 @@ function actualizarResumenBooklet() {
 
   resumenDiv.style.display = 'block';
 
-  const tipoTexto = datos.tipoInterior === 'color' ? 'Color' : 'Blanco y Negro';
+  const icon = (name) => typeof window.servigacoIcon === 'function' ? window.servigacoIcon(name) : '';
+  const papelNombres = {
+    bond: 'Papel Bond (20)',
+    hilo: 'Papel Hilo (20)',
+    satinado: 'Papel Satinado'
+  };
+  const empastadoNombres = {
+    grapado: 'Grapado simple (folleto)',
+    cartonite: 'Portada en Cartonite',
+    tapa_blanda: 'Tapa Blanda',
+    tapa_dura: 'Tapa Dura',
+    vinyl: 'Vinyl (Vinil)'
+  };
+
+  const papelTexto = papelNombres[datos.papel] || datos.papel;
+  const tipoTexto = datos.papel === 'satinado' 
+    ? 'Tarifa única' 
+    : (datos.tipoInterior === 'color' ? 'Color' : 'Blanco y Negro');
+  const empastadoTexto = empastadoNombres[datos.tipoEmpastado] || datos.tipoEmpastado;
 
   let html = `
     <div class="flex justify-between items-center py-1 border-b border-amber-100">
-      <span class="text-gray-600">${window.servigacoIcon('file-text')} Páginas del documento</span>
+      <span class="text-gray-600">${icon('file-text')} Páginas del documento</span>
       <span class="font-bold text-gray-800">${datos.paginas} páginas</span>
     </div>
     <div class="flex justify-between items-center py-1 border-b border-amber-100">
-      <span class="text-gray-600">${window.servigacoIcon('calculator')} Conversión a hojas físicas</span>
+      <span class="text-gray-600">${icon('calculator')} Conversión a hojas físicas</span>
       <span class="font-bold text-gray-800">${datos.paginas} ÷ 2 = <strong class="text-blue-600">${datos.hojasFisicas} hojas</strong></span>
     </div>
     <div class="flex justify-between items-center py-1 border-b border-amber-100">
-      <span class="text-gray-600">${window.servigacoIcon('palette')} Interior (${tipoTexto})</span>
+      <span class="text-gray-600">${icon('palette')} ${papelTexto} (${tipoTexto})</span>
       <span class="font-bold text-gray-800">${datos.hojasFisicas} × RD$${datos.precioHoja.toFixed(2)} = <strong>RD$${datos.costoInterior.toFixed(2)}</strong></span>
-    </div>`;
-
-  if (datos.tienePortada) {
-    html += `
+    </div>
     <div class="flex justify-between items-center py-1 border-b border-amber-100">
-      <span class="text-gray-600">${window.servigacoIcon('file-text')} Portada en cartonite</span>
-      <span class="font-bold text-orange-600">+ RD$${datos.costoPortada.toFixed(2)}</span>
-    </div>`;
-  } else {
-    html += `
+      <span class="text-gray-600">${icon('book')} Encuadernado: ${empastadoTexto}</span>
+      <span class="font-bold ${datos.costoEmpastado > 0 ? 'text-orange-600' : 'text-gray-500'}">
+        ${datos.costoEmpastado > 0 ? '+ RD$' + datos.costoEmpastado.toFixed(2) : 'RD$0.00 (Incluido)'}
+      </span>
+    </div>
     <div class="flex justify-between items-center py-1 border-b border-amber-100">
-      <span class="text-gray-600">${window.servigacoIcon('file-text')} Portada en cartonite</span>
-      <span class="text-gray-400 italic">Sin portada</span>
-    </div>`;
-  }
-
-  html += `
-    <div class="flex justify-between items-center py-1 border-b border-amber-100">
-      <span class="text-gray-600">${window.servigacoIcon('currency-dollar')} Costo por ejemplar</span>
+      <span class="text-gray-600">${icon('currency-dollar')} Costo por ejemplar</span>
       <span class="font-bold text-gray-800">RD$${datos.costoEjemplar.toFixed(2)}</span>
     </div>
     <div class="flex justify-between items-center py-1">
-      <span class="text-gray-600">${window.servigacoIcon('book-2')} Cantidad de ejemplares</span>
+      <span class="text-gray-600">${icon('book-2')} Cantidad de ejemplares</span>
       <span class="font-bold text-gray-800">${datos.ejemplares} ejemplar(es)</span>
     </div>`;
 
@@ -4354,17 +4495,31 @@ function agregarBooklet() {
     return;
   }
 
-  const tipoTexto = datos.tipoInterior === 'color' ? 'Color' : 'B/N';
-  const portTexto = datos.tienePortada
-    ? `Con portada cartonite (RD$${datos.costoPortada.toFixed(2)})`
-    : 'Sin portada cartonite';
+  const papelNombres = {
+    bond: 'Papel Bond (20)',
+    hilo: 'Papel Hilo (20)',
+    satinado: 'Papel Satinado'
+  };
+  const empastadoNombres = {
+    grapado: 'Grapado simple (folleto)',
+    cartonite: 'Portada en Cartonite',
+    tapa_blanda: 'Tapa Blanda',
+    tapa_dura: 'Tapa Dura',
+    vinyl: 'Vinyl (Vinil)'
+  };
 
-  const desglose = datos.tienePortada
-    ? `${datos.hojasFisicas} hojas × RD$${datos.precioHoja.toFixed(2)} + portada RD$${datos.costoPortada.toFixed(2)}`
+  const papelTexto = papelNombres[datos.papel] || datos.papel;
+  const tipoTexto = datos.papel === 'satinado'
+    ? 'Tarifa única'
+    : (datos.tipoInterior === 'color' ? 'Color' : 'B/N');
+  const empTexto = empastadoNombres[datos.tipoEmpastado] || datos.tipoEmpastado;
+
+  const desglose = datos.costoEmpastado > 0
+    ? `${datos.hojasFisicas} hojas × RD$${datos.precioHoja.toFixed(2)} + ${empTexto} RD$${datos.costoEmpastado.toFixed(2)}`
     : `${datos.hojasFisicas} hojas × RD$${datos.precioHoja.toFixed(2)}`;
 
-  let descripcion = `${datos.paginas} páginas · ${datos.hojasFisicas} hojas físicas · Interior ${tipoTexto}`;
-  descripcion += `\n${portTexto}`;
+  let descripcion = `${datos.paginas} páginas · ${datos.hojasFisicas} hojas físicas · ${papelTexto} · Interior ${tipoTexto}`;
+  descripcion += `\nEncuadernado: ${empTexto}`;
   if (datos.ejemplares > 1) {
     descripcion += `\nCosto por ejemplar: RD$${datos.costoEjemplar.toFixed(2)}`;
   }
@@ -4375,7 +4530,17 @@ function agregarBooklet() {
     descripcion: descripcion,
     cantidad: datos.ejemplares,
     precioUnitario: datos.costoEjemplar,
-    precio: datos.costoTotal
+    precio: datos.costoTotal,
+    datosPrecio: {
+      tipo: 'booklet',
+      paginas: datos.paginas,
+      hojasFisicas: datos.hojasFisicas,
+      papel: datos.papel,
+      tipoInterior: datos.tipoInterior,
+      tipoEmpastado: datos.tipoEmpastado,
+      precioHoja: datos.precioHoja,
+      costoEmpastado: datos.costoEmpastado
+    }
   });
 
   // Limpiar formulario
@@ -4397,16 +4562,23 @@ function inicializarEventListenersBooklet() {
     }
   });
 
+  // Event listeners para los radio buttons de tipo de papel
+  document.querySelectorAll('input[name="bookletPapel"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      actualizarEtiquetasPreciosBooklet();
+      actualizarResumenBooklet();
+    });
+  });
+
   // Event listeners para los radio buttons de tipo interior
   document.querySelectorAll('input[name="bookletTipoInterior"]').forEach(radio => {
     radio.addEventListener('change', actualizarResumenBooklet);
   });
 
-  // Event listeners para los radio buttons de portada
-  document.querySelectorAll('input[name="bookletPortada"]').forEach(radio => {
+  // Event listeners para los radio buttons de empastado
+  document.querySelectorAll('input[name="bookletEmpastado"]').forEach(radio => {
     radio.addEventListener('change', actualizarResumenBooklet);
   });
-
 }
 
 
@@ -4434,6 +4606,7 @@ function inicializarCustomSelect(config = {}) {
     wrapper.classList.add('sg-open');
     trigger.setAttribute('aria-expanded', 'true');
     dropdown.setAttribute('aria-hidden', 'false');
+    if (optionsList) optionsList.scrollTop = 0;
     searchInput.value = '';
     filtrarOpciones('');
     setTimeout(() => searchInput.focus(), 60);
