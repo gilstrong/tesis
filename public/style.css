@@ -3349,12 +3349,16 @@ li.sg-option[aria-selected="true"] .sg-check-icon {
 }
 
 .sg-thesis-select.sg-open .sg-dropdown {
-  max-height: 410px;
+  max-height: 480px;
   margin-top: 8px;
   padding: 8px;
   border: 1.5px solid var(--sg-border);
   box-shadow: var(--sg-shadow);
   transform: translateY(0);
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  overflow-y: auto !important;
 }
 
 .sg-thesis-select .sg-options-list {
@@ -3363,12 +3367,16 @@ li.sg-option[aria-selected="true"] .sg-check-icon {
 
 .sg-thesis-select li.sg-option {
   min-height: 48px;
-  animation: none;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
 }
 
 .sg-thesis-select.sg-open li.sg-option {
-  animation: sgThesisOptionReveal 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: var(--sg-thesis-option-delay, 0ms);
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  animation: none !important;
 }
 
 .sg-thesis-select .sg-option-icon-box,
@@ -3841,17 +3849,10 @@ label:hover .label-icon svg,
   animation-play-state: running !important;
 }
 
-/* ⏱️ DESACTIVACIÓN TRAS 30 SEGUNDOS CONTINUOS DE HOVER */
-.sg-anim-expired,
-.sg-anim-expired *,
+/* ⏱️ DESACTIVACIÓN TRAS 30 SEGUNDOS CONTINUOS DE HOVER (SOLO ICONOS WOBBLE) */
+[class*="sg-anim-"].sg-anim-expired,
 .form-group.sg-anim-expired [class*="sg-anim-"],
-.form-group.sg-anim-expired .sg-icon-cd-spinning,
-.form-group.sg-anim-expired .sg-icon-lomo-animated,
-.form-group.sg-anim-expired .sg-thesis-swatch,
 .sg-thesis-select.sg-anim-expired [class*="sg-anim-"],
-.sg-thesis-select.sg-anim-expired .sg-thesis-swatch,
-#cdSection.sg-anim-expired .sg-icon-cd-spinning,
-#lomoSection.sg-anim-expired .sg-icon-lomo-animated,
 label.sg-anim-expired .label-icon i,
 label.sg-anim-expired .label-icon svg {
   animation-play-state: paused !important;

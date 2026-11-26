@@ -503,14 +503,16 @@ function inicializarSelectorTesis(select, config = {}) {
     trigger.removeAttribute('aria-activedescendant');
     highlightedIndex = -1;
   };
-  const highlight = index => {
+  const highlight = (index, shouldScroll = true) => {
     const options = getOptions();
     if (!options.length) return;
     highlightedIndex = (index + options.length) % options.length;
     options.forEach((option, optionIndex) => option.classList.toggle('sg-focused', optionIndex === highlightedIndex));
     trigger.setAttribute('aria-activedescendant', options[highlightedIndex].id);
-    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-    options[highlightedIndex].scrollIntoView({ block: 'nearest', behavior });
+    if (shouldScroll) {
+      const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+      options[highlightedIndex].scrollIntoView({ block: 'nearest', behavior });
+    }
   };
   const close = (returnFocus = false) => {
     wrapper.classList.remove('sg-open');
@@ -521,11 +523,25 @@ function inicializarSelectorTesis(select, config = {}) {
   };
   const open = () => {
     if (select.disabled || !getOptions().length) return;
+
+    // Cerrar cualquier otro selector desplegable abierto para evitar solapamientos
+    document.querySelectorAll('.sg-thesis-select.sg-open').forEach(openWrapper => {
+      if (openWrapper !== wrapper) {
+        openWrapper.classList.remove('sg-open');
+        openWrapper.querySelector('.sg-trigger')?.setAttribute('aria-expanded', 'false');
+        openWrapper.querySelector('.sg-dropdown')?.setAttribute('aria-hidden', 'true');
+      }
+    });
+
     wrapper.classList.add('sg-open');
     trigger.setAttribute('aria-expanded', 'true');
     dropdown.setAttribute('aria-hidden', 'false');
+
+    // Resetear scroll de la lista al inicio para evitar que aparezca en blanco
+    list.scrollTop = 0;
+
     const selectedIndex = getOptions().findIndex(option => option.dataset.value === select.value);
-    highlight(selectedIndex >= 0 ? selectedIndex : 0);
+    highlight(selectedIndex >= 0 ? selectedIndex : 0, false);
   };
   const choose = option => {
     if (!option || select.disabled) return;
@@ -2047,7 +2063,7 @@ function inicializar() {
  */
 function inicializarTemporizadorAnimaciones() {
   const hoverTimers = new Map();
-  const SELECTOR_HOVER = '.form-group, .sg-thesis-select, .sg-option, .sg-switch, #cdSection, #lomoSection, label, .sg-thesis-swatch';
+  const SELECTOR_HOVER = '[class*="sg-anim-"], .label-icon';
 
   document.addEventListener('pointerover', (e) => {
     const container = e.target.closest(SELECTOR_HOVER);
