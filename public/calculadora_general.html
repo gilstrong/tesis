@@ -1304,78 +1304,74 @@
              📖 FORMULARIO: BOOKLET / FOLLETO
              ======================================== -->
         <div id="formBooklet" class="form-servicio animate-fade-in-up" style="display: none;">
-          <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <span class="text-2xl"><i class="ti ti-book" aria-hidden="true"></i></span>
-            Booklet / Folleto
-          </h3>
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+              <span class="text-2xl"><i class="ti ti-book" aria-hidden="true"></i></span>
+              Booklet / Folleto
+            </h3>
+            <button type="button" onclick="abrirModalAnalizadorPDF()" class="py-2 px-4 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 shadow-md transform transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-2 text-sm">
+              <i class="ti ti-file-analytics" aria-hidden="true"></i>
+              Analizar PDF (B/N vs Color)
+            </button>
+          </div>
 
-          <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-6 text-sm text-amber-800 flex gap-3 items-start">
+          <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/40 rounded-xl p-4 mb-6 text-sm text-amber-800 dark:text-amber-200 flex gap-3 items-start">
             <span class="text-xl"><i class="ti ti-bulb" aria-hidden="true"></i></span>
-            <p><strong>¿Cómo funciona?</strong> Las páginas del documento se dividen entre 2 para obtener las hojas físicas. Ej: 140 páginas ÷ 2 = 70 hojas.</p>
+            <p><strong>¿Cómo funciona?</strong> Las páginas del documento se dividen entre 2 para obtener las hojas físicas (ej: 140 páginas ÷ 2 = 70 hojas). Puedes ingresar páginas <strong>B/N</strong> y <strong>Color</strong> por separado o cargarlas directo desde el <strong>Analizador de PDF</strong>.</p>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-            <!-- Páginas del documento -->
-            <div class="group md:col-span-2">
-              <label for="bookletPaginas" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs"><i class="ti ti-list-numbers" aria-hidden="true"></i></span>
-                Cantidad de páginas del documento
+            <!-- Páginas Blanco y Negro -->
+            <div class="group">
+              <label for="bookletPaginasBN" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <span class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 p-1.5 rounded-lg text-xs"><i class="ti ti-contrast-2" aria-hidden="true"></i></span>
+                Páginas Blanco y Negro
               </label>
-              <input type="number" id="bookletPaginas" min="2" placeholder="Ej: 140" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
-              <small class="text-xs text-gray-400 mt-1 ml-1">Si el número es impar, se redondea hacia arriba automáticamente</small>
+              <input type="number" id="bookletPaginasBN" min="0" placeholder="Ej: 100" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-100 focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
+            </div>
+
+            <!-- Páginas a Color -->
+            <div class="group">
+              <label for="bookletPaginasColor" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <span class="bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-300 p-1.5 rounded-lg text-xs"><i class="ti ti-palette" aria-hidden="true"></i></span>
+                Páginas a Color
+              </label>
+              <input type="number" id="bookletPaginasColor" min="0" placeholder="Ej: 40" class="sg-quantity-input w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-100 focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none font-medium" />
+            </div>
+
+            <div class="md:col-span-2 -mt-2">
+              <small class="text-xs text-gray-500 dark:text-gray-400 ml-1" id="bookletPaginasInfo">
+                Si el total de páginas es impar, se redondea hacia arriba automáticamente al convertir a hojas físicas.
+              </small>
             </div>
 
             <!-- Tipo de papel -->
-            <div class="group">
+            <div class="group md:col-span-2">
               <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
                 <span class="bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 p-1.5 rounded-lg text-xs"><i class="ti ti-file-text" aria-hidden="true"></i></span>
                 Tipo de papel
               </label>
-              <div class="flex flex-col gap-3">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all">
                   <input type="radio" name="bookletPapel" id="bookletPapelBond" value="bond" checked class="accent-blue-600 w-4 h-4">
                   <div>
                     <span class="font-bold text-gray-800 dark:text-gray-100 text-sm">Papel Bond (20)</span>
-                    <small class="block text-gray-500 dark:text-gray-400 text-xs">Estándar (B/N: RD$5 · Color: RD$15)</small>
+                    <small class="block text-gray-500 dark:text-gray-400 text-xs" id="bookletPrecioBondLabel">B/N: RD$5 · Color: RD$15 / hoja</small>
                   </div>
                 </label>
                 <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all">
                   <input type="radio" name="bookletPapel" id="bookletPapelHilo" value="hilo" class="accent-blue-600 w-4 h-4">
                   <div>
                     <span class="font-bold text-gray-800 dark:text-gray-100 text-sm">Papel Hilo (20)</span>
-                    <small class="block text-gray-500 dark:text-gray-400 text-xs">Texturizado fino (B/N: RD$8 · Color: RD$18)</small>
+                    <small class="block text-gray-500 dark:text-gray-400 text-xs" id="bookletPrecioHiloLabel">B/N: RD$8 · Color: RD$18 / hoja</small>
                   </div>
                 </label>
                 <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all">
                   <input type="radio" name="bookletPapel" id="bookletPapelSatinado" value="satinado" class="accent-blue-600 w-4 h-4">
                   <div>
                     <span class="font-bold text-gray-800 dark:text-gray-100 text-sm">Papel Satinado</span>
-                    <small class="block text-gray-500 dark:text-gray-400 text-xs">Tarifa única: RD$30.00 por hoja</small>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <!-- Tipo de interior -->
-            <div class="group">
-              <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                <span class="bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 p-1.5 rounded-lg text-xs"><i class="ti ti-palette" aria-hidden="true"></i></span>
-                Tipo de impresión interior
-              </label>
-              <div class="flex flex-col gap-3">
-                <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all" id="bookletLabelBN">
-                  <input type="radio" name="bookletTipoInterior" id="bookletInteriorBN" value="bn" checked class="accent-blue-600 w-4 h-4">
-                  <div>
-                    <span class="font-bold text-gray-800 dark:text-gray-100 text-sm"><i class="ti ti-contrast-2" aria-hidden="true"></i> Blanco y Negro</span>
-                    <small class="block text-gray-500 dark:text-gray-400 text-xs" id="bookletPrecioBNLabel">RD$5.00 por hoja</small>
-                  </div>
-                </label>
-                <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all" id="bookletLabelColor">
-                  <input type="radio" name="bookletTipoInterior" id="bookletInteriorColor" value="color" class="accent-blue-600 w-4 h-4">
-                  <div>
-                    <span class="font-bold text-gray-800 dark:text-gray-100 text-sm"><i class="ti ti-palette" aria-hidden="true"></i> Color</span>
-                    <small class="block text-gray-500 dark:text-gray-400 text-xs" id="bookletPrecioColorLabel">RD$15.00 por hoja</small>
+                    <small class="block text-gray-500 dark:text-gray-400 text-xs" id="bookletPrecioSatinadoLabel">Tarifa única: RD$30.00 / hoja</small>
                   </div>
                 </label>
               </div>
@@ -2460,6 +2456,7 @@
         '<button onclick="pdfq_agregarUno(' + item.id + ')" ' +
         'class="ml-auto text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 px-3 py-1 rounded-lg shadow-sm transition-colors flex items-center gap-1">' +
         window.servigacoIcon('plus') + ' Agregar</button>' +
+        ' <button onclick="pdfq_enviarABooklet(' + item.id + ')" class="text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-300 px-3 py-1 rounded-lg border border-amber-200 dark:border-amber-700 shadow-sm transition-colors flex items-center gap-1" title="Usar en calculadora de Booklet">' + window.servigacoIcon('book') + ' Booklet</button>' +
         ' <button onclick="lomo_estimarDesdeAnalizador(' + item.id + ')" class="text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 px-3 py-1 rounded-lg border border-indigo-200 dark:border-indigo-700 shadow-sm transition-colors flex items-center gap-1">' + window.servigacoIcon('ruler') + ' Lomo</button>' +
         '</div>' +
 
@@ -3208,6 +3205,39 @@
       if (pdfq_agregarItemACotizacion(item)) {
         mostrarNotificacion('✅ "' + item.nombre + '" agregado a la cotización.', 'success');
       }
+    }
+
+    // ── Enviar resultados de un PDF analizado al formulario de Booklet ────────
+    function pdfq_enviarABooklet(id) {
+      var item = _PDFQ.archivos.find(function (a) { return a.id === id; });
+      if (!item || item.estado !== 'completado' || !item.resultado) return;
+
+      var tipoServicioEl = document.getElementById('tipoServicio');
+      if (tipoServicioEl) {
+        tipoServicioEl.value = 'booklet';
+        tipoServicioEl.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      var inputBN = document.getElementById('bookletPaginasBN');
+      var inputColor = document.getElementById('bookletPaginasColor');
+      if (inputBN) inputBN.value = item.resultado.bn || 0;
+      if (inputColor) inputColor.value = item.resultado.color || 0;
+
+      if (typeof actualizarResumenBooklet === 'function') {
+        actualizarResumenBooklet();
+      }
+
+      cerrarModalAnalizadorPDF();
+
+      var formBooklet = document.getElementById('formBooklet');
+      if (formBooklet) {
+        formBooklet.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      mostrarNotificacion(
+        '📖 "' + item.nombre + '" cargado en Booklet (' + (item.resultado.bn || 0) + ' B/N, ' + (item.resultado.color || 0) + ' Color).',
+        'success'
+      );
     }
 
     // ── Cotizar todos: delega en pdfq_agregarItemACotizacion por cada PDF ─────

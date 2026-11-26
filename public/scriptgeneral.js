@@ -419,16 +419,34 @@ function recalcularCotizacionConCatalogo() {
       item.precioUnitario = unitario;
       item.precio = unitario * item.cantidad;
     } else if (data.tipo === 'booklet') {
-      const hojasFisicas = Math.ceil((data.paginas || 0) / 2);
-      let precioHoja = 0;
-      if (data.papel === 'satinado') {
-        precioHoja = preciosBooklet.satinado ?? 30;
-      } else if (data.papel === 'hilo') {
-        precioHoja = data.tipoInterior === 'color' ? (preciosBooklet.hilo?.color ?? 18) : (preciosBooklet.hilo?.bn ?? 8);
+      let costoInterior = 0;
+      if (data.paginasBN !== undefined || data.paginasColor !== undefined) {
+        const pBN = data.paginasBN || 0;
+        const pColor = data.paginasColor || 0;
+        const hojasTotal = Math.ceil((pBN + pColor) / 2);
+        const hojasColor = Math.min(hojasTotal, Math.ceil(pColor / 2));
+        const hojasBN = Math.max(0, hojasTotal - hojasColor);
+
+        if (data.papel === 'satinado') {
+          costoInterior = hojasTotal * (preciosBooklet.satinado ?? 30);
+        } else if (data.papel === 'hilo') {
+          costoInterior = (hojasBN * (preciosBooklet.hilo?.bn ?? 8)) + (hojasColor * (preciosBooklet.hilo?.color ?? 18));
+        } else {
+          costoInterior = (hojasBN * (preciosBooklet.bond?.bn ?? preciosBooklet.bondBN ?? 5)) + (hojasColor * (preciosBooklet.bond?.color ?? preciosBooklet.bondColor ?? 15));
+        }
       } else {
-        precioHoja = data.tipoInterior === 'color'
-          ? (preciosBooklet.bond?.color ?? preciosBooklet.bondColor ?? 15)
-          : (preciosBooklet.bond?.bn ?? preciosBooklet.bondBN ?? 5);
+        const hojasFisicas = Math.ceil((data.paginas || 0) / 2);
+        let precioHoja = 0;
+        if (data.papel === 'satinado') {
+          precioHoja = preciosBooklet.satinado ?? 30;
+        } else if (data.papel === 'hilo') {
+          precioHoja = data.tipoInterior === 'color' ? (preciosBooklet.hilo?.color ?? 18) : (preciosBooklet.hilo?.bn ?? 8);
+        } else {
+          precioHoja = data.tipoInterior === 'color'
+            ? (preciosBooklet.bond?.color ?? preciosBooklet.bondColor ?? 15)
+            : (preciosBooklet.bond?.bn ?? preciosBooklet.bondBN ?? 5);
+        }
+        costoInterior = hojasFisicas * precioHoja;
       }
       const preciosEmp = {
         grapado: preciosBooklet.empastado?.grapado ?? 0,
@@ -438,7 +456,7 @@ function recalcularCotizacionConCatalogo() {
         vinyl: preciosBooklet.empastado?.vinyl ?? 950
       };
       const costoEmpastado = preciosEmp[data.tipoEmpastado] ?? 0;
-      const costoUnitario = (hojasFisicas * precioHoja) + costoEmpastado;
+      const costoUnitario = costoInterior + costoEmpastado;
       item.precioUnitario = costoUnitario;
       item.precio = costoUnitario * item.cantidad;
     } else if (data.tipo === 'servicio-configurado') {
@@ -1180,12 +1198,12 @@ function limpiarFormulario(formId) {
   if (formId === 'formBooklet') {
     const radioBond = document.getElementById('bookletPapelBond');
     if (radioBond) radioBond.checked = true;
-    const radioBN = document.getElementById('bookletInteriorBN');
-    if (radioBN) radioBN.checked = true;
     const radioGrapado = document.getElementById('bookletEmpastadoGrapado');
     if (radioGrapado) radioGrapado.checked = true;
     const resumen = document.getElementById('resumenBooklet');
     if (resumen) resumen.style.display = 'none';
+    const infoEl = document.getElementById('bookletPaginasInfo');
+    if (infoEl) infoEl.textContent = 'Si el total de páginas es impar, se redondea hacia arriba automáticamente al convertir a hojas físicas.';
     if (typeof actualizarEtiquetasPreciosBooklet === 'function') {
       actualizarEtiquetasPreciosBooklet();
     }
@@ -4294,26 +4312,19 @@ function inicializarPreciosBooklet() {
  * Actualiza los textos de precio que se muestran junto a cada opción del form.
  */
 function actualizarEtiquetasPreciosBooklet() {
-  const papel = document.querySelector('input[name="bookletPapel"]:checked')?.value || 'bond';
-  const labelBN        = document.getElementById('bookletPrecioBNLabel');
-  const labelColor     = document.getElementById('bookletPrecioColorLabel');
-
   const pBondBN = preciosBooklet.bond?.bn ?? preciosBooklet.bondBN ?? 5;
   const pBondColor = preciosBooklet.bond?.color ?? preciosBooklet.bondColor ?? 15;
   const pHiloBN = preciosBooklet.hilo?.bn ?? 8;
   const pHiloColor = preciosBooklet.hilo?.color ?? 18;
   const pSatinado = preciosBooklet.satinado ?? 30;
 
-  if (papel === 'satinado') {
-    if (labelBN) labelBN.textContent = `RD$${pSatinado.toFixed(2)} por hoja (tarifa única)`;
-    if (labelColor) labelColor.textContent = `RD$${pSatinado.toFixed(2)} por hoja (tarifa única)`;
-  } else if (papel === 'hilo') {
-    if (labelBN) labelBN.textContent = `RD$${pHiloBN.toFixed(2)} por hoja`;
-    if (labelColor) labelColor.textContent = `RD$${pHiloColor.toFixed(2)} por hoja`;
-  } else {
-    if (labelBN) labelBN.textContent = `RD$${pBondBN.toFixed(2)} por hoja`;
-    if (labelColor) labelColor.textContent = `RD$${pBondColor.toFixed(2)} por hoja`;
-  }
+  const labelBond = document.getElementById('bookletPrecioBondLabel');
+  const labelHilo = document.getElementById('bookletPrecioHiloLabel');
+  const labelSatinado = document.getElementById('bookletPrecioSatinadoLabel');
+
+  if (labelBond) labelBond.textContent = `B/N: RD$${pBondBN.toFixed(2)} · Color: RD$${pBondColor.toFixed(2)} / hoja`;
+  if (labelHilo) labelHilo.textContent = `B/N: RD$${pHiloBN.toFixed(2)} · Color: RD$${pHiloColor.toFixed(2)} / hoja`;
+  if (labelSatinado) labelSatinado.textContent = `Tarifa única: RD$${pSatinado.toFixed(2)} / hoja`;
 
   // Etiquetas de empastado
   const pGrapado = preciosBooklet.empastado?.grapado ?? 0;
@@ -4336,40 +4347,49 @@ function actualizarEtiquetasPreciosBooklet() {
 }
 
 /**
- * Calcula el costo del booklet y devuelve un objeto con el desglose.
+ * Calcula el costo del booklet diferenciando páginas B/N y Color y devuelve un objeto con el desglose.
  * @returns {Object|null} Objeto con el desglose o null si los datos son inválidos.
  */
 function calcularBooklet() {
-  const paginasVal = document.getElementById('bookletPaginas')?.value?.trim();
-  const paginas    = paginasVal ? parseInt(paginasVal, 10) : 0;
-  const papel      = document.querySelector('input[name="bookletPapel"]:checked')?.value || 'bond';
-  const tipoInterior = document.querySelector('input[name="bookletTipoInterior"]:checked')?.value || 'bn';
+  const bnVal    = document.getElementById('bookletPaginasBN')?.value?.trim();
+  const colorVal = document.getElementById('bookletPaginasColor')?.value?.trim();
+  const paginasBN    = bnVal ? Math.max(0, parseInt(bnVal, 10) || 0) : 0;
+  const paginasColor = colorVal ? Math.max(0, parseInt(colorVal, 10) || 0) : 0;
+  const paginas      = paginasBN + paginasColor;
+
+  const papel         = document.querySelector('input[name="bookletPapel"]:checked')?.value || 'bond';
   const tipoEmpastado = document.querySelector('input[name="bookletEmpastado"]:checked')?.value || 'grapado';
   const ejemplaresVal = document.getElementById('bookletEjemplares')?.value?.trim();
-  const ejemplares   = ejemplaresVal ? Math.max(1, parseInt(ejemplaresVal, 10) || 1) : 1;
+  const ejemplares    = ejemplaresVal ? Math.max(1, parseInt(ejemplaresVal, 10) || 1) : 1;
 
   if (!paginas || paginas < 1) return null;
   if (!ejemplares || ejemplares < 1) return null;
 
-  // Hojas físicas = páginas ÷ 2 (redondeado hacia arriba para números impares)
+  // Hojas físicas = páginas ÷ 2 (redondeado hacia arriba)
   const hojasFisicas = Math.ceil(paginas / 2);
+  const hojasColor   = Math.min(hojasFisicas, Math.ceil(paginasColor / 2));
+  const hojasBN      = Math.max(0, hojasFisicas - hojasColor);
 
-  // Precio por hoja según papel
-  let precioHoja = 0;
+  // Precios por hoja según papel
+  let precioHojaBN = 0;
+  let precioHojaColor = 0;
   if (papel === 'satinado') {
-    precioHoja = preciosBooklet.satinado ?? 30;
+    const pSat = preciosBooklet.satinado ?? 30;
+    precioHojaBN = pSat;
+    precioHojaColor = pSat;
   } else if (papel === 'hilo') {
-    precioHoja = tipoInterior === 'color' 
-      ? (preciosBooklet.hilo?.color ?? 18) 
-      : (preciosBooklet.hilo?.bn ?? 8);
+    precioHojaBN = preciosBooklet.hilo?.bn ?? 8;
+    precioHojaColor = preciosBooklet.hilo?.color ?? 18;
   } else {
-    precioHoja = tipoInterior === 'color' 
-      ? (preciosBooklet.bond?.color ?? preciosBooklet.bondColor ?? 15) 
-      : (preciosBooklet.bond?.bn ?? preciosBooklet.bondBN ?? 5);
+    precioHojaBN = preciosBooklet.bond?.bn ?? preciosBooklet.bondBN ?? 5;
+    precioHojaColor = preciosBooklet.bond?.color ?? preciosBooklet.bondColor ?? 15;
   }
 
-  // Costo interior por ejemplar
-  const costoInterior = hojasFisicas * precioHoja;
+  const costoBN = hojasBN * precioHojaBN;
+  const costoColor = hojasColor * precioHojaColor;
+  const costoInterior = papel === 'satinado'
+    ? hojasFisicas * precioHojaBN
+    : costoBN + costoColor;
 
   // Precios de empastado
   const preciosEmpastadoMap = {
@@ -4388,10 +4408,16 @@ function calcularBooklet() {
 
   return {
     paginas,
+    paginasBN,
+    paginasColor,
     hojasFisicas,
+    hojasBN,
+    hojasColor,
     papel,
-    tipoInterior,
-    precioHoja,
+    precioHojaBN,
+    precioHojaColor,
+    costoBN,
+    costoColor,
     costoInterior,
     tipoEmpastado,
     costoEmpastado,
@@ -4408,6 +4434,7 @@ function actualizarResumenBooklet() {
   const resumenDiv     = document.getElementById('resumenBooklet');
   const resumenContent = document.getElementById('resumenBookletContent');
   const totalDisplay   = document.getElementById('bookletTotalDisplay');
+  const infoEl         = document.getElementById('bookletPaginasInfo');
 
   if (!resumenDiv) return;
 
@@ -4415,10 +4442,14 @@ function actualizarResumenBooklet() {
 
   if (!datos) {
     resumenDiv.style.display = 'none';
+    if (infoEl) infoEl.textContent = 'Si el total de páginas es impar, se redondea hacia arriba automáticamente al convertir a hojas físicas.';
     return;
   }
 
   resumenDiv.style.display = 'block';
+  if (infoEl) {
+    infoEl.textContent = `Total: ${datos.paginas} páginas → ${datos.hojasFisicas} hojas físicas (${datos.hojasBN} B/N + ${datos.hojasColor} Color)`;
+  }
 
   const icon = (name) => typeof window.servigacoIcon === 'function' ? window.servigacoIcon(name) : '';
   const papelNombres = {
@@ -4435,24 +4466,46 @@ function actualizarResumenBooklet() {
   };
 
   const papelTexto = papelNombres[datos.papel] || datos.papel;
-  const tipoTexto = datos.papel === 'satinado' 
-    ? 'Tarifa única' 
-    : (datos.tipoInterior === 'color' ? 'Color' : 'Blanco y Negro');
   const empastadoTexto = empastadoNombres[datos.tipoEmpastado] || datos.tipoEmpastado;
+
+  let desglosePags = [];
+  if (datos.paginasBN > 0) desglosePags.push(`${datos.paginasBN} B/N`);
+  if (datos.paginasColor > 0) desglosePags.push(`${datos.paginasColor} Color`);
 
   let html = `
     <div class="flex justify-between items-center py-1 border-b border-amber-100">
       <span class="text-gray-600">${icon('file-text')} Páginas del documento</span>
-      <span class="font-bold text-gray-800">${datos.paginas} páginas</span>
+      <span class="font-bold text-gray-800">${datos.paginas} páginas (${desglosePags.join(' + ')})</span>
     </div>
     <div class="flex justify-between items-center py-1 border-b border-amber-100">
       <span class="text-gray-600">${icon('calculator')} Conversión a hojas físicas</span>
       <span class="font-bold text-gray-800">${datos.paginas} ÷ 2 = <strong class="text-blue-600">${datos.hojasFisicas} hojas</strong></span>
-    </div>
+    </div>`;
+
+  if (datos.papel === 'satinado') {
+    html += `
     <div class="flex justify-between items-center py-1 border-b border-amber-100">
-      <span class="text-gray-600">${icon('palette')} ${papelTexto} (${tipoTexto})</span>
-      <span class="font-bold text-gray-800">${datos.hojasFisicas} × RD$${datos.precioHoja.toFixed(2)} = <strong>RD$${datos.costoInterior.toFixed(2)}</strong></span>
-    </div>
+      <span class="text-gray-600">${icon('palette')} ${papelTexto} (Tarifa única)</span>
+      <span class="font-bold text-gray-800">${datos.hojasFisicas} × RD$${datos.precioHojaBN.toFixed(2)} = <strong>RD$${datos.costoInterior.toFixed(2)}</strong></span>
+    </div>`;
+  } else {
+    if (datos.hojasBN > 0) {
+      html += `
+      <div class="flex justify-between items-center py-1 border-b border-amber-100">
+        <span class="text-gray-600">${icon('contrast-2')} ${papelTexto} — Hojas B/N</span>
+        <span class="font-bold text-gray-800">${datos.hojasBN} × RD$${datos.precioHojaBN.toFixed(2)} = <strong>RD$${datos.costoBN.toFixed(2)}</strong></span>
+      </div>`;
+    }
+    if (datos.hojasColor > 0) {
+      html += `
+      <div class="flex justify-between items-center py-1 border-b border-amber-100">
+        <span class="text-gray-600">${icon('palette')} ${papelTexto} — Hojas Color</span>
+        <span class="font-bold text-green-700">${datos.hojasColor} × RD$${datos.precioHojaColor.toFixed(2)} = <strong>RD$${datos.costoColor.toFixed(2)}</strong></span>
+      </div>`;
+    }
+  }
+
+  html += `
     <div class="flex justify-between items-center py-1 border-b border-amber-100">
       <span class="text-gray-600">${icon('book')} Encuadernado: ${empastadoTexto}</span>
       <span class="font-bold ${datos.costoEmpastado > 0 ? 'text-orange-600' : 'text-gray-500'}">
@@ -4479,7 +4532,7 @@ function agregarBooklet() {
   const datos = calcularBooklet();
 
   if (!datos) {
-    mostrarNotificacion('Ingresa una cantidad de páginas válida', 'error');
+    mostrarNotificacion('Ingresa una cantidad de páginas válida (B/N o Color)', 'error');
     return;
   }
   if (datos.paginas < 2) {
@@ -4509,16 +4562,32 @@ function agregarBooklet() {
   };
 
   const papelTexto = papelNombres[datos.papel] || datos.papel;
-  const tipoTexto = datos.papel === 'satinado'
-    ? 'Tarifa única'
-    : (datos.tipoInterior === 'color' ? 'Color' : 'B/N');
   const empTexto = empastadoNombres[datos.tipoEmpastado] || datos.tipoEmpastado;
 
-  const desglose = datos.costoEmpastado > 0
-    ? `${datos.hojasFisicas} hojas × RD$${datos.precioHoja.toFixed(2)} + ${empTexto} RD$${datos.costoEmpastado.toFixed(2)}`
-    : `${datos.hojasFisicas} hojas × RD$${datos.precioHoja.toFixed(2)}`;
+  let tipoInteriorResumen = '';
+  if (datos.papel === 'satinado') {
+    tipoInteriorResumen = 'Tarifa única';
+  } else if (datos.paginasBN > 0 && datos.paginasColor > 0) {
+    tipoInteriorResumen = `Mixto (${datos.paginasBN} B/N + ${datos.paginasColor} Color)`;
+  } else if (datos.paginasColor > 0) {
+    tipoInteriorResumen = `Color (${datos.paginasColor} págs.)`;
+  } else {
+    tipoInteriorResumen = `B/N (${datos.paginasBN} págs.)`;
+  }
 
-  let descripcion = `${datos.paginas} páginas · ${datos.hojasFisicas} hojas físicas · ${papelTexto} · Interior ${tipoTexto}`;
+  const partesInterior = [];
+  if (datos.papel === 'satinado') {
+    partesInterior.push(`${datos.hojasFisicas} hojas × RD$${datos.precioHojaBN.toFixed(2)}`);
+  } else {
+    if (datos.hojasBN > 0) partesInterior.push(`${datos.hojasBN} hojas B/N × RD$${datos.precioHojaBN.toFixed(2)}`);
+    if (datos.hojasColor > 0) partesInterior.push(`${datos.hojasColor} hojas Color × RD$${datos.precioHojaColor.toFixed(2)}`);
+  }
+
+  const desglose = datos.costoEmpastado > 0
+    ? `${partesInterior.join(' + ')} + ${empTexto} RD$${datos.costoEmpastado.toFixed(2)}`
+    : partesInterior.join(' + ');
+
+  let descripcion = `${datos.paginas} páginas · ${datos.hojasFisicas} hojas físicas · ${papelTexto} · ${tipoInteriorResumen}`;
   descripcion += `\nEncuadernado: ${empTexto}`;
   if (datos.ejemplares > 1) {
     descripcion += `\nCosto por ejemplar: RD$${datos.costoEjemplar.toFixed(2)}`;
@@ -4534,11 +4603,15 @@ function agregarBooklet() {
     datosPrecio: {
       tipo: 'booklet',
       paginas: datos.paginas,
+      paginasBN: datos.paginasBN,
+      paginasColor: datos.paginasColor,
       hojasFisicas: datos.hojasFisicas,
+      hojasBN: datos.hojasBN,
+      hojasColor: datos.hojasColor,
       papel: datos.papel,
-      tipoInterior: datos.tipoInterior,
       tipoEmpastado: datos.tipoEmpastado,
-      precioHoja: datos.precioHoja,
+      precioHojaBN: datos.precioHojaBN,
+      precioHojaColor: datos.precioHojaColor,
       costoEmpastado: datos.costoEmpastado
     }
   });
@@ -4553,7 +4626,7 @@ function agregarBooklet() {
  * Inicializa los event listeners del formulario del booklet para el resumen en tiempo real.
  */
 function inicializarEventListenersBooklet() {
-  const camposBooklet = ['bookletPaginas', 'bookletEjemplares'];
+  const camposBooklet = ['bookletPaginasBN', 'bookletPaginasColor', 'bookletEjemplares'];
   camposBooklet.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -4568,11 +4641,6 @@ function inicializarEventListenersBooklet() {
       actualizarEtiquetasPreciosBooklet();
       actualizarResumenBooklet();
     });
-  });
-
-  // Event listeners para los radio buttons de tipo interior
-  document.querySelectorAll('input[name="bookletTipoInterior"]').forEach(radio => {
-    radio.addEventListener('change', actualizarResumenBooklet);
   });
 
   // Event listeners para los radio buttons de empastado
