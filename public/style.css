@@ -2087,7 +2087,7 @@ servigaco-nav {
   --sg-tabbar-panel-ambient: rgba(147, 197, 253, 0.55);
   --sg-tabbar-base: #f9f8fa;
   --sg-tabbar-active: #0077b6;
-  --sg-tabbar-muted: #374151;
+  --sg-tabbar-muted: #1f2937;
   --sg-tabbar-focus: #0f2747;
   --sg-tabbar-indicator-color: var(--sg-tabbar-panel);
   --sg-tabbar-duration: 320ms;
@@ -2106,7 +2106,7 @@ servigaco-nav {
   --sg-tabbar-panel: #173254;
   --sg-tabbar-panel-ambient: rgba(30, 58, 138, 0.5);
   --sg-tabbar-active: #7dd3fc;
-  --sg-tabbar-muted: #cbd5e1;
+  --sg-tabbar-muted: #f1f5f9;
   --sg-tabbar-focus: #f8fafc;
 }
 

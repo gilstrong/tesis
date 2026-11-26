@@ -1,15 +1,3 @@
-// Prevenir que cosmiconfig falle con EPERM al buscar package.json en rutas superiores en Windows
-const fs = require('fs');
-const _origReadFileSync = fs.readFileSync;
-fs.readFileSync = function(p, opts) {
-  if (typeof p === 'string' && p.toLowerCase().includes('servigaco\\package.json') && !p.toLowerCase().includes('tesis-main')) {
-    const err = new Error('ENOENT: no such file or directory');
-    err.code = 'ENOENT';
-    throw err;
-  }
-  return _origReadFileSync.apply(this, arguments);
-};
-
 require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
@@ -24,8 +12,8 @@ const { DEFAULTS: DEFAULT_PRICE_CATALOG, buildCatalog, validate: validatePriceCa
 // Inicialización consolidada y robusta de Firebase Admin SDK
 const { admin, db } = require('./config/firebase');
 
-const pdfController = require('./tesis/pdfController');
-const notionService = require('./tesis/notionService');
+const pdfController = require('./controllers/pdfController');
+const notionService = require('./services/notionService');
 
 const app = express();
 // Confiar en el proxy (1 nivel para Render/proxies inversos para obtener la IP real)
@@ -43,7 +31,7 @@ const ai = new GoogleGenAI({
 
 const responseCache = new Map();
 const MAX_CACHE_SIZE = 50;
-const PRICE_CACHE_MS = 5000;
+const PRICE_CACHE_MS = 60000; // 60 segundos de caché en memoria para catálogos
 let cachedPriceCatalog = null;
 let cachedPriceCatalogAt = 0;
 
@@ -437,9 +425,6 @@ app.use('/api', require('./routes/analyticsRoutes'));
 // ------------------------
 // ARCHIVOS ESTÁTICOS (Mover al final)
 // ------------------------
-app.use('/temp', express.static(
-    path.join(__dirname, 'tesis', 'public', 'temp')
-));
 
 app.use(express.static(
     path.join(__dirname, 'public'),
@@ -476,17 +461,37 @@ app.use((err, req, res, next) => {
 });
 
 // ------------------------
-// START
+// START & GRACEFUL SHUTDOWN
 // ------------------------
 
-app.listen(port, () => {
-
-    console.log(
-        `🚀 Servidor corriendo en http://localhost:${port}`
-    );
-
-    console.log(
-        `📁 Frontend servido desde: ${path.join(__dirname, 'public')}`
-    );
-
+const server = app.listen(port, () => {
+    console.log(`🚀 Servidor corriendo en http://localhost:${port}`);
+    console.log(`📁 Frontend servido desde: ${path.join(__dirname, 'public')}`);
 });
+
+let isShuttingDown = false;
+async function gracefulShutdown(signal) {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
+    console.log(`\n🛑 Recibida señal ${signal}. Iniciando apagado limpio de ServiGaco...`);
+
+    server.close(() => {
+        console.log('✅ Servidor HTTP cerrado para nuevas conexiones.');
+    });
+
+    try {
+        if (pdfController.closeBrowser) {
+            await pdfController.closeBrowser();
+        }
+    } catch (browserErr) {
+        console.warn('⚠️ Error cerrando Chromium:', browserErr.message);
+    }
+
+    setTimeout(() => {
+        console.log('👋 Proceso finalizado.');
+        process.exit(0);
+    }, 500);
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
